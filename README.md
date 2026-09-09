@@ -65,6 +65,16 @@ pip install -r requirements.txt
 
 Then sync the Dropbox `US_Data` and `IF_Data` folders into `data/acoustic/` and `data/histology/` as described in [`data/README.md`](data/README.md).
 
+Summarise a single recording, or reduce a whole experiment day to one row per target:
+
+```bash
+python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat
+python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat --plot
+python -m fus data/acoustic/20260611/*_Target*.mat --csv results/day1.csv --quiet
+```
+
+`src/fus/extract.py` is a documented port of the lab's `nt_ExtractHarmonicData.m`. It reproduces the `Cumulative 2nd Harmonic`, `Mean Voltage`, and `Cumulative Voltage` columns of `Mouse_Controller_Data.xlsx` exactly, verified against 15 targets from the 2026-06-11 session.
+
 The `.mat` files are MATLAB v5 — read them with `scipy.io.loadmat`, not `h5py`. Whole-slide `.vsi` scans open in [QuPath](https://qupath.github.io/); [ImageJ/Fiji](https://imagej.net/software/fiji/) works for tile-level work.
 
 ## Deliverable
