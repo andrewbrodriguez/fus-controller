@@ -1,0 +1,7 @@
+numpy
+scipy           # scipy.io.loadmat reads the v5 .mat recordings
+pandas
+openpyxl        # Mouse_Controller_Data.xlsx
+matplotlib
+scikit-learn
+jupyter
