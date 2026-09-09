@@ -1,3 +1,59 @@
-IF_Data/
+# ── Raw data ────────────────────────────────────────────────────────────
+# Acoustic emissions and whole-slide histology live on Dropbox / lab
+# storage, not in git. See data/README.md for how to obtain them.
+data/acoustic/
+data/histology/
 
+# Large binary formats, wherever they appear
+*.mat            # raw acoustic emission recordings (~500 MB each)
+*.vsi            # Olympus whole-slide scans
+*.ets            # Olympus tile stacks
+*.fig            # MATLAB figures
+*.tif
+*.tiff
+*.czi
+*.nd2
+*.lif
+
+# Slide decks (lab figures / IF panels) — large, binary, not diffable
+*.pptx
+
+# ── Literature ──────────────────────────────────────────────────────────
+# Published PDFs and in-preparation manuscripts are not redistributed here.
+# literature/README.md lists what belongs in this folder.
+literature/*.pdf
+
+# ── Python ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# ── Derived outputs ─────────────────────────────────────────────────────
+# Regenerate from raw data via the pipeline; keep the repo reproducible.
+results/**/*.png
+results/**/*.pdf
+results/**/*.svg
+data/processed/
+*.parquet
+*.h5
+*.hdf5
+*.npz
+
+# ── OS / editor ─────────────────────────────────────────────────────────
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Secrets ─────────────────────────────────────────────────────────────
+.env
+*.local
