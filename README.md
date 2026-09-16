@@ -80,9 +80,15 @@ Raw data is not in version control — a single `.mat` acoustic recording is rou
 ## Getting started
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+python3.12 -m venv .venv && source .venv/bin/activate   # Python ≥ 3.10 required
+pip install -r requirements.txt -e .
+pip install "napari[all]"                               # optional: interactive viewer used in the notebook
+
+# register the venv as a Jupyter kernel for notebooks/
+python -m ipykernel install --user --name fus-research --display-name "Python 3.12 (fus-research .venv)"
 ```
+
+In Jupyter or VS Code, pick the **Python 3.12 (fus-research .venv)** kernel.
 
 Then sync the Dropbox `US_Data` and `IF_Data` folders into `data/acoustic/` and `data/histology/` as described in [`data/README.md`](data/README.md).
 
