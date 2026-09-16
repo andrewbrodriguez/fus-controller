@@ -1,7 +1,7 @@
 # Mouse 1 — how the dose vs delivery plots were made
 
 **Status:** exploratory, 2026-09-16. One animal. Several steps rest on assumptions that
-haven't been confirmed with Nick or Bernie. Each one is marked **[A#]** and collected in
+haven't been confirmed yet. Each one is marked **[A#]** and collected in
 [Assumptions](#assumptions).
 
 This document follows the chain from raw files to the two plots below: acoustic dose per
@@ -332,9 +332,9 @@ The p-value in the scatter should not be quoted as a result.
 
 **What would firm it up:**
 
-1. Nick confirming which recordings went to which target position.
-2. Bernie confirming which image side is the animal's right, and whether the FITC-only
-   signal at target 6 is real GFP.
+1. Confirming which recordings went to which target position.
+2. Confirming which image side is the animal's right, and whether the FITC-only signal
+   at target 6 is real GFP.
 3. More animals. Each imaged animal adds up to six targets, and within-animal
    comparisons (same skull, different exposures) are the strongest design here.
 
