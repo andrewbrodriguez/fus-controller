@@ -352,6 +352,9 @@ PYTHONPATH=src python -m fus.histology measure \
 
 # join and plot (assumptions live at the top of this script)
 PYTHONPATH=src python scripts/mouse01_dose_vs_coverage.py
+
+# README example: target 1 vs the no-FUS control on section s4
+PYTHONPATH=src python scripts/mouse01_example_figure.py
 ```
 
 Outputs go to `results/histology/`. The figures in this document are copies saved in
