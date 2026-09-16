@@ -214,8 +214,13 @@ class Section:
         return block_mean(self.channels[channel].astype(np.float32), factor)
 
 
-def load_section(path: str | Path) -> Section:
-    """Read the full-resolution level of an exported OME-TIFF section."""
+def load_section(path: str | Path, level: int = 0) -> Section:
+    """Read one pyramid level of an exported OME-TIFF section.
+
+    Level 0 is the export resolution (1.3 um/px at 4x); each further level
+    halves it. Level 3 (~10 um/px) loads in well under a second and is enough
+    to see the whole section.
+    """
     path = Path(path)
     with tifffile.TiffFile(path) as tf:
         pixels = tf.ome_metadata.split("<Pixels ", 1)[1]
@@ -224,7 +229,9 @@ def load_section(path: str | Path) -> Section:
             chunk.split('Name="', 1)[1].split('"', 1)[0]
             for chunk in tf.ome_metadata.split("<Channel ")[1:]
         ]
-        data = tf.series[0].levels[0].asarray()
+        levels = tf.series[0].levels
+        data = levels[level].asarray()
+        pixel_um *= levels[0].shape[-1] / data.shape[-1]
     if data.ndim != 3 or data.shape[0] != len(names):
         raise ValueError(f"{path}: expected (C, Y, X), got {data.shape}")
     return Section(path, dict(zip(names, data)), pixel_um)
@@ -267,10 +274,23 @@ def tissue_mask(sec: Section, factor: int = 4, min_area_mm2: float = 0.5) -> np.
     signal = sum(np.log1p(sec.binned(ch, factor)) for ch in ("CY5", "TRITC"))
     signal = ndi.gaussian_filter(signal, 1.5)
     mask = signal > filters.threshold_otsu(signal)
-    mask = morphology.binary_opening(mask, morphology.disk(1))
-    mask = morphology.remove_small_holes(mask, int(0.05e6 / um**2))
-    mask = morphology.remove_small_objects(mask, int(min_area_mm2 * 1e6 / um**2))
+    # scipy rather than skimage.morphology: skimage renamed these parameters in
+    # 0.26 and drops binary_opening in 0.28. The border values reproduce
+    # skimage's opening exactly (erode with border on, dilate with it off).
+    disk = morphology.disk(1)
+    mask = ndi.binary_dilation(ndi.binary_erosion(mask, disk, border_value=1), disk, border_value=0)
+    mask = ~_drop_small(~mask, int(0.05e6 / um**2))
+    mask = _drop_small(mask, int(min_area_mm2 * 1e6 / um**2))
     return upsample(mask.astype(np.float32), factor, sec.shape) > 0.5
+
+
+def _drop_small(mask: np.ndarray, min_px: int) -> np.ndarray:
+    """Remove 4-connected components smaller than ``min_px`` pixels."""
+    labels, _ = ndi.label(mask)
+    sizes = np.bincount(labels.ravel())
+    keep = sizes >= min_px
+    keep[0] = False
+    return keep[labels]
 
 
 @dataclass
