@@ -36,9 +36,6 @@ env/
 
 # ── Derived outputs ─────────────────────────────────────────────────────
 # Regenerate from raw data via the pipeline; keep the repo reproducible.
-results/**/*.png
-results/**/*.pdf
-results/**/*.svg
 data/processed/
 *.parquet
 *.h5
