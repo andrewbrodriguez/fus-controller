@@ -10,6 +10,8 @@ dependencies = [
     "openpyxl",
     "matplotlib",
     "scikit-learn",
+    "scikit-image",
+    "tifffile",
 ]
 
 [build-system]
