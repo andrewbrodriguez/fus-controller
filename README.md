@@ -46,6 +46,8 @@ data/           Experiment summary sheet (tracked); raw acoustic + histology (gi
 literature/     Reference papers — index tracked, PDFs git-ignored
 reference/      Lab-provided material, incl. the MATLAB extraction script
 src/fus/        Analysis package — feature extraction, quantification, models
+scripts/        Helper scripts, incl. QuPath Groovy
+tests/          pytest suite
 notebooks/      Exploratory analysis
 results/        Generated figures and model outputs
 docs/           Proposal and lab presentations
@@ -74,6 +76,15 @@ python -m fus data/acoustic/20260611/*_Target*.mat --csv results/day1.csv --quie
 ```
 
 `src/fus/extract.py` is a documented port of the lab's `nt_ExtractHarmonicData.m`. It reproduces the `Cumulative 2nd Harmonic`, `Mean Voltage`, and `Cumulative Voltage` columns of `Mouse_Controller_Data.xlsx` exactly, verified against 15 targets from the 2026-06-11 session.
+
+`src/fus/histology.py` measures GFP area coverage at each target on the whole-slide scans — export with QuPath, then measure per section:
+
+```bash
+python -m fus.histology export data/histology/Mouse_01/Image.vsi data/processed/histology/Mouse_01/ds4
+python -m fus.histology measure data/processed/histology/Mouse_01/ds4/*.ome.tif --csv results/histology/mouse01_slots.csv --figures results/histology/figures
+```
+
+It is a first pass with provisional parameters; see [`docs/histology-pipeline.md`](docs/histology-pipeline.md) for the method, the Mouse_01 results, and the open questions.
 
 The `.mat` files are MATLAB v5 — read them with `scipy.io.loadmat`, not `h5py`. Whole-slide `.vsi` scans open in [QuPath](https://qupath.github.io/); [ImageJ/Fiji](https://imagej.net/software/fiji/) works for tile-level work.
 

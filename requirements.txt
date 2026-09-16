@@ -4,4 +4,7 @@ pandas
 openpyxl        # Mouse_Controller_Data.xlsx
 matplotlib
 scikit-learn
+scikit-image    # tissue masks, histology
+tifffile        # OME-TIFF sections exported from QuPath
+pytest
 jupyter
