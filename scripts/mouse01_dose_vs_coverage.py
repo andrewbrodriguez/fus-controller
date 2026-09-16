@@ -8,7 +8,7 @@ against dose. Writes to ``results/histology/``:
 
   mouse01_dose_vs_coverage.{csv,png}   both mappings x both dose measures x both channels
   mouse01_dose_delivery_scatter.png    one correlation: measured dose vs TRITC
-                                       coverage, deck mapping
+                                       coverage, deck mapping, least-squares line
 
 This is exploratory. Every join below rests on an assumption that has not been
 confirmed with the lab:
@@ -204,71 +204,37 @@ def plot(df: pd.DataFrame):
     return fig
 
 
-def plot_scatter(df: pd.DataFrame, sections: pd.DataFrame, mapping: str = "deck",
+def plot_scatter(df: pd.DataFrame, mapping: str = "deck",
                  xcol: str = "cum_2nd_harmonic", channel: str = "TRITC"):
-    """Single dose-delivery correlation: target means, per-section values, OLS fit."""
+    """Single dose-delivery correlation: one dot per target, least-squares line."""
     _style()
     sub = df[df.mapping == mapping].sort_values("target")
     x, y = sub[xcol].to_numpy(), sub[f"{channel}_mean"].to_numpy()
-    n = len(x)
-    c = SERIES[channel]
 
-    fig, ax = plt.subplots(figsize=(8, 6.4), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(7, 5.2), facecolor=SURFACE)
     _clean_axes(ax)
 
-    # OLS on the target means, with a 95% band for the mean response
     fit = stats.linregress(x, y)
-    gx = np.linspace(0, x.max() * 1.05, 200)
-    resid_sd = np.sqrt(np.sum((y - (fit.intercept + fit.slope * x)) ** 2) / (n - 2))
-    half = stats.t.ppf(0.975, n - 2) * resid_sd * np.sqrt(
-        1 / n + (gx - x.mean()) ** 2 / np.sum((x - x.mean()) ** 2))
-    line = fit.intercept + fit.slope * gx
-    ax.fill_between(gx, line - half, line + half, color=c, alpha=0.10, linewidth=0, zorder=1)
-    ax.plot(gx, line, color=INK_2, linewidth=1.5, zorder=2)
+    gx = np.array([0, x.max() * 1.05])
+    ax.plot(gx, fit.intercept + fit.slope * gx, color=MUTED, linewidth=1.5, zorder=2)
 
-    # Individual sections behind the means
-    dose = dict(zip(sub.target, sub[xcol]))
-    s = sections[sections.channel == channel]
-    ax.scatter(s.target.map(dose), s.coverage, s=22, color=c, alpha=0.35,
-               linewidths=0, zorder=3)
-
-    ax.scatter(x, y, s=260, color=c, edgecolors=SURFACE, linewidths=2, zorder=4)
+    ax.scatter(x, y, s=260, color=SERIES[channel], edgecolors=SURFACE, linewidths=2, zorder=3)
     for r in sub.itertuples():
         ax.annotate(str(r.target), (getattr(r, xcol), getattr(r, f"{channel}_mean")),
                     ha="center", va="center_baseline", fontsize=10, weight="bold",
-                    color="#ffffff", zorder=5)
+                    color="#ffffff", zorder=4)
 
-    pr = stats.pearsonr(x, y)
-    sr = stats.spearmanr(x, y)
-    keep = sub.target != 3
-    pr5 = stats.pearsonr(x[keep], y[keep])
-    ax.text(0.02, 0.98,
-            f"Pearson r = {pr.statistic:.2f}  (p = {pr.pvalue:.2f})\n"
-            f"Spearman ρ = {sr.statistic:.2f}  (p = {sr.pvalue:.2f})\n"
-            f"n = {n} targets\n"
-            f"Without the no-FUS control: r = {pr5.statistic:.2f}  (p = {pr5.pvalue:.2f}, n = {n - 1})",
-            transform=ax.transAxes, ha="left", va="top", fontsize=9.5, color=INK_2,
-            linespacing=1.5)
+    ax.text(0.03, 0.97, f"r = {fit.rvalue:.2f},  n = {len(x)} targets",
+            transform=ax.transAxes, ha="left", va="top", fontsize=11, color=INK_2)
 
-    ax.set_xlim(-0.05 * x.max(), x.max() * 1.08)
+    ax.set_xlim(-0.05 * x.max(), x.max() * 1.1)
     ax.set_ylim(-0.03, 1.0)
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
-    ax.set_xlabel("Acoustic dose — cumulative 2nd harmonic (sheet units)")
-    ax.set_ylabel("AAV delivery — GFP area coverage, anti-GFP stain (TRITC)")
-    fig.suptitle("Mouse 1 — acoustic dose vs AAV delivery", x=0.02, y=0.975,
-                 ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.935,
-             "Large dots: target means over sections s2, s4, s5, s6 (numbers are targets). "
-             "Small dots: individual sections.\nLine: least-squares fit to the means, "
-             "shaded 95% confidence band.",
-             fontsize=9, color=MUTED, va="top")
-    fig.text(0.02, 0.01,
-             "Assumptions: slide-deck mapping (target 1 = three sonications, doses summed); "
-             "target 3 = no-FUS control at zero dose;\n"
-             "sections s5 and s6 mirrored, s3 excluded. One animal — exploratory, not a "
-             "dose-response estimate.",
-             fontsize=8.5, color=MUTED, va="bottom")
-    fig.tight_layout(rect=(0, 0.06, 1, 0.905))
+    ax.set_xlabel("Acoustic dose (cumulative 2nd harmonic)")
+    ax.set_ylabel("AAV delivery (GFP coverage)")
+    ax.set_title("Mouse 1: acoustic dose vs AAV delivery", loc="left",
+                 fontsize=13, weight="bold", pad=12)
+    fig.tight_layout()
     return fig
 
 
@@ -278,7 +244,7 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.round(4).to_csv(OUT.with_suffix(".csv"), index=False)
     plot(df).savefig(OUT.with_suffix(".png"), dpi=150, facecolor=SURFACE)
-    plot_scatter(df, sections).savefig(SCATTER, dpi=150, facecolor=SURFACE)
+    plot_scatter(df).savefig(SCATTER, dpi=150, facecolor=SURFACE)
     print(df[["mapping", "target", "recordings", "cum_2nd_harmonic", "bursts_x_goal",
               "TRITC_mean", "FITC_mean"]].round(3).to_string(index=False))
     print(f"\nwrote {OUT.with_suffix('.png')}\nwrote {SCATTER}")

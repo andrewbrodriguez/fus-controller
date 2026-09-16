@@ -282,16 +282,15 @@ targets.
 
 The scatter at the top uses **mapping A, measured dose and TRITC**:
 
-- **Large dots:** target means, with the target number inside.
-- **Small dots:** each section's individual value.
+- **Dots:** one per target, at the mean of the four sections, with the target number
+  inside. The spread across sections is in the four-panel figure and the table in 2g.
 - **Line:** ordinary least squares on the six target means.
-- **Shaded band:** 95% confidence interval for the fitted mean
-  (t distribution, 4 degrees of freedom).
-- **Statistics:** `scipy.stats.pearsonr` and `spearmanr` on the six target means.
-  Individual sections are not treated as independent points.
+- **Statistics:** `scipy.stats.pearsonr` and `spearmanr` on the six target means, so
+  individual sections are not treated as independent points. The plot shows only r;
+  the other values are in the table under [The result](#the-result).
 
-Colors follow the project's dataviz palette. TRITC and FITC are also told apart by
-filled vs. hollow markers.
+Colors follow the project's dataviz palette. In the four-panel figure, TRITC and FITC
+are also told apart by filled vs. hollow markers.
 
 ---
 
