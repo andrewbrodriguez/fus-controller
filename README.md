@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Machine learning based acoustic feedback controller for FUS-BBB mediated AAV delivery</b><br>
-  <sub>ES91r Independent Study &middot; Fall 2026 &middot; Todd Lab, Brigham and Women's Hospital / Harvard Medical School</sub>
+  <sub>Research for Credit&middot; Fall 2026 &middot; Todd Lab, Brigham and Women's Hospital / Harvard Medical School</sub>
 </p>
 
 ---
