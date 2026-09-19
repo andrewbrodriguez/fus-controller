@@ -1,5 +1,27 @@
 # Zoom with Nick — target mapping + next steps
 
+spread sheet should be correct brain region all correct
+treatment number is the order that we did them in, by mistake 3 sonications all R1
+then 456 and then came back to 2 but never did 3
+
+time of dose is a reason to not do this in a human, cant spend 4 or 5 minutes at each lcoation
+and then also potential saftey, 
+
+yes except for mouse 1, target number and location number always match except for mouse 1
+treatment number always matches the brain region, except for mess up on mouse one
+
+notch in the bottom right of mouse 1, bottom left going forward
+
+pretty soon 2 more datasets to work with
+
+start with 2nd harmonic AUC, for US data, maybe look at others
+keep in mind extra US data, as secondary set of analysis
+
+
+
+
+
+
 Follow-up to the 9/16 email. He answered Q1, 4, 5, 6; said "let's discuss" on Q2 (sheet vs deck)
 and Q3 (does TargetN mean target N).
 
