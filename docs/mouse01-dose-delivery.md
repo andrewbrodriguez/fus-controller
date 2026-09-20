@@ -1,8 +1,8 @@
 # Mouse 1 — how the dose vs delivery plots were made
 
-**Status:** exploratory, 2026-09-16. One animal. Several steps rest on assumptions that
-haven't been confirmed yet. Each one is marked **[A#]** and collected in
-[Assumptions](#assumptions).
+**Status:** exploratory, 2026-09-16; mapping and channel confirmed by N. Todd on
+2026-09-18. One animal. The remaining steps rest on assumptions marked **[A#]** and
+collected in [Assumptions](#assumptions).
 
 This document follows the chain from raw files to the two plots below: acoustic dose per
 target on one side, measured AAV delivery per target on the other, then joined and
@@ -221,27 +221,26 @@ The scatter therefore uses **TRITC**. Both channels are shown in the four-panel 
 
 ## Step 3 — joining dose to delivery
 
-This is the least certain step. The files, the deck and the spreadsheet don't agree on
-which recording went to which target position:
+Mouse 1 was the one animal where the operator deviated from the plan. N. Todd confirmed
+the sequence on 2026-09-18, and the acquisition timestamps stored in each recording
+(`niscope.tracktime`) reproduce it exactly **[A4]**:
 
-- **The deck** gives position 1 as "420 bursts" and position 3 as "No FUS control".
-- **The spreadsheet's `Brain Region` column** puts **three** recordings at position 1,
-  none at position 3, and orders positions 4–6 differently from the deck.
-
-Two mappings were built **[A4]**:
-
-| Target | Mapping A — slide deck | Mapping B — spreadsheet |
+| Target | Recordings | Note |
 |---|---|---|
-| 1 | Target1 + Target2 + **Target3** | Target1 + Target2 + **Target6** |
-| 2 | Target2_Repeat | Target2_Repeat |
-| 3 | none (no FUS) | none (no FUS) |
-| 4 | Target4 | Target3 |
-| 5 | Target5 | Target4 |
-| 6 | Target6 | Target5 |
+| 1 | Target1 + Target2 + **Target3** | first three sonications all landed here — 420 bursts in total |
+| 2 | Target2_Repeat | the 7th and last sonication |
+| 3 | none | never sonicated — the no-FUS control |
+| 4 | Target4 | |
+| 5 | Target5 | |
+| 6 | Target6 | |
 
-- **Why Target3 goes to position 1 in mapping A:** 120 + 60 + 240 programmed bursts =
-  the deck's "420". Target6 (also 240 bursts at 0.55) is needed at position 6, which
-  leaves Target3, the other 240-burst file.
+- **Mouse 1 is the exception.** For every other animal, `TargetN` was fired at position N,
+  and the spreadsheet's `Treatment #` is the firing order.
+- **The spreadsheet's `Brain Region` column is correct**, including for Mouse 1. Its rows
+  3–6 do, however, carry whole rows from the wrong runs, rotated by one (they hold
+  Target6, Target3, Target4, Target5 where they should hold Target3, Target4, Target5,
+  Target6), so the sheet understates what regions 4–6 received. Nothing here uses those
+  values: doses come from the recordings.
 - **Repeat sonications add up [A5]:** target 1's dose is the sum of its three
   recordings.
 - **No FUS means zero dose [A6]:** the control target is plotted at 0.
@@ -267,20 +266,19 @@ also writes the joined table to `results/histology/mouse01_dose_vs_coverage.csv`
 
 ![Four panels: two mappings × two dose measures, both GFP channels](figures/mouse01-dose-coverage-grid.png)
 
-- **Rows** are the two mappings; **columns** are measured and prescribed dose.
+- **Columns** are measured and prescribed dose.
 - **Markers:** filled blue = TRITC (number = target), hollow orange = FITC for the same
   target, drawn 10 px to the right so the two don't overlap.
 - **Bars** span the min–max across the four sections.
 - **†** marks the recording where the safety cutoff fired.
 - Each panel shows Spearman ρ for both channels.
 
-This figure shows how much the picture depends on the assumptions. Switching mappings
-moves four of the six points along the dose axis, and switching channels reorders the
-targets.
+Switching channels reorders the targets, which is why the choice of GFP channel matters
+as much as the dose measure.
 
 ### The single correlation
 
-The scatter at the top uses **mapping A, measured dose and TRITC**:
+The scatter at the top uses **measured dose and TRITC**:
 
 - **Dots:** one per target, at the mean of the four sections, with the target number
   inside. The spread across sections is in the four-panel figure and the table in 2g.
@@ -298,14 +296,14 @@ are also told apart by filled vs. hollow markers.
 
 | # | Assumption | Basis | If wrong |
 |---|---|---|---|
-| A1 | s2 and s4 as scanned; s5 and s6 mirrored | Best between-section agreement on targets 1, 2, 4, 5 (SD 0.10 vs 0.14) | Coverage values get swapped between mirror pairs (1↔4, 2↔5, 3↔6) in some sections |
-| A2 | The empty spot is target 3 | Deck: "No FUS control" at position 3 | All labels mirror: 1↔4, 2↔5, 3↔6 |
+| A1 | s2 and s4 as scanned; s5 and s6 mirrored | Best between-section agreement on targets 1, 2, 4, 5 (SD 0.10 vs 0.14). Consistent with the notch (bottom right on Mouse 1) and with target 3 being unsonicated | Coverage values get swapped between mirror pairs (1↔4, 2↔5, 3↔6) in some sections |
+| A2 | The empty spot is target 3 | **Confirmed** by N. Todd: position 3 was never sonicated | — |
 | A3 | Target coverage = mean of s2, s4, s5, s6 | The only four sections with a good fit | Depends on section depth, which is unknown |
-| A4 | Recording → target: mapping A (scatter) or B (grid) | Deck labels and burst totals / spreadsheet `Brain Region` | Four of six points move along the dose axis |
+| A4 | Recording → target as in step 3 | **Confirmed** by N. Todd and by the acquisition timestamps | — |
 | A5 | Doses from repeat sonications at one target add | Simplest model | Target 1's dose would be overstated if only its last run mattered |
 | A6 | The no-FUS control has zero dose | By definition | — |
-| A7 | TRITC is the delivery measure | FITC shows signal that isn't GFP | Target 6 moves from lowest delivery (after the control) to highest |
-| — | Circle radius 0.75 mm, threshold 5 SD, background σ 1 mm | Chosen before any coverage was computed | Threshold: coverage shifts by up to 5 percentage points at 4 or 6 SD, and the target ranking is identical in both channels. Radius and σ have not been tested at other values |
+| A7 | TRITC is the delivery measure | **Confirmed** by N. Todd: use the GFP stain, not native GFP | Target 6 would move from lowest delivery (after the control) to highest |
+| — | Circle radius 0.75 mm, threshold 5 SD, background σ 1 mm. **The focal spot is ~2 × 2 mm in x/y and ~3 mm in z, so the radius should become 1.0 mm** — not yet re-run | Chosen before any coverage was computed | Threshold: coverage shifts by up to 5 percentage points at 4 or 6 SD, and the target ranking is identical in both channels. Radius and σ have not been tested at other values |
 
 ---
 
@@ -322,20 +320,19 @@ basic sanity check.
   which confirms FUS is needed at all. The other is target 1, whose dose is a sum of
   three runs under assumption A5. Across the four single-sonication targets, r = −0.06.
 - **Sample size:** n = 6 targets from one animal, with no replication across animals.
-- **Label uncertainty:** which recording went to which target is uncertain (A4), and the
-  two mappings disagree on four of the six doses.
-- **Channel choice:** the delivery measure depends on it (A7), and the two channels
-  disagree at one of six targets.
+- **Channel disagreement:** the two GFP channels disagree at one of six targets, and
+  what that FITC-only signal is has not been established.
 
 The p-value in the scatter should not be quoted as a result.
 
 **What would firm it up:**
 
-1. Confirming which recordings went to which target position.
-2. Confirming which image side is the animal's right, and whether the FITC-only signal
-   at target 6 is real GFP.
-3. More animals. Each imaged animal adds up to six targets, and within-animal
-   comparisons (same skull, different exposures) are the strongest design here.
+1. ~~Confirming which recordings went to which target position~~ — done (step 3).
+2. Establishing what the FITC-only signal at target 6 is.
+3. Re-running with the 1.0 mm ROI radius implied by the focal spot.
+4. More animals. Each imaged animal adds up to six targets, and within-animal
+   comparisons (same skull, different exposures) are the strongest design here. Two more
+   datasets are expected shortly.
 
 ---
 

@@ -1,6 +1,11 @@
 # Decision 001 — How do we measure delivered AAV?
 
-**Status:** OPEN — needs a call before quantification starts
+**Status:** OPEN — the *endpoint* (area vs segmentation) is still undecided
+
+> **Update 2026-09-18 (N. Todd).** The *channel* question is settled: use the anti-GFP
+> stain (TRITC), not native GFP. Area coverage as the starting point drew no objection,
+> and segmentation stays on the table as a later step. The pre-registered test below is
+> what should decide it.
 **Raised:** 2026-09-10
 **Decides:** the label the model is trained against, for the whole project
 **Needs input from:** Nick Todd, Bernie Owusu-Yaw

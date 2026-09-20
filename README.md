@@ -19,6 +19,8 @@ The lab already runs a closed-loop controller during sonication. It ramps drive 
 
 That gap is this project. The controller's prescribed dose (`N bursts × harmonic goal`) predicts the measured cumulative second-harmonic emission with r ≈ 0.76 — better than chance, far from deterministic. Skull geometry, vasculature, and microbubble kinetics fill in the rest. If acoustic emissions can be mapped to delivered AAV directly, the controller can be retargeted from an acoustic setpoint to a *delivery* setpoint.
 
+This matters most for translation. Brute force is not an option in a patient: spending four or five minutes of sonication on every target is impractical, and longer exposure raises the risk of tissue damage. Knowing how much was delivered — rather than how much energy was applied — is what makes a shorter, safer exposure defensible.
+
 ## A real example: Mouse 1
 
 <p align="center">
@@ -35,11 +37,11 @@ That is the whole premise: where the acoustic signal says the BBB opened, the vi
 
 The r = 0.83 comes almost entirely from the two ends: the unsonicated control, and target 1, which was sonicated three times. Among the four targets sonicated once (2, 4, 5 and 6), doses between 0.95 and 1.35 produced anywhere from 19% to 65% coverage, with no trend. That scatter is what a delivery-aware controller has to learn, and it takes more animals than one to learn it.
 
-This is one animal, and several labels rest on assumptions still to be confirmed. The full method, the assumptions, and how each figure was made are in [`docs/mouse01-dose-delivery.md`](docs/mouse01-dose-delivery.md).
+This is one animal. The recording-to-target mapping and the choice of GFP channel have since been confirmed with the lab; the full method, the remaining assumptions, and how each figure was made are in [`docs/mouse01-dose-delivery.md`](docs/mouse01-dose-delivery.md).
 
 ## Approach
 
-**1. Feature extraction from acoustic emissions.** Per-burst spectra are reduced to peak and integrated power in the second-harmonic (1.674 MHz) and wideband (1.7 MHz) bands, normalised to the pre-microbubble baseline, then accumulated over the sonication. Beyond the lab's existing metrics: subharmonic and ultraharmonic bands, the harmonic-to-broadband ratio as a stable-vs-inertial cavitation index, and the temporal shape of the emission trace rather than its sum alone.
+**1. Feature extraction from acoustic emissions.** Per-burst spectra are reduced to peak and integrated power in the second-harmonic (1.674 MHz) and wideband (1.7 MHz) bands, normalised to the pre-microbubble baseline, then accumulated over the sonication. **Cumulative second-harmonic AUC is the primary feature**, as the lab uses it. Secondary, once that is in place: subharmonic and ultraharmonic bands, the harmonic-to-broadband ratio as a stable-vs-inertial cavitation index, and the temporal shape of the emission trace rather than its sum alone.
 
 **2. Ground truth from tissue.** Brains are sectioned, stained, and imaged on a slide scanner. GFP area coverage in the FUS-targeted region — thresholded and expressed as percent of hemisphere, following the method in Owusu-Yaw et al. (2024) — is the delivery measurement the model learns against.
 

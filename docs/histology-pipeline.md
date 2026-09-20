@@ -1,7 +1,8 @@
 # Histology pipeline — GFP coverage per target
 
-**Status:** first pass, run on Mouse_01 only (2026-09-16). Every parameter marked
-*provisional* still needs a decision from Nick or Bernie.
+**Status:** first pass, run on Mouse_01 only (2026-09-16); orientation, delivery channel
+and focal-spot size confirmed by N. Todd on 2026-09-18. Parameters still marked
+*provisional* have not been decided.
 
 This is the ground-truth half of the project, implementing Phase 2 of
 [`ground-truth-spec.md`](ground-truth-spec.md). It turns a whole-slide `.vsi` scan into
@@ -69,7 +70,7 @@ converts a slot to a target once a section's orientation is known.
 | Background | Normalised Gaussian average of tissue, recomputed 3× with pixels above threshold excluded. Handles regional autofluorescence (s5 has two background levels) | σ = 1 mm *(provisional)* |
 | GFP+ | residual > k × robust pixel-noise SD, per channel | k = 5, k ± 1 also reported *(provisional)* |
 | Plan placement | Similarity fit (rotation, shift, shrinkage) of the six-point plan to the GFP+ density map, using both channels combined. Full search, then a **leave-one-out** refinement per target | scale 0.7–1.3 |
-| ROI | Disc at each target's leave-one-out position | r = 0.75 mm × fitted scale *(provisional)* |
+| ROI | Disc at each target's leave-one-out position | r = 0.75 mm × fitted scale *(provisional — should become 1.0 mm, from the ~2 × 2 mm focal spot)* |
 | Measure | coverage = GFP+ tissue px / tissue px in ROI; mean background-subtracted intensity | both channels |
 
 **Why leave-one-out.** Placing ROIs from the GFP itself would put each ROI on its own
@@ -114,23 +115,24 @@ is s2 and s4 as-is, s5 and s6 mirrored: mean between-section SD 0.10, against 0.
 the runner-up. Under that orientation the empty site is the **same target in all four
 sections**. That agreement is independent evidence.
 
-Which target it is — 3 or 6 — depends on the global flip, which the image can't give.
-The table below follows the deck ("No FUS control" at position 3).
+Which target it is — 3 or 6 — cannot be read off the image. **Confirmed:** position 3
+was never sonicated, so the empty site is target 3. For future animals the notch (bottom
+left) gives the orientation directly, without relying on an unsonicated target.
 
 ### Coverage by target (s2, s4, s5, s6)
 
-| Target | Deck label | TRITC mean (range) | FITC mean (range) |
+| Target | Exposure | TRITC mean (range) | FITC mean (range) |
 |---|---|---|---|
-| 1 | 420 bursts, 0.85 | 0.82 (0.66–0.90) | 0.41 (0.23–0.53) |
+| 1 | 3 sonications, 420 bursts | 0.82 (0.66–0.90) | 0.41 (0.23–0.53) |
 | 2 | 45 bursts, 1.05 | 0.65 (0.59–0.77) | 0.36 (0.27–0.46) |
 | 3 | No FUS control | **0.02** (0.01–0.05) | **0.00** |
 | 4 | 90 bursts, 0.95 | 0.52 (0.48–0.60) | 0.26 (0.15–0.45) |
 | 5 | 60 bursts, 0.85 | 0.31 (0.00–0.42) | 0.30 (0.27–0.32) |
 | 6 | 240 bursts, 0.55 | 0.19 (0.00–0.57) | 0.66 (0.17–0.84) |
 
-**Not a dose-response.** This is one animal. The deck labels are position labels, and
-their correspondence to recordings is still unresolved (spec §3; the spreadsheet's
-`Brain Region` column disagrees with the deck for positions 4–6).
+**Not a dose-response.** This is one animal. The recording-to-position mapping is now
+confirmed (see [mouse01-dose-delivery.md](mouse01-dose-delivery.md) step 3); Mouse 1 was
+the one animal where the operator deviated from the plan.
 
 ---
 
@@ -141,8 +143,9 @@ How these numbers were joined to acoustic dose and plotted:
 
 ## Known problems
 
-1. **FITC and TRITC disagree at target 6** (and at target 5 in s5). The site is bright in
-   native GFP and near background in the antibody channel. At full resolution in s4, the
+1. **FITC and TRITC disagree at target 6** (and at target 5 in s5). TRITC is the agreed
+   delivery measure, so this affects the placement map rather than the numbers. The site
+   is bright in native GFP and near background in the antibody channel. At full resolution in s4, the
    99th-percentile brightness is 21.9 k (FITC) against 1.7 k (TRITC); at target 1 TRITC
    reaches 22.8 k. FITC also marks a detached cerebellum fragment in s2 that TRITC does
    not, so FITC picks up at least some non-GFP signal. **Needs a look at full
@@ -170,11 +173,23 @@ How these numbers were joined to acoustic dose and plotted:
 | `angle_flag` | Full fit more than 30° from anterior-left — treat the section as failed |
 | `row`, `col`, `radius_px`, `noise_sd`, `threshold_k` | Provenance, in 4× export pixels |
 
-## Open questions
+## Answered on 2026-09-18 (N. Todd)
 
-1. **Which image side is the animal's right?** Is there a side mark, or a mounting
-   convention? Were sections mounted both ways up (s2/s4 vs s5/s6)?
-2. **FITC vs TRITC** — which is primary, and what is the FITC-only signal at target 6?
-3. **ROI radius** — what is the focal spot size at 837 kHz?
-4. **Section order and depth** — series 2–6 need not be in depth order, and the spacing
-   is unknown.
+1. **Which image side is the animal's right?** Sections carry a **notch** — bottom right
+   on Mouse 1, bottom left for animals from here on. Mouse 1 also has the unsonicated
+   target 3 as a second cue. Sections were indeed mounted both ways up.
+2. **FITC vs TRITC** — use the **GFP stain (TRITC)** as the delivery measure. What the
+   FITC-only signal at target 6 is remains open.
+3. **ROI radius** — the focal spot is **~2 × 2 mm in x/y and ~3 mm in z**, so the radius
+   should become **1.0 mm**; precise dimensions to follow. Not yet re-run.
+4. **Recording → target** — `TargetN` was fired at position N for every animal except
+   Mouse 1; see [mouse01-dose-delivery.md](mouse01-dose-delivery.md) step 3.
+
+## Still open
+
+1. **Section order and depth** — series 2–6 need not be in depth order, the spacing is
+   unknown, and which sections fall inside the 3 mm focal column is therefore unknown.
+2. **What the FITC-only signal is** at target 6 (autofluorescence, blood, or failed
+   staining).
+3. **Imaging settings** — whether exposure is held fixed across sessions, which any
+   intensity comparison between animals depends on.

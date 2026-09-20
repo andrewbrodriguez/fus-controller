@@ -67,7 +67,23 @@ much". Phase 3 in §10.
 
 ---
 
-## 3. Blocking issue: target ↔ recording correspondence
+## 3. Target ↔ recording correspondence — RESOLVED 2026-09-18
+
+> **Resolved with N. Todd, and independently confirmed by the acquisition timestamps
+> stored in each recording (`niscope.tracktime`).**
+>
+> - `TargetN` was fired at position N for every animal **except Mouse 1**.
+> - Mouse 1: the first three sonications (Target1, Target2, Target3) all went to
+>   position 1 — 420 bursts in total; then positions 4, 5, 6 in turn; then a 7th back at
+>   position 2 (`Target2_Repeat`). **Position 3 was never sonicated** and serves as a
+>   no-FUS control.
+> - The spreadsheet's `Brain Region` column is correct, and `Treatment #` is the firing
+>   order. For Mouse 1 only, the *values* in rows 3–6 are rotated by one, so that sheet
+>   understates what regions 4–6 received. Doses should be read from the recordings.
+> - `y` is antero-posterior, not dorsal/ventral — see
+>   [histology-pipeline.md](histology-pipeline.md); the table below is mislabelled.
+>
+> The rest of this section is kept as the original statement of the problem.
 
 **This must be resolved before any tissue is quantified.**
 
@@ -281,8 +297,9 @@ a reason. Excluded sections must be counted in the write-up.
 
 ## 10. Phasing
 
-**Phase 1 — resolve correspondence (blocking, no lab work).** Answer §3 with Nick. Write
-the target↔file mapping into a tracked CSV. Output: `data/target_map.csv`.
+**Phase 1 — resolve correspondence.** ✅ Done 2026-09-18 (§3). `TargetN` = position N
+except Mouse 1, so a `data/target_map.csv` is only needed to record that one exception
+and any future deviations.
 
 **Phase 2 — build and validate the pipeline on Mouse_01 (this term).** Atlas
 registration, ROI placement, thresholding, coverage extraction, on the one animal already
@@ -350,9 +367,22 @@ week 11.
 
 ## 13. Open questions
 
-1. §3 items 1–5 — target correspondence. **Blocking.**
-2. Native GFP or antibody-stained GFP as primary?
-3. ROI method — is Option A acceptable to Bernie, and what radius?
-4. Is per-target MRI contrast enhancement available as an independent check?
-5. Were all animals stained and imaged in one batch, or several?
-6. Realistic tissue throughput this term (§12).
+**Answered 2026-09-18 (N. Todd):**
+
+1. ~~§3 target correspondence~~ — resolved, see §3.
+2. ~~Native GFP or antibody-stained GFP as primary?~~ — **the GFP stain (TRITC)**.
+3. ~~What radius?~~ — the focal spot is ~2 × 2 mm in x/y and ~3 mm in z, so **r = 1.0 mm**;
+   precise dimensions to follow. The ROI method itself (§7 option A) is unchanged, and
+   with the mapping resolved, the plan can be placed from the target pattern.
+4. Orientation: sections carry a **notch** — bottom right on Mouse 1, bottom left from
+   here on.
+
+**Still open:**
+
+5. Is per-target MRI contrast enhancement available as an independent check?
+6. Were all animals stained and imaged in one batch, or several, and is imaging exposure
+   fixed across sessions?
+7. Realistic tissue throughput this term (§12). Two more datasets are expected shortly.
+8. Section order, spacing, and which sections fall inside the 3 mm focal column.
+9. Is there an untreated animal or another negative reference for the threshold (§8)?
+   Mouse 1's no-FUS control exists only because of the targeting mistake.

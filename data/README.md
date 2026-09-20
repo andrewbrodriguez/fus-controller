@@ -22,7 +22,27 @@ data/
 
 Currently synced locally: **one** acoustic day (`20260611`, mice 1–6) and **one**
 imaged mouse (`Mouse_01`). The summary sheet covers **24 mice × 6 targets**, so
-the remaining acoustic days still need to be pulled from Dropbox.
+the remaining acoustic days still need to be pulled from Dropbox. Two more datasets
+are expected shortly (N. Todd, 2026-09-18).
+
+## Which recording went where
+
+`TargetN` was fired at position N for every animal **except Mouse 1**, where the
+operator deviated (confirmed by N. Todd on 2026-09-18 and by the acquisition
+timestamps):
+
+| Mouse 1 file | Fired at |
+|---|---|
+| `Target1`, `Target2`, `Target3` | position 1 — 420 bursts in total |
+| `Target4`, `Target5`, `Target6` | positions 4, 5, 6 |
+| `Target2_Repeat` | position 2 (7th and last sonication) |
+| — | **position 3 was never sonicated** — a no-FUS control |
+
+In the summary sheet, `Treatment #` is the firing order and `Brain Region` is correct.
+For Mouse 1 only, the *values* in rows 3–6 are rotated by one row, so that sheet
+understates the exposure at regions 4–6. Read doses from the recordings, not the sheet.
+
+Sections are notched for orientation: bottom right on Mouse 1, bottom left from here on.
 
 ## Mouse_Controller_Data.xlsx
 
@@ -61,6 +81,8 @@ df = 19.07 Hz.
 | Wideband monitor | 1.7 MHz — deliberately ~26 kHz off the harmonic, to catch broadband |
 | PRF | `data.posx.curPRF` |
 | Per-burst drive voltage | `data.posx.data(end).V`, shape (n_bursts, 2) |
+| Acquisition time | `data.niscope.tracktime` — MATLAB datenum; sorting files by it recovers the firing order of a session |
+| Controller's own per-burst readings | `data.posx.data(end).HH` and `.WB` — the harmonic and wideband values the controller compared against its goal |
 | Raw time-domain | `data.posx.data(end).rawdata` — usually empty; retention is gated by the `rawdatasave` flags |
 
 `data.posx` also carries the **full controller state**, which is the most useful and least
