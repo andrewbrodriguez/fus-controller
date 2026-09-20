@@ -6,24 +6,23 @@ Reads the per-slot histology table (``python -m fus.histology measure``) and
 the seven Mouse_Cntr_01 recordings, joins them per target, and plots coverage
 against dose. Writes to ``results/histology/``:
 
-  mouse01_dose_vs_coverage.{csv,png}   both mappings x both dose measures x both channels
+  mouse01_dose_vs_coverage.{csv,png}   both dose measures x both GFP channels
   mouse01_dose_delivery_scatter.png    one correlation: measured dose vs TRITC
-                                       coverage, deck mapping, least-squares line
+                                       coverage, least-squares line
 
 This is exploratory. Every join below rests on an assumption that has not been
 confirmed with the lab:
 
-A1  Section orientation: s2 and s4 as scanned, s5 and s6 mirrored (the best
-    agreement on targets 1, 2, 4, 5). s3 is excluded (plan fit failed).
-A2  The empty site is target 3, per the slide deck's "No FUS control".
+A1  Section orientation: s2 and s4 as scanned, s5 and s6 mirrored. Confirmed
+    9/18: sections carry a notch (bottom right on Mouse 1) and target 3 was
+    never sonicated, so a flipped section is identifiable.
+A2  The empty site is target 3 -- confirmed by N. Todd.
 A3  Coverage per target is the mean over s2, s4, s5, s6; bars span min-max.
-A4  Which recordings were fired at which position -- two versions, one per
-    row of the figure:
-      deck         pos 1 = Target1 + Target2 + Target3 (120 + 60 + 240 = the
-                   deck's "420 bursts"); every other position follows its
-                   filename, with Target2_Repeat at pos 2.
-      spreadsheet  the xlsx `Brain Region` column: pos 1 = Target1 + Target2 +
-                   Target6, pos 4 = Target3, pos 5 = Target4, pos 6 = Target5.
+A4  Recording -> position, **confirmed** by N. Todd (9/18) and by the
+    acquisition timestamps in each file: the first three sonications all went
+    to position 1 (Target1, Target2, Target3), then positions 4, 5, 6 in turn,
+    then a 7th back at position 2 (Target2_Repeat). Position 3 was never
+    sonicated. For every other mouse, TargetN was fired at position N.
 A5  Repeat sonications at one position add: doses are summed.
 A6  The no-FUS control has zero dose.
 """
@@ -53,15 +52,10 @@ SCATTER = ROOT / "results" / "histology" / "mouse01_dose_delivery_scatter.png"
 MIRRORED = {"section_s2": False, "section_s4": False, "section_s5": True, "section_s6": True}
 
 MAPPINGS = {
-    "deck": {1: ["Target1", "Target2", "Target3"], 2: ["Target2_Repeat"], 3: [],
-             4: ["Target4"], 5: ["Target5"], 6: ["Target6"]},
-    "spreadsheet": {1: ["Target1", "Target2", "Target6"], 2: ["Target2_Repeat"], 3: [],
-                    4: ["Target3"], 5: ["Target4"], 6: ["Target5"]},
+    "confirmed": {1: ["Target1", "Target2", "Target3"], 2: ["Target2_Repeat"], 3: [],
+                  4: ["Target4"], 5: ["Target5"], 6: ["Target6"]},
 }
-ROW_TITLES = {
-    "deck": "Mapping A — slide deck",
-    "spreadsheet": "Mapping B — spreadsheet Brain Region",
-}
+ROW_TITLES = {"confirmed": "Recording → position confirmed by N. Todd, 9/18"}
 
 # Reference palette (dataviz skill), light mode.
 SURFACE, INK, INK_2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
@@ -143,7 +137,8 @@ def plot(df: pd.DataFrame):
         ("cum_2nd_harmonic", "Measured dose — cumulative 2nd harmonic (sheet units)"),
         ("bursts_x_goal", "Prescribed dose — N bursts × harmonic goal"),
     ]
-    fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharey=True, sharex="col", facecolor=SURFACE)
+    fig, axes = plt.subplots(len(MAPPINGS), 2, figsize=(12, 4.9 * len(MAPPINGS)), sharey=True,
+                             sharex="col", facecolor=SURFACE, squeeze=False)
     for i, mapping in enumerate(MAPPINGS):
         sub = df[df.mapping == mapping].sort_values("target")
         for j, (xcol, xlabel) in enumerate(xs):
@@ -180,7 +175,7 @@ def plot(df: pd.DataFrame):
             ax.set_ylim(-0.03, 1.0)
             ax.set_xlim(left=-0.05 * df[xcol].max(), right=1.1 * df[xcol].max())
             ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
-            if i == 1:
+            if i == len(MAPPINGS) - 1:
                 ax.set_xlabel(xlabel)
             if j == 0:
                 ax.set_ylabel("GFP area coverage in target ROI")
@@ -197,14 +192,14 @@ def plot(df: pd.DataFrame):
         "Exploratory — rests on unconfirmed assumptions (see script header). One animal; numbers are targets. "
         "Points: mean of sections s2, s4, s5, s6; bars: min–max.\n"
         "Target 1 received three sonications (doses summed); target 3 is the no-FUS control.  "
-        "† = wideband interlock lowered the goal mid-run.  Mappings A and B disagree on which exposure went to targets 1, 4, 5, 6.",
+        "† = wideband interlock lowered the goal mid-run.",
         fontsize=8.5, color=MUTED, va="bottom",
     )
-    fig.tight_layout(rect=(0, 0.045, 1, 0.94))
+    fig.tight_layout(rect=(0, 0.075, 1, 0.9))
     return fig
 
 
-def plot_scatter(df: pd.DataFrame, mapping: str = "deck",
+def plot_scatter(df: pd.DataFrame, mapping: str = "confirmed",
                  xcol: str = "cum_2nd_harmonic", channel: str = "TRITC"):
     """Single dose-delivery correlation: one dot per target, least-squares line."""
     _style()
