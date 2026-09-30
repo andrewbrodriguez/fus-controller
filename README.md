@@ -24,18 +24,18 @@ This matters most for translation. Brute force is not an option in a patient: sp
 ## A real example: Mouse 1
 
 <p align="center">
-  <img src="docs/figures/mouse01-example.png" alt="Mouse 1 brain section with two circled targets. Target 1 was sonicated: its acoustic trace jumps about 40 dB when microbubbles arrive, and 90% of its circle is GFP-positive. Target 3 was a no-FUS control: nothing was recorded, and 1% of its circle is GFP-positive." width="100%">
+  <img src="docs/figures/mouse01-example.png" alt="Mouse 1 brain section with two circled targets. Target 1 was sonicated: its acoustic trace jumps about 40 dB when microbubbles arrive, and 72% of its circle is GFP-positive. Target 3 was a no-FUS control: nothing was recorded, and 2% of its circle is GFP-positive." width="100%">
 </p>
 
-One mouse, one AAV injection, six planned targets. At **target 1** the controller drove the transducer while microbubbles circulated. The blue trace is the second-harmonic emission it regulates, about 40 dB above baseline once the bubbles arrive. **Target 3**, 2.5 mm behind it in the same brain, was left unsonicated as a control. In this section, 90% of the target 1 circle expresses GFP from the delivered virus; the control reads 1% (82% vs 2% averaged over four sections).
+One mouse, one AAV injection, six planned targets. At **target 1** the controller drove the transducer while microbubbles circulated. The blue trace is the second-harmonic emission it regulates, about 40 dB above baseline once the bubbles arrive. **Target 3**, 2.5 mm behind it in the same brain, was left unsonicated as a control. In this section, 72% of the target 1 circle expresses GFP from the delivered virus; the control reads 2% (66% vs 2% averaged over four sections).
 
 That is the whole premise: where the acoustic signal says the BBB opened, the virus got in. The open question — and the reason this project exists — is ***how much***. Plotting all six Mouse 1 targets, acoustic dose against delivery:
 
 <p align="center">
-  <img src="docs/figures/mouse01-dose-delivery-scatter.png" alt="Scatter of cumulative second-harmonic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line; r = 0.83" width="560">
+  <img src="docs/figures/mouse01-dose-delivery-scatter.png" alt="Scatter of cumulative second-harmonic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line; r = 0.85" width="560">
 </p>
 
-The r = 0.83 comes almost entirely from the two ends: the unsonicated control, and target 1, which was sonicated three times. Among the four targets sonicated once (2, 4, 5 and 6), doses between 0.95 and 1.35 produced anywhere from 19% to 65% coverage, with no trend. That scatter is what a delivery-aware controller has to learn, and it takes more animals than one to learn it.
+The r = 0.85 comes almost entirely from the two ends: the unsonicated control, and target 1, which was sonicated three times. Among the four targets sonicated once (2, 4, 5 and 6), doses between 0.95 and 1.35 produced anywhere from 18% to 48% coverage, with no clear trend. That scatter is what a delivery-aware controller has to learn, and it takes more animals than one to learn it.
 
 This is one animal. The recording-to-target mapping and the choice of GFP channel have since been confirmed with the lab; the full method, the remaining assumptions, and how each figure was made are in [`docs/mouse01-dose-delivery.md`](docs/mouse01-dose-delivery.md).
 
@@ -60,6 +60,16 @@ This is one animal. The recording-to-target mapping and the choice of GFP channe
 
 The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The virus is delivered by tail vein immediately after sonication. The capsid split comes from the lab's controller-study slides (`docs/lab/ControllerStudy_Plots.pptx`); `Mouse_Controller_Data.xlsx` does not yet record which mouse received which, and any delivery model needs that as a factor.
 
+## Project status
+
+Current state, blockers and next steps: [`notes/current.md`](notes/current.md). Working
+conventions for anyone (or any agent) picking this up: [`AGENTS.md`](AGENTS.md).
+
+As of 2026-09-30: both pipelines are built and verified on Mouse 1, and the
+recording-to-target bookkeeping is resolved. Mouse 2 has arrived and been measured, and it
+maps to targets once each section's orientation is recorded. The limiting factor is still
+tissue — 2 of 24 brains imaged, 1 of 4 acoustic sessions synced.
+
 ## Repository layout
 
 ```
@@ -72,9 +82,10 @@ tests/          pytest suite
 notebooks/      Exploratory analysis
 results/        Generated figures and model outputs
 docs/           Proposal and lab presentations
-notes/          Meeting notes and working log
+notes/          Meeting notes and working log (`current.md` = state of play)
 assets/         Images used in documentation
-ARCH.md         Project charter: scope, weekly plan, deliverables
+ARCH.md         Project charter: scope, weekly plan, status
+AGENTS.md       Conventions, commands and gotchas for contributors
 ```
 
 Raw data is not in version control — a single `.mat` acoustic recording is roughly half a gigabyte, and one imaged mouse is several more. See [`data/README.md`](data/README.md) for the layout, the Dropbox source, and how to read the file formats.

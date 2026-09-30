@@ -63,3 +63,19 @@ def test_anterior_faces_left_at_90_degrees():
 def test_slot_to_target():
     assert [h.slot_to_target(s, False) for s in range(1, 7)] == [1, 2, 3, 4, 5, 6]
     assert [h.slot_to_target(s, True) for s in range(1, 7)] == [4, 5, 6, 1, 2, 3]
+
+
+def test_angle_hint_keeps_search_near_it():
+    density, _ = synthetic_density(200, 0.9, (450, 450))
+    fit = h.fit_plan(density, PIXEL_UM, angle_hint=180.0)
+    assert abs(((fit.angle_deg - 200 + 180) % 360) - 180) < 2
+
+
+def test_template_centre_and_direction():
+    # anterior left (90 deg): the target centroid sits 1.9 plan mm left of the click
+    fit = h.template_fit((400.0, 500.0), 90.0, PIXEL_UM, scale=1.0)
+    ppm = 1000 / PIXEL_UM
+    assert fit.row0 == pytest.approx(400.0)
+    assert fit.col0 == pytest.approx(500.0 - 1.9 * ppm)
+    pts = fit.points()
+    assert pts[1][1] < pts[3][1]  # target 1 is anterior of target 3

@@ -371,8 +371,8 @@ week 11.
 
 1. ~~§3 target correspondence~~ — resolved, see §3.
 2. ~~Native GFP or antibody-stained GFP as primary?~~ — **the GFP stain (TRITC)**.
-3. ~~What radius?~~ — the focal spot is ~2 × 2 mm in x/y and ~3 mm in z, so **r = 1.0 mm**;
-   precise dimensions to follow. The ROI method itself (§7 option A) is unchanged, and
+3. ~~What radius?~~ — the focal spot is ~2 × 2 mm in x/y and ~3 mm in z, so **r = 1.0 mm**
+   (in use from 2026-09-30); precise dimensions to follow. The ROI method itself (§7 option A) is unchanged, and
    with the mapping resolved, the plan can be placed from the target pattern.
 4. Orientation: sections carry a **notch** — bottom right on Mouse 1, bottom left from
    here on.

@@ -9,6 +9,31 @@
 ## Project Title
 Machine Learning Based Acoustic Feedback Controller for FUS-BBB Mediated AAV Delivery
 
+## Status — 2026-09-30 (week ~5 of 13)
+
+Moment-in-time detail, including blockers and next steps: [`notes/current.md`](notes/current.md).
+
+| Phase | Plan | Actual |
+|---|---|---|
+| 1 — Preparation & data (wk 1–4) | Import, filter, feature extraction | **Done and ahead.** `nt_ExtractHarmonicData.m` ported to Python and reproduces the lab's numbers exactly; harmonic and wideband bands, cumulative dose, interlock detection |
+| 2 — Experimental (wk 5–8) | In vivo work, sectioning, staining, microscopy | **Partly, out of order.** A full quantification pipeline exists and has been run on Mouse 1. Mouse 2 arrived 9/29 and is exported and measured; per-section orientation must be recorded by hand before it maps to targets |
+| 3 — Integration & ML (wk 9–12) | Align ground truth to acoustics, fit a model | **Started early.** Dose and delivery are joined per target and plotted for Mouse 1. No model — one animal, six targets |
+| 4 — Report (wk 13) | Draft manuscript | Not started |
+
+**Ahead of plan:** the computational side. Feature extraction, the histology pipeline, the
+join, tests, a notebook, and method docs are all in place.
+
+**Behind plan, and the limiting factor:** tissue. Two of 24 brains are imaged, and one of four
+acoustic sessions is synced. The subharmonic/ultraharmonic work in phase 1 was deliberately
+deferred — the lab asked to lead with cumulative 2nd-harmonic AUC.
+
+**Settled with the PI on 2026-09-18:** recording→target mapping, the notch for section
+orientation, the anti-GFP stain as the delivery measure, and a ~2 × 2 × 3 mm focal spot.
+
+**Open:** capsid assignment per mouse, tissue throughput this term, the remaining acoustic
+sessions, and orientation notes for the Mouse 2 sections. The 1.0 mm ROI radius is in use
+from 2026-09-30.
+
 ## Description
 An independent study bridging computational modeling with wet-lab biological measurement, applying machine learning and signal processing to a translational medicine problem. The blood-brain barrier (BBB) is a major obstacle for delivering novel gene therapies (AAVs) to the central nervous system. Focused Ultrasound BBB (FUS-BBB) opening is a promising, non-invasive technique that uses targeted acoustic waves and circulating microbubbles to temporarily increase BBB permeability. This project designs a dynamic feedback controller that processes acoustic emissions in real time to predict and control the quantity of AAV delivered to the brain.
 
@@ -92,11 +117,14 @@ During this 13-week independent study, the project focuses on the first two phas
 <!-- Not specified in the proposal — ES91r is typically graded on the basis of the final report and mentor evaluation -->
 
 ## Agent Notes
-- This is an ES91r independent study, not a traditional class with weekly lectures
-- Primary work happens at BWH/HMS lab (Tue/Wed/Thu)
-- Lab safety training (BWH/HMS) is a Week 1 prerequisite — must be completed before starting
-- The project combines computational work (Python, ML, signal processing) with wet lab work (FUS experiments, tissue handling, microscopy)
-- The "lectures/" and "assignments/" folders may not be the right structure — this is research work, not coursework
-- Consider organizing research outputs in `projects/` (final report, code, data analysis) and `reading/` (literature review on FUS-BBB and acoustic cavitation)
-- The final report should be formatted as a draft journal manuscript
-- Move `ES91r Project Proposal.pdf` into `projects/` since it's the project deliverable/documentation
+
+Working conventions, commands, and gotchas live in [`AGENTS.md`](AGENTS.md); current state in
+[`notes/current.md`](notes/current.md).
+
+- Research, not coursework: no lectures, no assignments. Deliverable is a draft journal
+  manuscript plus, if it holds up, code the lab can run.
+- Wet-lab work happens at BWH/HMS (Tue/Wed/Thu); computational work is done in this repo.
+- The weekly plan above is the proposal's. Real sequencing has diverged — see the status table:
+  computation ran ahead while tissue lagged.
+- Tissue throughput sets the ceiling on everything. Judge scope against how many brains are
+  realistically imaged, not against the plan's week numbers.

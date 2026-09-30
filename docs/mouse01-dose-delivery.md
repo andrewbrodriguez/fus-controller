@@ -1,7 +1,7 @@
 # Mouse 1 — how the dose vs delivery plots were made
 
 **Status:** exploratory, 2026-09-16; mapping and channel confirmed by N. Todd on
-2026-09-18. One animal. The remaining steps rest on assumptions marked **[A#]** and
+2026-09-18; re-run with the 1.0 mm ROI radius on 2026-09-30. One animal. The remaining steps rest on assumptions marked **[A#]** and
 collected in [Assumptions](#assumptions).
 
 This document follows the chain from raw files to the two plots below: acoustic dose per
@@ -30,11 +30,11 @@ plotted.
 
 | | Value |
 |---|---|
-| Pearson r (6 targets) | **0.83** (p = 0.04) |
+| Pearson r (6 targets) | **0.85** (p = 0.03) |
 | Spearman ρ (6 targets) | 0.71 (p = 0.11) |
-| Pearson r without the no-FUS control (5 targets) | 0.67 (p = 0.21) |
-| Pearson r, single-sonication targets only (2, 4, 5, 6) | **−0.06** (p = 0.94) |
-| Least-squares fit | coverage = 0.043 + 0.314 × dose, R² = 0.68 |
+| Pearson r without the no-FUS control (5 targets) | 0.71 (p = 0.18) |
+| Pearson r, single-sonication targets only (2, 4, 5, 6) | **0.12** (p = 0.88) |
+| Least-squares fit | coverage = 0.040 + 0.255 × dose, R² = 0.72 |
 
 **Two points produce almost all of the correlation:** the no-FUS control at (0, 0) and
 target 1, which got three sonications. Among the four targets that got one sonication
@@ -155,7 +155,7 @@ The six targets form a fixed pattern, so the code fits that pattern (rotation, p
 shrinkage) to the GFP spots. **Each target's circle comes from a fit to the other five
 targets**, so a target's own GFP cannot pull its circle onto itself. An empty target is
 then measured where the rest of the pattern says it should be. Each circle has a
-radius of 0.75 mm, scaled by the fitted shrinkage.
+radius of 1.0 mm — half the ~2 mm lateral focal spot — scaled by the fitted shrinkage.
 
 Coverage is the fraction of tissue pixels inside the circle that are GFP+.
 
@@ -182,7 +182,7 @@ sections was scored on how well the sections agree about **targets 1, 2, 4 and 5
 so the empty pair did not influence the choice.
 
 - **Best combination [A1]:** s2 and s4 as scanned, s5 and s6 mirrored. Mean
-  between-section SD 0.10, against 0.14 for the next best.
+  between-section SD 0.10, against 0.12 for the next best (s4 alone mirrored).
 - **Independent check:** under that choice, the empty spot is the same target in all four
   sections.
 - **Remaining ambiguity [A2]:** whether that spot is target 3 or target 6 depends on an
@@ -210,12 +210,17 @@ The scatter therefore uses **TRITC**. Both channels are shown in the four-panel 
 
 | Target | TRITC coverage (range) | FITC coverage (range) |
 |---|---|---|
-| 1 | 0.82 (0.66–0.90) | 0.41 (0.23–0.53) |
-| 2 | 0.65 (0.59–0.77) | 0.36 (0.27–0.46) |
-| 3 | 0.02 (0.01–0.05) | 0.00 |
-| 4 | 0.52 (0.48–0.60) | 0.26 (0.15–0.45) |
-| 5 | 0.31 (0.00–0.42) | 0.30 (0.27–0.32) |
-| 6 | 0.19 (0.00–0.57) | 0.66 (0.17–0.84) |
+| 1 | 0.66 (0.46–0.75) | 0.29 (0.18–0.39) |
+| 2 | 0.48 (0.40–0.55) | 0.24 (0.19–0.28) |
+| 3 | 0.02 (0.01–0.03) | 0.00 |
+| 4 | 0.48 (0.43–0.52) | 0.26 (0.16–0.41) |
+| 5 | 0.25 (0.00–0.33) | 0.27 (0.20–0.31) |
+| 6 | 0.18 (0.00–0.46) | 0.58 (0.11–0.76) |
+
+At 0.75 mm (the placeholder radius, before 2026-09-30) the TRITC means were 0.82, 0.65,
+0.02, 0.52, 0.31, 0.19. The wider disc takes in more of each plume's edge, so every
+sonicated target drops. The TRITC ranking is unchanged, though targets 2 and 4 are now
+level.
 
 ---
 
@@ -303,7 +308,9 @@ are also told apart by filled vs. hollow markers.
 | A5 | Doses from repeat sonications at one target add | Simplest model | Target 1's dose would be overstated if only its last run mattered |
 | A6 | The no-FUS control has zero dose | By definition | — |
 | A7 | TRITC is the delivery measure | **Confirmed** by N. Todd: use the GFP stain, not native GFP | Target 6 would move from lowest delivery (after the control) to highest |
-| — | Circle radius 0.75 mm, threshold 5 SD, background σ 1 mm. **The focal spot is ~2 × 2 mm in x/y and ~3 mm in z, so the radius should become 1.0 mm** — not yet re-run | Chosen before any coverage was computed | Threshold: coverage shifts by up to 5 percentage points at 4 or 6 SD, and the target ranking is identical in both channels. Radius and σ have not been tested at other values |
+| A8 | All six targets lie at one depth (z = 0), so one horizontal section crosses all six at the same level | `posx.xyz` has z = 0 for every target | **Not true for Mouse 2**: N. Todd (2026-09-29) reports the head was rolled, right-side targets higher and left-side lower. Whether Mouse 1 was level is unknown. Where it isn't, one section samples the two sides at different depths, and the mean over sections (A3) mixes depths unevenly |
+| A9 | Notch is on the animal's right for Mouse 1, left from Mouse 2 on | N. Todd, 2026-09-18; for Mouse 2 he first said bottom right, then corrected it to left on 2026-09-29, noting it "makes more sense with the delivery and harmonic doses" | That reasoning uses the dose–delivery relationship this project is trying to measure, so the notch itself should be checked in the images before Mouse 2 is used as evidence |
+| — | Circle radius 1.0 mm, threshold 5 SD, background σ 1 mm | Radius: half the ~2 mm lateral focal spot (N. Todd, 9/18; precise dimensions to follow). Threshold and σ chosen before any coverage was computed | Threshold: target means shift by up to 4 percentage points at 4 or 6 SD. The FITC ranking is identical; in TRITC, targets 2 and 4 swap at 6 SD (they are level at 5). Radius: going from 0.75 to 1.0 mm lowered every sonicated target (T1 0.82 → 0.66) without reordering them. σ has not been tested at other values |
 
 ---
 
@@ -316,9 +323,9 @@ basic sanity check.
 
 **It does not show a dose–response relationship:**
 
-- **Leverage:** r = 0.83 comes mostly from two high-leverage points. One is the control,
+- **Leverage:** r = 0.85 comes mostly from two high-leverage points. One is the control,
   which confirms FUS is needed at all. The other is target 1, whose dose is a sum of
-  three runs under assumption A5. Across the four single-sonication targets, r = −0.06.
+  three runs under assumption A5. Across the four single-sonication targets, r = 0.12.
 - **Sample size:** n = 6 targets from one animal, with no replication across animals.
 - **Channel disagreement:** the two GFP channels disagree at one of six targets, and
   what that FITC-only signal is has not been established.
@@ -329,10 +336,10 @@ The p-value in the scatter should not be quoted as a result.
 
 1. ~~Confirming which recordings went to which target position~~ — done (step 3).
 2. Establishing what the FITC-only signal at target 6 is.
-3. Re-running with the 1.0 mm ROI radius implied by the focal spot.
+3. ~~Re-running with the 1.0 mm ROI radius implied by the focal spot~~ — done 2026-09-30.
 4. More animals. Each imaged animal adds up to six targets, and within-animal
-   comparisons (same skull, different exposures) are the strongest design here. Two more
-   datasets are expected shortly.
+   comparisons (same skull, different exposures) are the strongest design here. Mouse 2
+   arrived 2026-09-29.
 
 ---
 

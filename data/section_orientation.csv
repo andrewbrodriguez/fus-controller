@@ -1,0 +1,18 @@
+mouse,section,centre_row,centre_col,front_row,front_col,notch_row,notch_col,exclude,review,notes
+1,section_s2,3526.5,4390.0,2418.5,1397.4,7506.0,3000.3,,,anterior-left known from anatomy; mirrored=False from the empty target 3
+1,section_s3,4297.6,1957.1,,,,,yes,,half a section; fit fails
+1,section_s4,3987.0,3473.1,4097.3,212.1,8577.6,3749.9,,,mirrored=False from the empty target 3
+1,section_s5,4679.0,3205.9,4911.4,322.7,384.6,2881.4,,,mirrored=True from the empty target 3
+1,section_s6,4455.0,3952.3,5170.3,276.4,96.5,3099.6,,,mirrored=True from the empty target 3
+2,slide01_s2,4450.7,3675.7,453.4,4865.0,5441.1,7229.5,,,typed 2026-09-30: notch bottom-right; automatic fit poor (scale 1.14; slot 4 moved 1.6 mm leave-one-out); little GFP - outside focal column?; review of old GFP-fit placement: wrong
+2,slide01_s3,5824.8,3926.6,1546.2,4116.4,6119.7,7891.5,,,typed 2026-09-30: notch bottom-right; review of old GFP-fit placement: ok
+2,slide01_s4,4365.2,3822.1,174.2,2726.8,5451.1,467.6,,,typed 2026-09-30: notch top-left; little GFP; review of old GFP-fit placement: ok
+2,slide02_s2,4658.0,3921.8,481.1,3565.3,5004.5,320.1,,,typed 2026-09-30: notch bottom-left; automatic fit hit scale bound 1.30; little GFP - outside focal column?; review of old GFP-fit placement: wrong
+2,slide02_s3,4995.4,4505.0,445.1,5583.1,3997.1,302.1,,,typed 2026-09-30: notch bottom-left; review of old GFP-fit placement: wrong
+2,slide02_s4,5724.0,4001.7,1152.6,4799.8,4990.9,115.3,,,typed 2026-09-30: notch bottom-left; notch hard to see; review of old GFP-fit placement: wrong
+2,slide03_s2,4645.7,3923.3,745.8,6190.8,2540.2,497.6,,,typed 2026-09-30: notch bottom-left; slot 5 moved 1.6 mm leave-one-out; review of old GFP-fit placement: wrong
+2,slide03_s3,3806.0,3965.0,1034.5,1101.4,6422.7,1007.9,,,typed 2026-09-30: notch bottom-left; automatic fit hit scale bound 0.70; review of old GFP-fit placement: wrong
+2,slide03_s4,4168.2,3925.5,-134.5,4631.9,3333.4,8.0,,,little GFP; review of old GFP-fit placement: wrong
+2,slide04_s2,3876.4,3590.4,-128.9,3061.0,3254.1,7047.8,,,typed 2026-09-30: notch bottom-right; automatic fit poor (scale 1.22; slot 2 off tissue); little GFP - outside focal column?; review of old GFP-fit placement: wrong
+2,slide04_s3,3917.7,3256.5,2571.7,7560.3,7832.2,4387.4,,,typed 2026-09-30: notch bottom; notch at bottom middle; automatic fit looked right; review of old GFP-fit placement: wrong
+2,slide04_s4,4214.3,4404.8,180.0,4948.2,3769.7,354.1,,,typed 2026-09-30: notch bottom-left; automatic fit looked right; review of old GFP-fit placement: wrong

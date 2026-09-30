@@ -1,7 +1,7 @@
 mapping,target,recordings,n_sonications,cum_2nd_harmonic,bursts_x_goal,interlock_fired,TRITC_mean,TRITC_min,TRITC_max,FITC_mean,FITC_min,FITC_max
-confirmed,1,Target1 + Target2 + Target3,3,2.4413,305.25,False,0.8204,0.662,0.896,0.4142,0.2273,0.5314
-confirmed,2,Target2_Repeat,1,1.1015,63.0,False,0.6457,0.5854,0.7676,0.3645,0.2691,0.4563
-confirmed,3,none (no FUS),0,0.0,0.0,False,0.0208,0.0061,0.0495,0.0007,0.0001,0.0012
-confirmed,4,Target4,1,1.3457,99.75,True,0.5164,0.4765,0.6027,0.2559,0.1532,0.4508
-confirmed,5,Target5,1,0.9466,63.75,False,0.308,0.0025,0.4199,0.2999,0.2681,0.3218
-confirmed,6,Target6,1,1.3164,140.25,False,0.1888,0.0001,0.5704,0.6596,0.1676,0.8386
+confirmed,1,Target1 + Target2 + Target3,3,2.4413,305.25,False,0.659,0.4612,0.754,0.2878,0.1793,0.3916
+confirmed,2,Target2_Repeat,1,1.1015,63.0,False,0.4834,0.3982,0.5517,0.2351,0.1908,0.276
+confirmed,3,none (no FUS),0,0.0,0.0,False,0.0209,0.0065,0.0319,0.0014,0.0004,0.0034
+confirmed,4,Target4,1,1.3457,99.75,True,0.4768,0.4281,0.5222,0.258,0.164,0.4054
+confirmed,5,Target5,1,0.9466,63.75,False,0.248,0.0025,0.3341,0.2653,0.1981,0.3088
+confirmed,6,Target6,1,1.3164,140.25,False,0.1759,0.0001,0.4639,0.5843,0.1097,0.7616

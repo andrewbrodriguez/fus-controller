@@ -85,11 +85,11 @@ PLAN_MM: dict[int, tuple[float, float]] = {
     6: (-1.5, 2.5),
 }
 
-#: ROI radius, in plan mm (scaled by the fitted shrinkage). Fixed before any
-#: coverage was computed. The closest pair of targets (2 and 3) is 2.06 mm
-#: apart, so 0.75 mm keeps neighbouring ROIs from overlapping. Provisional
-#: until the focal spot size at 837 kHz is confirmed.
-ROI_RADIUS_MM = 0.75
+#: ROI radius, in plan mm (scaled by the fitted shrinkage). Half the ~2 mm
+#: lateral focal spot at 837 kHz (N. Todd, 2026-09-18; precise dimensions to
+#: follow). The closest pair of targets (2 and 3) is 2.06 mm apart, so
+#: neighbouring ROIs still do not overlap. Was 0.75 mm before 2026-09-30.
+ROI_RADIUS_MM = 1.0
 
 #: GFP+ means more than this many noise SDs above local background. The
 #: spec's sensitivity analysis reports k-1 and k+1 alongside.
@@ -106,6 +106,21 @@ GFP_CHANNELS = ("FITC", "TRITC")  # native GFP, anti-GFP stain
 #: degrees in `PlanFit`. A fit further than this from it gets flagged.
 EXPECTED_ANGLE_DEG = 90.0
 ANGLE_WARN_DEG = 30.0
+
+#: Mouse_02 onwards is mounted at any rotation, and the six-target pattern
+#: nearly matches itself turned 180 degrees (on Mouse_02 the 180-degree
+#: alternative scored within 12% of the best fit on 8 of 12 sections), so the
+#: fit takes the anterior direction from a person -- see `fus.orientation`.
+#: With an anterior hint, the search covers this many degrees either side.
+HINT_WINDOW_DEG = 45.0
+
+#: Template placement (Mouse_02 on): the plan is laid rigidly on the section from
+#: a person's clicks -- no GFP fit. The centre click marks this plan point: on the
+#: midline, and on Mouse_01's four good sections the fitted target pattern sat
+#: 1.5-1.7 mm (tissue) in front of the brain centre, i.e. ~1.9 plan mm in front
+#: of y = 1.6 ... 3.5. Scale is Mouse_01's mean fitted shrinkage (0.82-0.91).
+TEMPLATE_CENTRE_MM = (0.0, 1.6)
+TEMPLATE_SCALE = 0.87
 
 #: Mirror pairs: the target on the other side of the midline.
 MIRROR = {1: 4, 2: 5, 3: 6, 4: 1, 5: 2, 6: 3}
@@ -149,13 +164,15 @@ def list_series(vsi: str | Path) -> list[dict]:
 
 
 def export_sections(
-    vsi: str | Path, out_dir: str | Path, downsample: float = 4
+    vsi: str | Path, out_dir: str | Path, downsample: float = 4, prefix: str = "section"
 ) -> list[Path]:
     """Write each fluorescence section of a ``.vsi`` as a pyramidal OME-TIFF.
 
     Sections are the series with more than 3 channels (the label and overview
-    images are RGB). Output is ``section_s<series>.ome.tif``. At the default
-    4x a section is ~9000 px square at 1.3 um/px, ~0.4 GB compressed.
+    images are RGB). Output is ``<prefix>_s<series>.ome.tif``. At the default
+    4x a section is ~9000 px square at 1.3 um/px, ~0.4 GB compressed. Mouse_01
+    is one ``.vsi``; later animals come as one ``.vsi`` per slide, whose series
+    numbers repeat, so give each slide its own ``prefix`` (e.g. ``slide01``).
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -163,7 +180,7 @@ def export_sections(
     for s in list_series(vsi):
         if len(s["channels"]) <= 3:
             continue
-        dest = out_dir / f"section_s{s['index']}.ome.tif"
+        dest = out_dir / f"{prefix}_s{s['index']}.ome.tif"
         subprocess.run(
             [
                 _qupath(),
@@ -484,12 +501,28 @@ def plan_density(
     return ndi.gaussian_filter(block_mean(union.astype(np.float32), factor), sigma_px)
 
 
+def template_fit(
+    centre: tuple[float, float],
+    angle_deg: float,
+    pixel_um: float,
+    scale: float = TEMPLATE_SCALE,
+    plan: dict[int, tuple[float, float]] | None = None,
+) -> PlanFit:
+    """Place the plan rigidly: ``centre`` (row, col) is `TEMPLATE_CENTRE_MM`, and
+    plan +y points along ``angle_deg`` (`fus.orientation.anterior_angle`)."""
+    plan = dict(plan or PLAN_MM)
+    centroid = np.mean(list(plan.values()), axis=0)
+    dr, dc = _mm_to_px(*(centroid - TEMPLATE_CENTRE_MM), angle_deg, scale, pixel_um)
+    return PlanFit(centre[0] + dr, centre[1] + dc, float(angle_deg % 360), scale, pixel_um, plan)
+
+
 def fit_plan(
     density: np.ndarray,
     pixel_um: float,
     plan: dict[int, tuple[float, float]] | None = None,
     leave_out: int | None = None,
     start: PlanFit | None = None,
+    angle_hint: float | None = None,
 ) -> PlanFit:
     """Place the six-target plan on a GFP density map.
 
@@ -500,7 +533,8 @@ def fit_plan(
     arrangement of plumes.
 
     ``leave_out`` drops one target from the objective; its point is still
-    placed by the transform.
+    placed by the transform. ``angle_hint`` limits the search to
+    `HINT_WINDOW_DEG` either side of that angle.
     """
     plan = dict(plan or PLAN_MM)
     used = {k: v for k, v in plan.items() if k != leave_out}
@@ -511,7 +545,7 @@ def fit_plan(
         coarse = ndi.gaussian_filter(block_mean(density, 2), 430 / search_um)
         _, (r0, c0, a, s) = _grid_search(
             coarse, used, search_um,
-            angles=np.arange(0, 360, 5), scales=np.arange(0.7, 1.31, 0.1),
+            angles=_search_angles(angle_hint), scales=np.arange(0.7, 1.31, 0.1),
         )
         r0, c0 = (r0 + 0.5) * 2 - 0.5, (c0 + 0.5) * 2 - 0.5
         # _grid_search offsets are relative to the centroid of `used`; convert
@@ -527,6 +561,12 @@ def fit_plan(
     (ru, cu, a, s), score = _refine(density, used, pixel_um, x0)
     r0, c0 = _recentre(ru, cu, a, s, pixel_um, used, plan)
     return PlanFit(r0, c0, float(a % 360), float(s), pixel_um, plan, float(score))
+
+
+def _search_angles(hint: float | None) -> np.ndarray:
+    if hint is None:
+        return np.arange(0, 360, 5)
+    return (hint + np.arange(-HINT_WINDOW_DEG, HINT_WINDOW_DEG + 1, 5)) % 360
 
 
 def _recentre(r0, c0, a, s, pixel_um, src, dst):
@@ -560,6 +600,7 @@ class SectionResult:
     rows: list[dict]
     tissue: np.ndarray
     residuals: dict[str, Residual]
+    radius_mm: float = ROI_RADIUS_MM
 
     def table(self):
         import pandas as pd
@@ -615,32 +656,90 @@ def measure_slots(
     return rows
 
 
+def measure_rois(sec: Section, tissue: np.ndarray, residuals: dict[str, Residual],
+                 rois: dict, k: float = THRESHOLD_K) -> list[dict]:
+    """Like `measure_slots`, inside hand-placed ellipses (`fus.rois.Roi`, by target)."""
+    rows = []
+    for t, roi in sorted(rois.items()):
+        box, d = roi.mask(sec.shape)
+        m = tissue[box] & d
+        base = {
+            "section": sec.name, "slot": roi.slot, "target": t,
+            "row": round(roi.centre[0], 1), "col": round(roi.centre[1], 1),
+            "radius_px": round(roi.radius, 1), "semi_a_px": round(roi.semi_a, 1),
+            "semi_b_px": round(roi.semi_b, 1), "roi_angle_deg": round(roi.angle_deg % 180, 1),
+            "tissue_fraction": round(int(m.sum()) / max(int(d.sum()), 1), 3),
+            "loo_shift_mm": 0.0,
+        }
+        for ch, res in residuals.items():
+            v = res.values[box][m]
+            row = dict(base, channel=ch, noise_sd=round(res.noise_sd, 1), threshold_k=k)
+            for kk, name in [(k, "coverage"), (k - 1, "coverage_k-1"), (k + 1, "coverage_k+1")]:
+                row[name] = float(np.mean(v > kk * res.noise_sd)) if v.size else np.nan
+            row["mean_residual"] = float(v.mean()) if v.size else np.nan
+            rows.append(row)
+    return rows
+
+
 def analyse_section(
     sec: Section,
     plan: dict[int, tuple[float, float]] | None = None,
     radius_mm: float = ROI_RADIUS_MM,
     k: float = THRESHOLD_K,
     fit_factor: int = 8,
+    angle_hint: float | None = None,
+    template: PlanFit | None = None,
+    rois: dict | None = None,
 ) -> SectionResult:
-    """Tissue, background, plan placement, and measurement for one section."""
+    """Tissue, background, plan placement, and measurement for one section.
+
+    ``template`` (from `template_fit`) places the plan directly and skips the
+    GFP fit: every slot uses it, so ``loo_shift_mm`` is 0 and the six ROIs stay
+    a rigid pattern. Otherwise the plan is fitted to the GFP, leave-one-out;
+    ``angle_hint`` (`fus.orientation.anterior_angle`) then limits the rotation
+    searched, and without it the angle check assumes anterior faces left, as on
+    Mouse_01. ``rois`` (`fus.rois.Roi` by target, from finetuning) replaces
+    the circles with hand-placed ellipses; ``template`` is still needed for
+    the section's fit fields.
+    """
+    hint = angle_hint
     plan = dict(plan or PLAN_MM)
     tissue = tissue_mask(sec)
     residuals = {ch: gfp_residual(sec, ch, tissue, k=k) for ch in GFP_CHANNELS}
+
+    if template is not None:
+        slot_fits = {s: template for s in template.plan}
+        if rois is not None:
+            rows = measure_rois(sec, tissue, residuals, rois, k)
+            placement = "finetuned"
+        else:
+            rows = measure_slots(sec, tissue, residuals, slot_fits, template, radius_mm, k)
+            placement = "template"
+        for r in rows:
+            r.update(fit_angle_deg=round(template.angle_deg, 1), fit_scale=round(template.scale, 3))
+            r.update(placement=placement, angle_hint_deg=round(template.angle_deg, 1),
+                     anchor_row=round(template.row0, 1), anchor_col=round(template.col0, 1),
+                     angle_flag=False)
+        return SectionResult(sec.name, sec.pixel_um, template, slot_fits, rows, tissue,
+                             residuals, radius_mm)
 
     coarse_um = sec.pixel_um * fit_factor
     density = plan_density(
         [r.positive(k) for r in residuals.values()], tissue, fit_factor,
         sigma_px=250 / coarse_um,
     )
-    full = fit_plan(density, coarse_um, plan)
+    full = fit_plan(density, coarse_um, plan, angle_hint=hint)
     loo = {s: fit_plan(density, coarse_um, plan, leave_out=s, start=full) for s in plan}
 
     full_px = full.rescaled(fit_factor)
     loo_px = {s: f.rescaled(fit_factor) for s, f in loo.items()}
     rows = measure_slots(sec, tissue, residuals, loo_px, full_px, radius_mm, k)
+    expected = EXPECTED_ANGLE_DEG if hint is None else hint
     for r in rows:
-        r["angle_flag"] = abs(((full.angle_deg - EXPECTED_ANGLE_DEG + 180) % 360) - 180) > ANGLE_WARN_DEG
-    return SectionResult(sec.name, sec.pixel_um, full_px, loo_px, rows, tissue, residuals)
+        r["placement"] = "fit"
+        r["angle_hint_deg"] = "" if hint is None else round(hint, 1)
+        r["angle_flag"] = abs(((full.angle_deg - expected + 180) % 360) - 180) > ANGLE_WARN_DEG
+    return SectionResult(sec.name, sec.pixel_um, full_px, loo_px, rows, tissue, residuals, radius_mm)
 
 
 def slot_to_target(slot: int, mirrored: bool) -> int:
@@ -661,7 +760,7 @@ def slot_to_target(slot: int, mirrored: bool) -> int:
 def plot_section(sec: Section, result: SectionResult, factor: int = 8):
     """Composite with tissue outline and ROIs, plus the GFP+ masks."""
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Circle
+    from matplotlib.patches import Circle, Ellipse
 
     def stretch(a, lo=1, hi=99.8):
         p1, p2 = np.percentile(a, [lo, hi])
@@ -686,10 +785,17 @@ def plot_section(sec: Section, result: SectionResult, factor: int = 8):
         ax.contour(tissue, [0.5], colors="c", linewidths=0.6)
         ch = title.split()[0]
         for slot, fit in result.slot_fits.items():
-            r, c = fit.points()[slot]
-            rad = ROI_RADIUS_MM * fit.scale * 1000 / sec.pixel_um
-            ax.add_patch(Circle(((c + 0.5) / factor - 0.5, (r + 0.5) / factor - 0.5),
-                                rad / factor, fill=False, ec="yellow", lw=1.4))
+            first = table.query("slot == @slot").iloc[0]
+            if "semi_a_px" in table:  # finetuned ellipse, as measured
+                r, c = first.row, first.col
+                ax.add_patch(Ellipse(((c + 0.5) / factor - 0.5, (r + 0.5) / factor - 0.5),
+                                     2 * first.semi_a_px / factor, 2 * first.semi_b_px / factor,
+                                     angle=90 - first.roi_angle_deg, fill=False, ec="yellow", lw=1.4))
+            else:
+                r, c = fit.points()[slot]
+                rad = result.radius_mm * fit.scale * 1000 / sec.pixel_um
+                ax.add_patch(Circle(((c + 0.5) / factor - 0.5, (r + 0.5) / factor - 0.5),
+                                    rad / factor, fill=False, ec="yellow", lw=1.4))
             label = f"S{slot}"
             if ch in masks:
                 cov = table.query("slot == @slot and channel == @ch")["coverage"].iloc[0]
@@ -702,7 +808,7 @@ def plot_section(sec: Section, result: SectionResult, factor: int = 8):
     f = result.full_fit
     fig.suptitle(
         f"{sec.name}   fit: angle {f.angle_deg:.0f} deg, scale {f.scale:.2f}   "
-        f"ROI r = {ROI_RADIUS_MM} mm, GFP+ = residual > {THRESHOLD_K:g} SD   "
+        f"{'hand-placed ROIs' if 'semi_a_px' in table else f'ROI r = {result.radius_mm:g} mm'}, GFP+ = residual > {THRESHOLD_K:g} SD   "
         "(slots assume targets 1-3 in the lower hemisphere)"
     )
     fig.tight_layout()
@@ -726,6 +832,7 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("vsi", type=Path)
     e.add_argument("out_dir", type=Path)
     e.add_argument("--downsample", type=float, default=4)
+    e.add_argument("--prefix", default="section", help="output name prefix (default: section)")
 
     m = sub.add_parser("measure", help="GFP coverage per slot for exported sections")
     m.add_argument("sections", nargs="+", type=Path)
@@ -733,17 +840,31 @@ def main(argv: list[str] | None = None) -> int:
     m.add_argument("--figures", type=Path, metavar="DIR")
     m.add_argument("--radius-mm", type=float, default=ROI_RADIUS_MM)
     m.add_argument("-k", type=float, default=THRESHOLD_K)
+    m.add_argument("--orientation", type=Path, metavar="CSV",
+                   help="section_orientation.csv: place the template from its clicks")
     args = p.parse_args(argv)
 
     if args.cmd == "export":
-        for path in export_sections(args.vsi, args.out_dir, args.downsample):
+        for path in export_sections(args.vsi, args.out_dir, args.downsample, args.prefix):
             print(f"wrote {path}")
         return 0
 
+    clicks = {}
+    if args.orientation:
+        from fus.orientation import mouse_of, read_sheet
+
+        clicks = read_sheet(args.orientation)
     tables = []
     for path in args.sections:
         sec = load_section(path)
-        res = analyse_section(sec, radius_mm=args.radius_mm, k=args.k)
+        template = None
+        if clicks:
+            a = clicks.get((mouse_of(path), sec.name))
+            if a is None or a.exclude or a.centre is None or a.front is None:
+                print(f"{sec.name}: excluded or not clicked, skipping")
+                continue
+            template = template_fit(a.centre, a.angle_deg, sec.pixel_um)
+        res = analyse_section(sec, radius_mm=args.radius_mm, k=args.k, template=template)
         tables.append(res.table())
         f = res.full_fit
         print(f"{sec.name}: angle {f.angle_deg:.0f} deg, scale {f.scale:.2f}")

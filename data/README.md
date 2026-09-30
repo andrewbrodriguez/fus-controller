@@ -9,21 +9,28 @@ is tracked here, because it is small, text-like, and the key to everything else.
 ```
 data/
 ├── Mouse_Controller_Data.xlsx    tracked — experimental conditions for all targets
+├── section_orientation.csv       tracked — per-section front and notch clicks, from
+│                                 `python -m fus.orientation`; the Mouse 2+ join needs it
+├── roi_locations.csv             tracked — hand-finetuned T1–T6 shapes per section (export px),
+│                                 from the finetune step of notebooks/ingest_new_histology.ipynb
 ├── acoustic/                     git-ignored
 │   └── <YYYYMMDD>/               one folder per experiment day, 6 mice each
 │       ├── Mouse_Cntr_XX_BL.mat          baseline, before microbubbles
 │       ├── Mouse_Cntr_XX_TargetYY.mat    one per target (6 per mouse), ~0.4–0.6 GB
 │       └── Mouse_Cntr_XX_*.jpg           per-run spectrogram screenshots
 └── histology/                    git-ignored
-    └── Mouse_01/
-        ├── Image.vsi             Olympus whole-slide scan — open in QuPath
-        └── _Image_/              tile stacks (.ets) backing the .vsi
+    ├── Mouse_01/
+    │   ├── Image.vsi             Olympus whole-slide scan, 5 sections — open in QuPath
+    │   └── _Image_/              tile stacks (.ets) backing the .vsi
+    └── Mouse_02/
+        ├── Control_02_Slide_0{1-4}.vsi   one scan per slide, 3 sections each
+        └── _Control_02_Slide_0{1-4}_/    tile stacks
 ```
 
-Currently synced locally: **one** acoustic day (`20260611`, mice 1–6) and **one**
-imaged mouse (`Mouse_01`). The summary sheet covers **24 mice × 6 targets**, so
-the remaining acoustic days still need to be pulled from Dropbox. Two more datasets
-are expected shortly (N. Todd, 2026-09-18).
+Currently synced locally: **one** acoustic day (`20260611`, mice 1–6) and **two**
+imaged mice (`Mouse_01`, and `Mouse_02` from 2026-09-29). Mouse 2's recordings are in the
+6/11 session, so both halves exist for it. The summary sheet covers **24 mice × 6
+targets**, so the remaining acoustic days still need to be pulled from Dropbox.
 
 ## Which recording went where
 
@@ -42,7 +49,9 @@ In the summary sheet, `Treatment #` is the firing order and `Brain Region` is co
 For Mouse 1 only, the *values* in rows 3–6 are rotated by one row, so that sheet
 understates the exposure at regions 4–6. Read doses from the recordings, not the sheet.
 
-Sections are notched for orientation: bottom right on Mouse 1, bottom left from here on.
+Sections are notched for orientation: on the animal's right for Mouse 1, on the left from
+Mouse 2 on (N. Todd, 2026-09-29, correcting his earlier "bottom right"). Click the front and
+notch of each section with `python -m fus.orientation`; see `docs/histology-pipeline.md#mouse_02`.
 
 ## Mouse_Controller_Data.xlsx
 
