@@ -1,0 +1,9 @@
+{
+  "model": "Cellpose-SAM (cpsam, defaults)",
+  "channel": "CY5 (NeuN)",
+  "flow_threshold": 0.4,
+  "cellprob_threshold": 0.0,
+  "n_cells": 308,
+  "seconds": 21.7,
+  "device": "mps"
+}

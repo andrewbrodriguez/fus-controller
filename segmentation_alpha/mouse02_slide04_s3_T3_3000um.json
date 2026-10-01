@@ -1,0 +1,32 @@
+{
+  "mouse": 2,
+  "section": "slide04_s3",
+  "target": 3,
+  "side_um": 3000.0,
+  "pixel_um": 0.3250074021980164,
+  "shape_cyx": [
+    4,
+    9230,
+    9230
+  ],
+  "channels": [
+    "DAPI",
+    "FITC",
+    "TRITC",
+    "CY5"
+  ],
+  "source": "data/processed/histology/Mouse_02/full/slide04_s3.ome.tif",
+  "rows": [
+    6505,
+    15735
+  ],
+  "cols": [
+    9512,
+    18742
+  ],
+  "roi_centre_fullres_px": [
+    11119.6,
+    14126.8
+  ],
+  "roi": "finetuned T3 from data/roi_locations.csv, crop centred on it"
+}

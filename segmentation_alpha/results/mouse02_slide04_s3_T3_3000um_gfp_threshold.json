@@ -1,0 +1,28 @@
+{
+  "crop": "mouse02_slide04_s3_T3_3000um.ome.tif",
+  "labels": "mouse02_slide04_s3_T3_3000um_stardist_labels.tif",
+  "score": "mean over the cell's pixels of normalised TRITC",
+  "normalisation": {
+    "over": "whole-section tissue (4x export)",
+    "percentiles": [
+      1.0,
+      99.9
+    ],
+    "lo": 70.0,
+    "hi": 15671.0
+  },
+  "threshold": 0.0575,
+  "threshold_from": "log_otsu",
+  "threshold_log_otsu": 0.0575,
+  "threshold_reference": 0.0213,
+  "reference": {
+    "patches": 4000,
+    "percentile": 99.0,
+    "where": "cell-free tissue > 1.5 mm from every target",
+    "fraction_of_crop": 0.056
+  },
+  "threshold_otsu": 0.2607,
+  "cells": 16723,
+  "gfp_positive": 4721,
+  "fraction_positive": 0.282
+}

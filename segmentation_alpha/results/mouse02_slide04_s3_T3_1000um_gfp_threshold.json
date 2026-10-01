@@ -1,0 +1,18 @@
+{
+  "crop": "mouse02_slide04_s3_T3_1000um.ome.tif",
+  "labels": "mouse02_slide04_s3_T3_1000um_stardist_labels.tif",
+  "gfp_channel": "TRITC",
+  "metric": "AUC = sum over cell pixels of (TRITC - median TRITC in a 2-5 um ring), x um^2",
+  "ring_um": [
+    2.0,
+    5.0
+  ],
+  "null_n": 4000,
+  "null_percentile": 99.0,
+  "threshold_auc": 459784.2,
+  "tissue_fraction": 1.0,
+  "cells": 1761,
+  "cells_scored": 1645,
+  "gfp_positive": 229,
+  "fraction_positive": 0.139
+}
