@@ -43,3 +43,9 @@ def test_tag_counts_centroids_inside_roi_and_thresholds(tmp_path):
 def test_source_maps_section_names():
     assert cells.source(1, "section_s4")[1] == 4
     assert cells.source(1, "section_s4")[0].name == "Image.vsi"
+
+
+def test_stardist_processes_get_a_plain_matplotlib_backend(monkeypatch):
+    # Jupyter's inline backend doesn't exist in the StarDist environment
+    monkeypatch.setenv("MPLBACKEND", "module://matplotlib_inline.backend_inline")
+    assert cells._child_env()["MPLBACKEND"] == "Agg"
