@@ -164,7 +164,8 @@ def list_series(vsi: str | Path) -> list[dict]:
 
 
 def export_sections(
-    vsi: str | Path, out_dir: str | Path, downsample: float = 4, prefix: str = "section"
+    vsi: str | Path, out_dir: str | Path, downsample: float = 4, prefix: str = "section",
+    series: int | None = None,
 ) -> list[Path]:
     """Write each fluorescence section of a ``.vsi`` as a pyramidal OME-TIFF.
 
@@ -173,12 +174,13 @@ def export_sections(
     4x a section is ~9000 px square at 1.3 um/px, ~0.4 GB compressed. Mouse_01
     is one ``.vsi``; later animals come as one ``.vsi`` per slide, whose series
     numbers repeat, so give each slide its own ``prefix`` (e.g. ``slide01``).
+    ``series`` exports just that one section.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
     for s in list_series(vsi):
-        if len(s["channels"]) <= 3:
+        if len(s["channels"]) <= 3 or (series is not None and s["index"] != series):
             continue
         dest = out_dir / f"{prefix}_s{s['index']}.ome.tif"
         subprocess.run(

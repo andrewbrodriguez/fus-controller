@@ -165,6 +165,20 @@ def write_sheet(annotations: Sheet, path: Path = SHEET) -> None:
     pd.DataFrame(rows, columns=COLUMNS).to_csv(path, index=False)
 
 
+def update_sheet(key: tuple[int, str], path: Path = SHEET, **fields) -> None:
+    """Change only ``fields`` of one section, re-reading the file first.
+
+    Each napari window holds its own copy of the sheet; writing that copy back
+    whole let a window that stayed open erase what another had saved since (the
+    review verdicts were lost that way on 2026-09-30).
+    """
+    current = read_sheet(path)
+    a = current.setdefault(key, Annotation(*key))
+    for name, value in fields.items():
+        setattr(a, name, value)
+    write_sheet(current, path)
+
+
 def mouse_of(path) -> int:
     m = re.search(r"Mouse_0*(\d+)", str(path))
     if not m:
@@ -274,7 +288,8 @@ def _stretch(a: np.ndarray, lo: float = 1, hi: float = 99.5) -> np.ndarray:
 
 
 def _add_images(viewer):
-    gray = viewer.add_image(np.zeros((2, 2)), name="NeuN (CY5, log)", colormap="gray")
+    gray = viewer.add_image(np.zeros((2, 2)), name="NeuN (CY5, log)", colormap="gray",
+                            opacity=0.4)
     gfp = viewer.add_image(np.zeros((2, 2)), name="GFP stain (TRITC)", colormap="green",
                            blending="additive", opacity=0.7)
     return gray, gfp
@@ -320,6 +335,40 @@ def _draw_template(layer, a: Annotation, view_um: float, scale: float, plus_x, c
     text = [names[s] + (f" {coverage[s]:.0%}" if coverage and s in coverage else "")
             for s in sorted(pts)]
     layer.text = {"string": text, "color": "yellow", "size": 14}
+
+
+def canonical_affine(a: Annotation, scale: float = 1.0) -> np.ndarray | None:
+    """Display transform putting the front arrow straight up and the notch-side arrow left.
+
+    A 3x3 affine on (row, col) in view pixels (export px / ``scale``), with the
+    centre click at the origin. It is a rotation, plus a mirror flip when the
+    section lies face down. It is a display transform only: napari draws the
+    unchanged pixels through it, so nothing is resampled, and clicks and shapes
+    stay in image coordinates. None until all three clicks exist.
+    """
+    if None in (a.centre, a.front, a.notch):
+        return None
+    f = np.subtract(a.front, a.centre)
+    f = f / np.linalg.norm(f)
+    n = np.subtract(a.notch, a.centre)
+    n = n - (n @ f) * f
+    if np.linalg.norm(n) < 1e-6:
+        return None
+    n = n / np.linalg.norm(n)
+    m = -np.column_stack([f, n]).T  # f -> (-1, 0) up, n -> (0, -1) left
+    out = np.eye(3)
+    out[:2, :2] = m
+    out[:2, 2] = -m @ np.divide(a.centre, scale)
+    return out
+
+
+def _straighten(viewer, a: Annotation, scale: float) -> bool:
+    """Apply `canonical_affine` to every layer (identity if clicks are missing)."""
+    affine = canonical_affine(a, scale)
+    for layer in viewer.layers:
+        layer.affine = np.eye(3) if affine is None else affine
+    viewer.reset_view()
+    return affine is not None
 
 
 def _draw_measured(layer, rows: pd.DataFrame, scale: float, mirrored: bool | None):
@@ -428,19 +477,8 @@ def annotate(paths, mice=None, sheet: Path = SHEET, show: bool = True):
     }
 
     lay, title, note, buttons = _panel(viewer)
-    note(
-        "Click, in order:<br>"
-        "1. <b style='color:cyan'>centre</b> of the brain, on the midline<br>"
-        "2. <b style='color:red'>front</b> tip of the brain (opposite the cerebellum)<br>"
-        "3. <b style='color:yellow'>notch side</b>: out to the side the notch is on, "
-        "roughly square to the front arrow<br>"
-        "The next dot is selected for you. Clicking again replaces a dot; "
-        "use the buttons (or C / F / N) to redo one.<br>"
-        "The yellow circles are the target template, placed from your centre and front "
-        "clicks: it sits ~1.6 mm in front of the centre, at a fixed size. Move the "
-        "<b>centre</b> or <b>front</b> dot to shift or turn it. Labels become T1–T6 once "
-        "the notch side is set.")
     b_c, b_f, b_n = buttons("Centre [C]", "Front [F]", "Notch side [N]")
+    (b_straight,) = buttons("Straighten view: front up, notch left [R]")
     exclude = QCheckBox("Exclude section")
     exclude.setToolTip("No usable GFP, torn, or partial")
     lay.addWidget(exclude)
@@ -507,7 +545,9 @@ def annotate(paths, mice=None, sheet: Path = SHEET, show: bool = True):
         state["loading"] = False
         title.setText(f"<h3>Mouse {mouse} — {sec.name}</h3>{i + 1} of {len(paths)}")
         viewer.title = f"Orientation — Mouse {mouse} — {sec.name}"
-        viewer.reset_view()
+        # Straighten sections that are already clicked; leave new ones as scanned
+        # so the view doesn't turn under the cursor while clicking.
+        _straighten(viewer, a, state["scale"])
         refresh()
         pick(next((n for n in order if getattr(a, n) is None), "centre"))
 
@@ -515,7 +555,8 @@ def annotate(paths, mice=None, sheet: Path = SHEET, show: bool = True):
         a = current()
         a.exclude = exclude.isChecked()
         a.notes = notes.text()
-        write_sheet(annotations, sheet)
+        update_sheet((a.mouse, a.section), sheet, centre=a.centre, front=a.front,
+                     notch=a.notch, exclude=a.exclude, notes=a.notes)
 
     def go(step):
         save()
@@ -532,12 +573,18 @@ def annotate(paths, mice=None, sheet: Path = SHEET, show: bool = True):
         finally:
             _close_later(viewer)
 
+    def straighten():
+        if not _straighten(viewer, current(), state["scale"]):
+            status.setText(status.text() + "<br>Click centre, front and notch side first.")
+
+    b_straight.clicked.connect(straighten)
     for b, fn in ((b_c, lambda: pick("centre")), (b_f, lambda: pick("front")),
                   (b_n, lambda: pick("notch")), (b_next, lambda: go(+1)),
                   (b_prev, lambda: go(-1)), (b_done, done)):
         b.clicked.connect(fn)
     exclude.toggled.connect(lambda v: (setattr(current(), "exclude", v), refresh()))
     _bind(viewer, layers.values(), {
+        "r": lambda v: straighten(),
         "c": lambda v: pick("centre"), "f": lambda v: pick("front"),
         "n": lambda v: pick("notch"), "Space": lambda v: go(+1), "b": lambda v: go(-1)})
 
@@ -575,12 +622,6 @@ def review(paths, slots: pd.DataFrame, mice=None, sheet: Path = SHEET, show: boo
     arrows.editable = False
 
     lay, title, note, buttons = _panel(viewer)
-    note(
-        "Yellow shapes are the ROIs exactly as measured (template, or your finetuned "
-        "shapes), labelled <b>T#</b> with TRITC coverage. Red arrow = your front click, "
-        "yellow = notch side.<br>"
-        "Check each ROI sits on its target and the labels are on the right side. To "
-        "change one, fix it in the orientation or finetune window and re-measure.")
     b_ok, b_bad = buttons("Looks right ✓ [Y]", "Wrong ✗ [X]")
     b_prev, b_next = buttons("◀ Previous [B]", "Next ▶ [Space]")
     (b_done,) = buttons("Done — save and close")
@@ -617,10 +658,14 @@ def review(paths, slots: pd.DataFrame, mice=None, sheet: Path = SHEET, show: boo
         status.setText("<br>".join(info) + f"<br><b>{verdict}</b>")
         title.setText(f"<h3>Mouse {a.mouse} — {sec.name}</h3>{i + 1} of {len(paths)}")
         viewer.title = f"Review — Mouse {a.mouse} — {sec.name}"
-        viewer.reset_view()
+        _straighten(viewer, a, scale)
+
+    def save_verdict():
+        a = current()
+        update_sheet((a.mouse, a.section), sheet, review=a.review)
 
     def go(step):
-        write_sheet(annotations, sheet)
+        save_verdict()
         j = state["i"] + step
         if 0 <= j < len(paths):
             load(j)
@@ -633,7 +678,7 @@ def review(paths, slots: pd.DataFrame, mice=None, sheet: Path = SHEET, show: boo
 
     def done():
         try:
-            write_sheet(annotations, sheet)
+            save_verdict()
         finally:
             _close_later(viewer)
 
