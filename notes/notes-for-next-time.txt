@@ -1,0 +1,4 @@
+over arching question is what is the correct way to choose which transverse cut (horizontal plane) to choose. 
+
+more specific question is, are the cuts aligned across mice or consistent?
+
