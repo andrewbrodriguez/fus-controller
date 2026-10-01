@@ -2,15 +2,19 @@
 
     .venv/bin/python scripts/slices_dose_delivery.py
 
-Inputs: the finetuned/template measurements for each mouse
-(``results/histology/mouseNN_template_slots.csv``, TRITC channel), the section
-sheet (exclusions and review verdicts), and each target's acoustic dose
+Runs once per delivery measure, on the same ROIs:
+
+* **pixels** (pipeline A) -- anti-GFP coverage, ``results/histology/mouseNN_template_slots.csv``
+* **cells** (pipeline B) -- fraction of NeuN cells tagged GFP+,
+  ``results/histology/cells/mouseNN_cell_rois.csv`` (``python -m fus.cells``)
+
+Other inputs: the section sheet (exclusions and review verdicts), and each target's acoustic dose
 (cumulative 2nd harmonic, from the recordings; Mouse 1 target 1 is the sum of its
 three sonications and target 3 is the no-FUS control at 0).
 
 Slices are dropped if excluded or marked wrong in review. Of the rest, a slice is
-**low-signal** when its mean coverage over the six targets is below
-`LOW_SIGNAL_MEAN` -- most likely cut outside most targets' focal column. That
+**low-signal** when its mean *pixel* coverage over the six targets is below
+`LOW_SIGNAL_MEAN` (the same slices for both measures) -- most likely cut outside most targets' focal column. That
 cutoff was chosen *after* looking at the per-slice table (2026-09-30), so every
 aggregate is reported with and without low-signal slices.
 
@@ -22,10 +26,10 @@ coverage vs dose; then how many slices are positive.
 
 Writes to ``results/histology/slices/``:
 
-  slices_dose_delivery.csv      long table: one row per slice x target
-  heatmap.png                   coverage, slice x target, targets ordered by dose
-  per_slice.png                 coverage vs dose, one panel per slice
-  aggregate_standardized.png    within-slice z vs dose, pooled; per-target means
+  slices_dose_delivery.csv      long table: one row per slice x target, both measures
+  heatmap.png, per_slice.png, aggregate_standardized.png          pipeline A (pixels)
+  heatmap_cells.png, per_slice_cells.png, aggregate_standardized_cells.png   pipeline B
+  pixels_vs_cells.png           B against A for every slice x target
   README.md                     what each figure shows, with the headline numbers
 """
 
@@ -50,6 +54,14 @@ DOSES = OUT / "doses.csv"
 MICE = (1, 2)
 
 LOW_SIGNAL_MEAN = 0.2  # post hoc -- see module docstring
+
+MEASURES = {
+    "pixels": {"suffix": "", "name": "GFP coverage", "pipeline": "A",
+               "what": "fraction of the ROI's pixels that are anti-GFP positive"},
+    "cells": {"suffix": "_cells", "name": "Fraction of cells GFP+", "pipeline": "B",
+              "what": "fraction of NeuN cells in the ROI tagged GFP+ (mean normalised anti-GFP > 0.0575)"},
+}
+M = MEASURES["pixels"]  # the measure being drawn; set in main()
 
 # Recordings per target. Mouse 1 was the operator deviation (docs/mouse01-dose-delivery.md).
 RECORDINGS = {
@@ -87,15 +99,27 @@ def doses() -> pd.DataFrame:
     return d
 
 
-def table() -> pd.DataFrame:
+def table(measure: str = "pixels") -> pd.DataFrame:
+    """One row per slice x target; ``coverage`` holds the chosen measure."""
     sheet = orientation.read_sheet()
     parts = []
     for mouse in MICE:
         d = pd.read_csv(ROOT / f"results/histology/mouse{mouse:02d}_template_slots.csv")
         d = d[d.channel == "TRITC"][["section", "target", "coverage", "placement"]].copy()
         d["mouse"] = mouse
+        cells = ROOT / f"results/histology/cells/mouse{mouse:02d}_cell_rois.csv"
+        if cells.exists():
+            b = pd.read_csv(cells)[["section", "target", "fraction_gfp_pos", "n_cells"]]
+            d = d.merge(b.rename(columns={"fraction_gfp_pos": "cell_fraction"}),
+                        on=["section", "target"], how="left")
+        else:
+            d["cell_fraction"], d["n_cells"] = np.nan, np.nan
         parts.append(d)
-    d = pd.concat(parts, ignore_index=True)
+    d = pd.concat(parts, ignore_index=True).rename(columns={"coverage": "pixel_coverage"})
+    # Low signal is judged on pixel coverage, so both measures use the same slices.
+    d["low_signal"] = d.groupby(["mouse", "section"]).pixel_coverage.transform("mean") < LOW_SIGNAL_MEAN
+    d["coverage"] = d.pixel_coverage if measure == "pixels" else d.cell_fraction
+    d = d[d.groupby(["mouse", "section"]).coverage.transform("count") == 6]  # sections measured
 
     status = {}
     for (mouse, section), a in sheet.items():
@@ -105,7 +129,6 @@ def table() -> pd.DataFrame:
     d = d.merge(doses(), on=["mouse", "target"])
 
     d["slice_mean"] = d.groupby(["mouse", "section"]).coverage.transform("mean")
-    d["low_signal"] = d.slice_mean < LOW_SIGNAL_MEAN
     g = d.groupby(["mouse", "section"]).coverage
     d["z"] = (d.coverage - g.transform("mean")) / g.transform("std").replace(0, np.nan)
     d["label"] = [slice_name(m, s) for m, s in zip(d.mouse, d.section)]
@@ -220,11 +243,11 @@ def heatmap(d: pd.DataFrame):
             cb.outline.set_visible(False)
             cb.ax.tick_params(length=0, labelsize=8, colors=MUTED)
             cb.ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
-            cb.set_label("GFP coverage", color=INK_2)
-    _header(fig, "GFP coverage per slice and target",
-            "Anti-GFP stain (TRITC) in 1.74 mm ROIs. Columns: targets ordered by acoustic dose "
+            cb.set_label(M["name"], color=INK_2)
+    _header(fig, f"{M['name']} per slice and target (pipeline {M['pipeline']})",
+            f"{M['what'].capitalize()}, 1.74 mm ROIs. Columns: targets ordered by acoustic dose "
             "(cumulative 2nd harmonic), low → high.")
-    _footer(fig, f"Low signal: slice mean coverage < {LOW_SIGNAL_MEAN} (post hoc). "
+    _footer(fig, f"Low signal: slice mean pixel coverage < {LOW_SIGNAL_MEAN} (post hoc). "
             "Mouse 1 T1 got three sonications (doses summed).")
     return fig
 
@@ -278,10 +301,10 @@ def per_slice(d: pd.DataFrame, rho: pd.DataFrame):
         bottom = next(axes[r, c] for r in range(len(rows) - 1, -1, -1) if axes[r, c].get_visible())
         bottom.set_xlabel("dose (cum. 2nd harmonic)")
         bottom.xaxis.set_tick_params(labelbottom=True)
-    _header(fig, "Coverage vs dose, one panel per slice",
-            "Number = target. Line: least squares within the slice. ρ: Spearman, coverage vs dose. "
+    _header(fig, f"{M['name']} vs dose, one panel per slice (pipeline {M['pipeline']})",
+            "Number = target. Line: least squares within the slice. ρ: Spearman with dose. "
             "Hollow = low-signal slice.")
-    _footer(fig, "Y: anti-GFP coverage in the target ROI. Mouse 1 T3 is the no-FUS control at dose 0; "
+    _footer(fig, f"Y: {M['what']}. Mouse 1 T3 is the no-FUS control at dose 0; "
             "T1 = three sonications summed.")
     return fig
 
@@ -314,90 +337,149 @@ def aggregate(d: pd.DataFrame, rho: pd.DataFrame):
     ax.set_ylim(lo - 0.1, hi + 0.1)
     ax.set_yticks(np.arange(lo, hi + 0.01, 0.5))
     ax.set_xlabel("Acoustic dose (cumulative 2nd harmonic)", fontsize=12.5, color=INK, labelpad=8)
-    ax.set_ylabel("Coverage, z-scored within slice", fontsize=12.5, color=INK, labelpad=8)
+    ax.set_ylabel(f"{M['name']}, z-scored within slice", fontsize=12.5, color=INK, labelpad=8)
     ax.tick_params(labelsize=10, labelcolor=INK_2)
     ax.legend(loc="upper left", bbox_to_anchor=(0, 1.1), ncol=2, frameon=False, fontsize=8.5,
               handletextpad=0.3, columnspacing=1.6)
-    _header(fig, "Dose vs delivery, standardized within each slice")
+    _header(fig, f"Dose vs delivery, standardized within each slice (pipeline {M['pipeline']})")
     return fig
 
 
-def write_readme(d: pd.DataFrame, rho: pd.DataFrame) -> None:
-    use = d[~d.low_signal & (d.dropped == "")]
-    r_ok = rho[~rho.low_signal]
-    means = use.groupby(["mouse", "target"]).agg(dose=("dose", "first"), z=("z", "mean"))
-    by_mouse = {m: stats.spearmanr(means.loc[m].dose, means.loc[m].z).statistic for m in MICE}
-    n_low = int(rho.low_signal.sum())
-    dropped = sorted(set(d.loc[d.dropped != "", "section"]))
+def pixels_vs_cells(d: pd.DataFrame):
+    """Pipeline B against pipeline A for every slice x target."""
+    use = d[(d.dropped == "") & d.cell_fraction.notna()]
+    fig, ax = plt.subplots(figsize=(6.6, 6.2))
+    fig.subplots_adjust(left=0.13, right=0.97, top=0.86, bottom=0.11)
+    _clean(ax)
+    ax.plot([0, 1], [0, 1], color=AXIS, linewidth=1.2, linestyle=":", zorder=1)
+    for mouse in MICE:
+        m = use[use.mouse == mouse]
+        col = MOUSE_COLOR[mouse]
+        ax.scatter(m.pixel_coverage, m.cell_fraction, s=34, zorder=3, linewidths=1.2,
+                   facecolors=[SURFACE if lo else col for lo in m.low_signal],
+                   edgecolors=[col if lo else SURFACE for lo in m.low_signal],
+                   label=f"Mouse {mouse} ({m.section.nunique()} slices)")
+    r = stats.pearsonr(use.pixel_coverage, use.cell_fraction).statistic
+    ax.set(xlim=(-0.02, 1.02), ylim=(-0.02, 1.02))
+    for axis in (ax.xaxis, ax.yaxis):
+        axis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+    ax.set_xlabel("A: GFP+ pixel coverage", fontsize=12, color=INK, labelpad=6)
+    ax.set_ylabel("B: fraction of cells GFP+", fontsize=12, color=INK, labelpad=6)
+    ax.tick_params(labelsize=10, labelcolor=INK_2)
+    ax.legend(loc="lower right", frameon=False, fontsize=9)
+    _header(fig, "Pipeline B vs pipeline A, every slice × target",
+            f"Pearson r = {r:.2f}, n = {len(use)}. Dotted: equal. Hollow = low-signal slice.")
+    return fig
 
+
+def write_readme(results: dict) -> None:
     def line(sub):
         pos = int((sub.rho > 0).sum())
         return f"median ρ {sub.rho.median():+.2f}, positive in {pos}/{len(sub)}"
 
+    rows, means_line = [], []
+    for label, pick in (("Both mice, excluding low-signal slices", lambda r: r[~r.low_signal]),
+                        ("Mouse 1", lambda r: r[~r.low_signal & (r.mouse == 1)]),
+                        ("Mouse 2, excluding low-signal slices", lambda r: r[~r.low_signal & (r.mouse == 2)]),
+                        ("Mouse 2, all slices", lambda r: r[r.mouse == 2])):
+        rows.append(f"| {label} | " + " | ".join(line(pick(rho)) for _, rho in results.values()) + " |")
+    for measure, (d, _) in results.items():
+        use = d[~d.low_signal & (d.dropped == "")]
+        means = use.groupby(["mouse", "target"]).agg(dose=("dose", "first"), z=("z", "mean"))
+        by = {m: stats.spearmanr(means.loc[m].dose, means.loc[m].z).statistic for m in MICE}
+        means_line.append(f"{MEASURES[measure]['pipeline']} ({measure}): Mouse 1 {by[1]:+.2f}, "
+                          f"Mouse 2 {by[2]:+.2f}")
+    d = results["pixels"][0]
+    both = d[(d.dropped == "") & d.cell_fraction.notna()]
+    r_ab = stats.pearsonr(both.pixel_coverage, both.cell_fraction).statistic
+    n_low = int(d.groupby(["mouse", "section"]).low_signal.first().sum())
+    dropped = sorted(set(d.loc[d.dropped != "", "section"]))
+    header = " | ".join(f"Pipeline {MEASURES[m]['pipeline']}: {m}" for m in results)
+
     text = f"""# Dose vs delivery, per slice and pooled
 
 Generated by `scripts/slices_dose_delivery.py`; re-run it after re-measuring or
-re-reviewing. Delivery = anti-GFP (TRITC) coverage in each target's 1.74 mm ROI,
-finetuned by hand. Dose = cumulative 2nd harmonic from the recordings.
+re-reviewing. Dose = cumulative 2nd harmonic from the recordings. Delivery is
+measured two ways in the same hand-finetuned 1.74 mm ROIs:
+
+- **Pipeline A, pixels:** {MEASURES["pixels"]["what"]}.
+- **Pipeline B, cells:** {MEASURES["cells"]["what"]}.
 
 ## Figures
+
+Each pipeline has the same three figures; B's carry a `_cells` suffix.
 
 **`heatmap.png`: the raw numbers.** One row per slice, one column per target,
 with targets ordered by dose left to right. If delivery followed dose, rows
 would get darker toward the right. Grey row labels are low-signal slices.
 
-**`per_slice.png`: coverage vs dose inside each slice.** One panel per slice,
+**`per_slice.png`: delivery vs dose inside each slice.** One panel per slice,
 grouped by animal and slide. Each dot is a target, and the line is a
-least-squares fit within that slice. ρ is the Spearman rank correlation of
-coverage with dose in that slice (6 targets).
+least-squares fit within that slice. ρ is the Spearman rank correlation with
+dose in that slice (6 targets).
 
-**`aggregate_standardized.png`: all slices pooled.** Each slice's six coverages
+**`aggregate_standardized.png`: all slices pooled.** Each slice's six values
 are z-scored against that slice's own mean and SD. This removes what the whole
 slice shares (depth relative to the focal column, staining, exposure) and keeps
 how its targets rank against each other. Small dots are slice × target; big dots
 are each target's mean ± SE across slices, placed at that target's dose.
 
+**`pixels_vs_cells.png`: the two pipelines against each other**, one dot per
+slice × target. Pearson r = {r_ab:.2f} over {len(both)} ROIs.
+
 ## Headline numbers
 
-| | Within-slice ρ (coverage vs dose) |
-|---|---|
-| Both mice, excluding low-signal slices | {line(r_ok)} |
-| Mouse 1 | {line(r_ok[r_ok.mouse == 1])} |
-| Mouse 2, excluding low-signal slices | {line(r_ok[r_ok.mouse == 2])} |
-| Mouse 2, all slices | {line(rho[rho.mouse == 2])} |
+| Within-slice ρ with dose | {header} |
+|---|---|---|
+{chr(10).join(rows)}
 
-Across the six target means (z), ρ with dose is {by_mouse[1]:+.2f} for Mouse 1 and
-{by_mouse[2]:+.2f} for Mouse 2.
+Across the six target means (z), ρ with dose: {"; ".join(means_line)}.
 
 ## Read with care
 
-- **Low signal** means a slice mean coverage below {LOW_SIGNAL_MEAN}, a cutoff chosen after
-  looking at the data. It flags {n_low} slice(s), probably cut outside most targets'
-  focal column. {"Dropped (excluded or marked wrong): " + ", ".join(dropped) + "." if dropped else "No slice is excluded or marked wrong in `data/section_orientation.csv`."}
+- **Low signal** means a slice mean *pixel* coverage below {LOW_SIGNAL_MEAN}, a cutoff chosen
+  after looking at the data. It flags {n_low} slice(s), probably cut outside most targets'
+  focal column, and the same slices are set aside for both pipelines.
+  {"Dropped (excluded or marked wrong): " + ", ".join(dropped) + "." if dropped else "No slice is excluded or marked wrong in `data/section_orientation.csv`."}
+- **Pipeline B's threshold** (0.0575) was set on one 3 mm crop of one section and is not yet
+  checked against a hand count (`docs/gfp-cell-tagging.md`).
 - **Mouse 1's correlation leans on the no-FUS control** (T3, dose 0) and on T1, whose
   dose is three sonications summed.
-- **Mouse 2 T2** (mid dose, low coverage) is the main exception. It's a right-side
+- **Mouse 2 T2** (mid dose, low delivery) is the main exception. It's a right-side
   lateral target, and the head was rolled with the right side higher, so most
   slices probably miss its focal column.
 - **Slices are not independent**: they come from two animals. The sign-test p-values
-  on the figure describe consistency within these animals, not a population effect.
+  on the figures describe consistency within these animals, not a population effect.
 - **Doses aren't calibrated between animals**; the z-scores compare targets within a
-  slice, not absolute coverage across mice.
+  slice, not absolute delivery across mice.
 """
     (OUT / "README.md").write_text(text)
 
 
 def main():
+    global M
     _style()
-    d = table()
-    rho = per_slice_rho(d[d.dropped == ""])
     OUT.mkdir(parents=True, exist_ok=True)
-    d.round(4).to_csv(OUT / "slices_dose_delivery.csv", index=False)
-    for name, fig in (("heatmap", heatmap(d)), ("per_slice", per_slice(d, rho)),
-                      ("aggregate_standardized", aggregate(d, rho))):
-        fig.savefig(OUT / f"{name}.png", dpi=170)
+    results = {}
+    for measure, info in MEASURES.items():
+        M = info
+        d = table(measure)
+        if d.empty:
+            print(f"{measure}: no measurements yet, skipped")
+            continue
+        rho = per_slice_rho(d[d.dropped == ""])
+        results[measure] = (d, rho)
+        for name, fig in (("heatmap", heatmap(d)), ("per_slice", per_slice(d, rho)),
+                          ("aggregate_standardized", aggregate(d, rho))):
+            fig.savefig(OUT / f"{name}{info['suffix']}.png", dpi=170)
+            plt.close(fig)
+    full = table("pixels")
+    full.drop(columns=["coverage", "slice_mean", "z"]).round(4).to_csv(OUT / "slices_dose_delivery.csv", index=False)
+    if "cells" in results:
+        fig = pixels_vs_cells(results["pixels"][0])
+        fig.savefig(OUT / "pixels_vs_cells.png", dpi=170)
         plt.close(fig)
-    write_readme(d, rho)
+        write_readme(results)
     print(f"wrote {', '.join(p.name for p in sorted(OUT.glob('*')))} to {OUT.relative_to(ROOT)}")
 
 

@@ -30,6 +30,7 @@ pilot** (StarDist on NeuN, cells tagged GFP+ by mean normalised anti-GFP) works 
 | `notebooks/view_slice.ipynb` | Any section at full resolution (0.325 µm/px) in napari with ROIs. Exports on first open: ~7 min, ~7 GB per section |
 | `scripts/slices_dose_delivery.py` | Dose vs coverage per slice and pooled; within-slice z-scores. Output and README in `results/histology/slices/` |
 | `scripts/benchmark_mouse01.py` | Scores a placement method against Mouse 1's answer key (control, known front, validated fit) |
+| `src/fus/cells.py` | **Pipeline B**: per-ROI cell count and fraction GFP+ (fixed threshold 0.0575). Run on Mouse 2 `slide04_s3` only so far; `python -m fus.cells --mouse N --all` for the rest (~5 min/section). View one slice in `notebooks/cell_pipeline_one_slice.ipynb` |
 | `segmentation_alpha/` | Cell-level pilot: crops, StarDist/Cellpose environments, GFP tagging, napari notebooks. See `docs/gfp-cell-tagging.md` |
 | `tests/` | 29 tests, passing |
 
@@ -125,15 +126,17 @@ written into `docs/`**. Re-derive before citing:
 
 ## Next steps, in the order I would do them
 
-1. Re-tag review verdicts, re-run the slice analysis, and send Nick an update with the
+1. Check pipeline B on `slide04_s3` in `notebooks/cell_pipeline_one_slice.ipynb`, then run it on
+   every section (`python -m fus.cells --mouse 1 --all`, `--mouse 2 --all`; ~1.5 h).
+2. Re-tag review verdicts, re-run the slice analysis, and send Nick an update with the
    two-animal result and the questions above.
-2. Hand-count the cell pilot (core, edge, background) and score StarDist plus the GFP+ calls.
+3. Hand-count the cell pilot (core, edge, background) and score StarDist plus the GFP+ calls.
    That settles decision 001.
-3. Look at Mouse 1 T4 in the benchmark (the one failing check) and decide whether 0.10 is
+4. Look at Mouse 1 T4 in the benchmark (the one failing check) and decide whether 0.10 is
    the right tolerance.
-4. Script the spreadsheet EDA into `docs/controller-data-eda.md`.
-5. When new tissue arrives: `notebooks/ingest_new_histology.ipynb`.
-6. Later: port the feature extraction to MATLAB for the lab.
+5. Script the spreadsheet EDA into `docs/controller-data-eda.md`.
+6. When new tissue arrives: `notebooks/ingest_new_histology.ipynb`.
+7. Later: port the feature extraction to MATLAB for the lab.
 
 ## Deliverable and timing
 

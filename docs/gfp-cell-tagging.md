@@ -112,6 +112,25 @@ git-ignored.
   Ask Nick before reading these as neurons.
 - **One crop, one section, one animal.** Nothing here has been run across targets or mice.
 
+## In production: pipeline B
+
+[`src/fus/cells.py`](../src/fus/cells.py) runs this per target ROI, alongside pipeline A
+(pixel coverage, `fus.histology`), on the **same ROI**: the finetuned shape, or else the
+clicked template. For each ROI it:
+1. exports the bounding box plus 30 µm at full resolution straight from the `.vsi`, with
+   QuPath `--crop`. That takes ~11 s, and the region is pixel-identical to a full export.
+2. segments NeuN with StarDist (`scripts/stardist_segment.py`, run in `.venv-stardist`).
+3. normalises anti-GFP over the whole section and tags cells whose centre lies in the ROI,
+   at the fixed threshold **0.0575**.
+
+It writes one row per ROI to `results/histology/cells/mouseNN_cell_rois.csv`: cell count,
+density, GFP+ count and fraction, median cell score. About 5 minutes per section.
+
+First run, Mouse 2 `slide04_s3`. T3 matches the pilot: 0.865 GFP+ of 4,162 cells against the
+pilot's 0.864 of 4,095. Across the six targets, B's fraction of GFP+ cells tracks A's pixel
+coverage: within 0.03 for five targets, +0.08 at T4. Check any section in
+[`notebooks/cell_pipeline_one_slice.ipynb`](../notebooks/cell_pipeline_one_slice.ipynb).
+
 ## Reproduce
 
 ```bash
