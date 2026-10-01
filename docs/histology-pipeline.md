@@ -210,6 +210,11 @@ offset median 0.61 mm, max 1.08; largest target difference 0.14; ρ 0.83. Re-run
 clicking the Mouse_01 centres by hand. Until it passes, Mouse_02 numbers from the template
 are provisional.
 
+**Re-scored with hand-finetuned shapes (2026-09-30)**, from `results/histology/mouse01_benchmark.csv`:
+it passes 4 of 5 checks. Offset is a median 0.33 mm and a max 0.94 mm, ranking ρ is 0.94,
+and the control and mirroring checks pass. It fails delivery on one target only: T4 reads
++0.14 against a tolerance of 0.10.
+
 **Accuracy caveat.** On Mouse_01, the template placed from the *automatic* brain centroid
 landed 0.1–1.1 mm from the validated GFP fit's ROI centres. That moved coverage by up to
 0.3 (s2 T1: 0.46 → 0.18). Part of it is the centroid sitting 0.2–0.8 mm off the midline,

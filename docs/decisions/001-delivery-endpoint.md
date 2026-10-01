@@ -2,6 +2,17 @@
 
 **Status:** OPEN — the *endpoint* (area vs segmentation) is still undecided
 
+> **Update 2026-09-30 (pilot, not the test).** A cell-level pipeline now exists for option B
+> ([`docs/gfp-cell-tagging.md`](../gfp-cell-tagging.md)). StarDist was chosen over
+> Cellpose-SAM for speed (428 vs 308 cells on 500 µm of NeuN, agreeing on 271). Each NeuN
+> cell is tagged GFP+ by its mean normalised anti-GFP, split by log-Otsu. In 3 mm around
+> one target that gives a clean spatial pattern: 97–100% of cells tagged within 0.5 mm,
+> under 1% beyond 1.25 mm. **The pre-registered test below has not been run** (no blinded
+> hand count yet), so this changes nothing about the decision. It only makes the test
+> runnable. Two new facts bear on it: the per-cell mean can't tell a transduced soma from
+> one sitting in bright neuropil (an earlier ring-subtracted score tagged only ~⅓ of core
+> neurons), and CY5 may not be NeuN on Mouse 2.
+
 > **Update 2026-09-18 (N. Todd).** The *channel* question is settled: use the anti-GFP
 > stain (TRITC), not native GFP. Area coverage as the starting point drew no objection,
 > and segmentation stays on the table as a later step. The pre-registered test below is

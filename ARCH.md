@@ -9,19 +9,20 @@
 ## Project Title
 Machine Learning Based Acoustic Feedback Controller for FUS-BBB Mediated AAV Delivery
 
-## Status — 2026-09-30 (week ~5 of 13)
+## Status — 2026-09-30 evening (week ~5 of 13)
 
 Moment-in-time detail, including blockers and next steps: [`notes/current.md`](notes/current.md).
 
 | Phase | Plan | Actual |
 |---|---|---|
 | 1 — Preparation & data (wk 1–4) | Import, filter, feature extraction | **Done and ahead.** `nt_ExtractHarmonicData.m` ported to Python and reproduces the lab's numbers exactly; harmonic and wideband bands, cumulative dose, interlock detection |
-| 2 — Experimental (wk 5–8) | In vivo work, sectioning, staining, microscopy | **Partly, out of order.** A full quantification pipeline exists and has been run on Mouse 1. Mouse 2 arrived 9/29 and is exported and measured; per-section orientation must be recorded by hand before it maps to targets |
-| 3 — Integration & ML (wk 9–12) | Align ground truth to acoustics, fit a model | **Started early.** Dose and delivery are joined per target and plotted for Mouse 1. No model — one animal, six targets |
+| 2 — Experimental (wk 5–8) | In vivo work, sectioning, staining, microscopy | **Partly, out of order.** Two brains measured (16 sections), oriented and finetuned by hand in napari; hand placement passes 4 of 5 checks against Mouse 1's answer key. A cell-level pilot (StarDist on NeuN plus GFP tagging) runs on one 3 mm crop, not yet hand-validated |
+| 3 — Integration & ML (wk 9–12) | Align ground truth to acoustics, fit a model | **Started early.** Dose and delivery are joined per slice for both mice: within-slice ρ is positive in 11/11 slices with clear signal. No model yet — two animals |
 | 4 — Report (wk 13) | Draft manuscript | Not started |
 
-**Ahead of plan:** the computational side. Feature extraction, the histology pipeline, the
-join, tests, a notebook, and method docs are all in place.
+**Ahead of plan:** the computational side. Feature extraction, the histology pipeline with
+hand orientation and finetuning, the per-slice dose analysis, a full-resolution viewer, the
+cell-level pilot, 29 tests, and method docs are all in place.
 
 **Behind plan, and the limiting factor:** tissue. Two of 24 brains are imaged, and one of four
 acoustic sessions is synced. The subharmonic/ultraharmonic work in phase 1 was deliberately
@@ -30,9 +31,9 @@ deferred — the lab asked to lead with cumulative 2nd-harmonic AUC.
 **Settled with the PI on 2026-09-18:** recording→target mapping, the notch for section
 orientation, the anti-GFP stain as the delivery measure, and a ~2 × 2 × 3 mm focal spot.
 
-**Open:** capsid assignment per mouse, tissue throughput this term, the remaining acoustic
-sessions, and orientation notes for the Mouse 2 sections. The 1.0 mm ROI radius is in use
-from 2026-09-30.
+**Open:** capsid assignment per mouse; which marker CY5 shows on Mouse 2; review verdicts
+(lost to a since-fixed bug); a hand count for the cell pilot (decision 001); tissue
+throughput this term; the remaining acoustic sessions.
 
 ## Description
 An independent study bridging computational modeling with wet-lab biological measurement, applying machine learning and signal processing to a translational medicine problem. The blood-brain barrier (BBB) is a major obstacle for delivering novel gene therapies (AAVs) to the central nervous system. Focused Ultrasound BBB (FUS-BBB) opening is a promising, non-invasive technique that uses targeted acoustic waves and circulating microbubbles to temporarily increase BBB permeability. This project designs a dynamic feedback controller that processes acoustic emissions in real time to predict and control the quantity of AAV delivered to the brain.

@@ -1,0 +1,17 @@
+{
+  "model": "StarDist 2D_versatile_fluo (defaults)",
+  "channel": "CY5 (NeuN)",
+  "crop": "mouse02_slide04_s3_T3_3000um.ome.tif",
+  "n_tiles": [
+    9,
+    9
+  ],
+  "normalize_percentiles": [
+    1,
+    99.8
+  ],
+  "prob_thresh": 0.479071463157368,
+  "nms_thresh": 0.3,
+  "n_cells": 16723,
+  "seconds": 83.8
+}

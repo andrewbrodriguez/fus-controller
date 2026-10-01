@@ -13,7 +13,7 @@ Use `.venv/bin/python`. It is Python 3.12 with the project installed editable, s
 `PYTHONPATH` is needed. System `python3` is 3.9 and will not work.
 
 ```bash
-.venv/bin/python -m pytest tests -q          # 16 geometry + orientation tests
+.venv/bin/python -m pytest tests -q          # 29 tests: geometry, orientation, ROIs
 ```
 
 Jupyter kernel: **Python 3.12 (fus-research .venv)**.
@@ -43,7 +43,13 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 # join dose to delivery, and the README example figure
 .venv/bin/python scripts/mouse01_dose_vs_coverage.py
 .venv/bin/python scripts/mouse02_dose_vs_coverage.py   # stops until orientation is recorded
-.venv/bin/python scripts/benchmark_mouse01.py          # template placement vs Mouse 1 answer key
+.venv/bin/python scripts/benchmark_mouse01.py          # hand placement vs Mouse 1 answer key
+.venv/bin/python scripts/slices_dose_delivery.py       # per-slice + pooled dose vs coverage
+
+# cell-level pilot (own environments; see docs/gfp-cell-tagging.md)
+.venv/bin/python segmentation_alpha/make_crop.py 3000
+segmentation_alpha/.venv-stardist/bin/python segmentation_alpha/run_stardist.py segmentation_alpha/<crop>.ome.tif
+.venv/bin/python segmentation_alpha/gfp_tagging.py segmentation_alpha/<crop>.ome.tif
 .venv/bin/python scripts/mouse01_example_figure.py
 ```
 
@@ -58,6 +64,9 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 | `notes/` | Meeting notes and the current-state file |
 | `data/` | Only the summary sheet is tracked; raw data is git-ignored (see `data/README.md`) |
 | `results/` | Generated CSVs and figures |
+| `src/fus/orientation.py`, `src/fus/rois.py` | napari tools: orientation clicks, review, finetuned target shapes |
+| `notebooks/` | `ingest_new_histology.ipynb` (per-animal workflow), `view_slice.ipynb` (full-resolution viewer) |
+| `segmentation_alpha/` | Cell segmentation + GFP tagging pilot; its own `.venv` (Cellpose) and `.venv-stardist` |
 
 ## Ground rules
 

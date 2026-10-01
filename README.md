@@ -39,11 +39,28 @@ The r = 0.85 comes almost entirely from the two ends: the unsonicated control, a
 
 This is one animal. The recording-to-target mapping and the choice of GFP channel have since been confirmed with the lab; the full method, the remaining assumptions, and how each figure was made are in [`docs/mouse01-dose-delivery.md`](docs/mouse01-dose-delivery.md).
 
+## Two animals, slice by slice
+
+Mouse 2 is the first clean animal: each target was sonicated once, at six different doses. Its 12 sections are oriented by hand (front, notch side, and hand-finetuned target circles in napari) and measured the same way as Mouse 1's. Within each slice, the higher-dose targets tend to carry more GFP. Across the 11 slices with clear signal, the rank correlation of coverage with dose is positive in all 11 (median ρ = +0.54). Five Mouse 2 slices carry little GFP anywhere, probably cut outside the focal column, and they're reported separately. This is still two animals, so it's a consistent within-animal pattern, not a population result; the figures and caveats are in [`results/histology/slices/README.md`](results/histology/slices/README.md).
+
+## From pixels to cells (pilot)
+
+Coverage counts GFP+ *pixels*, most of which are processes rather than cell bodies. The pilot below asks how many *neurons* took up the virus. It segments every NeuN-stained cell with StarDist, scores each by its mean anti-GFP intensity (normalised over the whole section), and tags it GFP+ above a threshold. In a 3 × 3 mm square around one Mouse 2 target, 16,723 cells are segmented. Essentially every neuron within 0.5 mm of the target centre is tagged (97–100%), falling to under 1% beyond 1.25 mm.
+
+<p align="center">
+  <img src="docs/figures/gfp-tagging-stains.png" alt="400 micrometre square at the edge of a Mouse 2 target: NeuN in grey and the anti-GFP stain in green, bright on the right where the plume is." width="49%">
+  <img src="docs/figures/gfp-tagging-cells.png" alt="The same square with the stains hidden: each segmented neuron outlined yellow if tagged GFP-positive, mostly on the right, or magenta if negative, mostly on the left." width="49%">
+</p>
+
+*A 400 µm window on the edge of the target. Left: NeuN (grey) and the anti-GFP stain (green). Right: the same window with the stains off; each segmented cell is outlined yellow (GFP+) or magenta (GFP−).*
+
+It has not yet been checked against a hand count. Method, numbers and caveats: [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
+
 ## Approach
 
 **1. Feature extraction from acoustic emissions.** Per-burst spectra are reduced to peak and integrated power in the second-harmonic (1.674 MHz) and wideband (1.7 MHz) bands, normalised to the pre-microbubble baseline, then accumulated over the sonication. **Cumulative second-harmonic AUC is the primary feature**, as the lab uses it. Secondary, once that is in place: subharmonic and ultraharmonic bands, the harmonic-to-broadband ratio as a stable-vs-inertial cavitation index, and the temporal shape of the emission trace rather than its sum alone.
 
-**2. Ground truth from tissue.** Brains are sectioned, stained, and imaged on a slide scanner. GFP area coverage in the FUS-targeted region — thresholded and expressed as percent of hemisphere, following the method in Owusu-Yaw et al. (2024) — is the delivery measurement the model learns against.
+**2. Ground truth from tissue.** Brains are sectioned, stained, and imaged on a slide scanner. The delivery measurement is GFP area coverage: the fraction of each target's 2 mm circle that is GFP+ on the anti-GFP stain, following the thresholding approach of Owusu-Yaw et al. (2024). Each section is oriented by hand: its front, its notch side, and optionally each target's circle are set in napari, because the target pattern is too symmetric to place reliably from the GFP alone. A cell-level count (segment neurons, tag the GFP+ ones) is being piloted as an alternative; [decision 001](docs/decisions/001-delivery-endpoint.md) sets how to choose between them.
 
 **3. Mapping acoustics to delivery.** Acoustic features are joined to their tissue measurements per target and used to fit a model predicting delivery from emissions. Six targets per mouse at different exposures means the design carries within-animal contrasts, which the model should exploit rather than ignore.
 
@@ -65,10 +82,13 @@ The acoustic recordings were made with an **837 kHz** carrier (second harmonic a
 Current state, blockers and next steps: [`notes/current.md`](notes/current.md). Working
 conventions for anyone (or any agent) picking this up: [`AGENTS.md`](AGENTS.md).
 
-As of 2026-09-30: both pipelines are built and verified on Mouse 1, and the
-recording-to-target bookkeeping is resolved. Mouse 2 has arrived and been measured, and it
-maps to targets once each section's orientation is recorded. The limiting factor is still
-tissue — 2 of 24 brains imaged, 1 of 4 acoustic sessions synced.
+As of 2026-09-30, week ~5 of 13:
+- **Acoustics:** the feature extraction is built and reproduces the lab's numbers.
+- **Tissue:** 2 of 24 brains are imaged. Both (16 sections) are oriented by hand, measured, and joined to dose. Within slices, dose and delivery rise together in both animals.
+- **Cell level:** a segmentation and GFP-tagging pilot works on one section and still needs a hand count to validate it.
+- **Still open:** the capsid assignment per mouse, which marker the CY5 channel shows on Mouse 2, and section depth. 3 of 4 acoustic sessions aren't synced yet.
+
+The limiting factor is still tissue.
 
 ## Repository layout
 
@@ -79,7 +99,8 @@ reference/      Lab-provided material, incl. the MATLAB extraction script
 src/fus/        Analysis package — feature extraction, quantification, models
 scripts/        Helper scripts, incl. QuPath Groovy
 tests/          pytest suite
-notebooks/      Exploratory analysis
+notebooks/      Per-animal ingest (orient, finetune, measure, review), full-resolution slice viewer
+segmentation_alpha/  Cell segmentation + GFP tagging pilot (own envs for StarDist / Cellpose)
 results/        Generated figures and model outputs
 docs/           Proposal and lab presentations
 notes/          Meeting notes and working log (`current.md` = state of play)
@@ -123,6 +144,8 @@ python -m fus.histology measure data/processed/histology/Mouse_01/ds4/*.ome.tif 
 ```
 
 It is a first pass with provisional parameters; see [`docs/histology-pipeline.md`](docs/histology-pipeline.md) for the method, the Mouse_01 results, and the open questions.
+
+For each new animal, run [`notebooks/ingest_new_histology.ipynb`](notebooks/ingest_new_histology.ipynb). It exports the sections, opens napari for the orientation clicks and optional finetuning, measures, and opens a review window. To inspect any section at full resolution, use [`notebooks/view_slice.ipynb`](notebooks/view_slice.ipynb). The cell-level pilot lives in [`segmentation_alpha/`](segmentation_alpha/); see [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
 
 The `.mat` files are MATLAB v5 — read them with `scipy.io.loadmat`, not `h5py`. Whole-slide `.vsi` scans open in [QuPath](https://qupath.github.io/); [ImageJ/Fiji](https://imagej.net/software/fiji/) works for tile-level work.
 
