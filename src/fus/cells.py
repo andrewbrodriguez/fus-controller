@@ -116,6 +116,18 @@ def box(roi: rois.Roi, full_um: float) -> tuple[int, int, int, int]:
     return max(x, 0), max(y, 0), int(np.ceil(2 * ext)), int(np.ceil(2 * ext))
 
 
+def _child_env() -> dict:
+    """Environment for the StarDist processes.
+
+    Jupyter sets ``MPLBACKEND=module://matplotlib_inline.backend_inline``; inherited by a
+    process in the StarDist environment, which has no matplotlib_inline, it makes
+    matplotlib (imported by Keras) fail and no cells get segmented. Use Agg there.
+    """
+    env = dict(os.environ)
+    env["MPLBACKEND"] = "Agg"
+    return env
+
+
 def export_and_segment(vsi: Path, series: int, jobs: dict, verbose: bool = True) -> None:
     """Export every ROI box in one QuPath launch; start StarDist on each as it lands.
 
@@ -143,7 +155,7 @@ def export_and_segment(vsi: Path, series: int, jobs: dict, verbose: bool = True)
         log = open(Path(str(labels)).with_suffix(".log"), "w")  # not a pipe: TF is chatty
         running.append(subprocess.Popen(
             [str(STARDIST_PYTHON), str(SEGMENT_SCRIPT), "--channel", str(NEUN), crop, str(labels)],
-            stdout=log, stderr=subprocess.STDOUT))
+            stdout=log, stderr=subprocess.STDOUT, env=_child_env()))
         running[-1].log = log
 
     for line in exporter.stdout:
