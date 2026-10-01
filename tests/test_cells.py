@@ -33,11 +33,11 @@ def test_tag_counts_centroids_inside_roi_and_thresholds(tmp_path):
     tifffile.imwrite(tmp_path / "crop.ome.tif", image, ome=True, metadata={"axes": "CYX"})
     tifffile.imwrite(tmp_path / "labels.tif", labels)
     roi = rois.Roi(1, 1, (100.0, 100.0), 50.0, 50.0)
-    out = cells.tag(tmp_path / "crop.ome.tif", tmp_path / "labels.tif", roi, lo=100.0, hi=1100.0)
+    out = cells.tag(tmp_path / "crop.ome.tif", tmp_path / "labels.tif", roi, background=100.0)
     assert sorted(out.label) == [1, 2]
     got = out.set_index("label")
-    assert got.gfp_mean[1] == pytest.approx(0.9) and got.gfp_positive[1]
-    assert got.gfp_mean[2] == pytest.approx(0.02) and not got.gfp_positive[2]
+    assert got.gfp_fold[1] == pytest.approx(10.0) and got.gfp_positive[1]     # 10x background
+    assert got.gfp_fold[2] == pytest.approx(1.2) and not got.gfp_positive[2]   # 1.2x background
 
 
 def test_source_maps_section_names():

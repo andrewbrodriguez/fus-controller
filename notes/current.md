@@ -1,4 +1,4 @@
-# Where the project is — 2026-09-30 (evening)
+# Where the project is — end of the 2026-09-30 session
 
 Week ~5 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
@@ -11,11 +11,13 @@ Both halves of the pipeline work. The acoustic side reproduces the lab's own num
 the tissue side turns a whole-slide scan into GFP coverage per target. **Two brains are
 measured.** All 16 usable sections of Mouse 1 and Mouse 2 were oriented by hand (centre,
 front and notch side, plus finetuned target circles in napari) and joined to acoustic dose.
-Within each slice, higher-dose targets tend to carry more GFP in both animals: 11 of 11
-slices with clear signal show a positive rank correlation (median ρ +0.54). A **cell-level
-pilot** (StarDist on NeuN, cells tagged GFP+ by mean normalised anti-GFP) works on one
-3 mm crop. Neither has been checked against a hand count. Tissue remains the limit: 2 of
-24 brains imaged.
+Delivery is measured two ways in the same ROIs: **pixel coverage (pipeline A)** and the
+**fraction of NeuN cells tagged GFP+ (pipeline B**, StarDist; GFP+ above 4.05× the slice's
+background). They agree at r = 0.98 across 96 ROIs. Within each slice, higher-dose targets
+tend to carry more GFP in both animals: positive rank correlation in 11/11 slices with clear
+signal under A (median ρ +0.54) and 10/11 under B (+0.61). Neither measure has been checked
+against a hand count, and the review verdicts still need re-tagging. Tissue remains the
+limit: 2 of 24 brains imaged.
 
 ## What exists and is trusted
 
@@ -30,9 +32,9 @@ pilot** (StarDist on NeuN, cells tagged GFP+ by mean normalised anti-GFP) works 
 | `notebooks/view_slice.ipynb` | Any section at full resolution (0.325 µm/px) in napari with ROIs. Exports on first open: ~7 min, ~7 GB per section |
 | `scripts/slices_dose_delivery.py` | Dose vs coverage per slice and pooled; within-slice z-scores. Output and README in `results/histology/slices/` |
 | `scripts/benchmark_mouse01.py` | Scores a placement method against Mouse 1's answer key (control, known front, validated fit) |
-| `src/fus/cells.py` | **Pipeline B**: per-ROI cell count and fraction GFP+ (fixed threshold 0.0575). Run on Mouse 2 `slide04_s3` only so far; `python -m fus.cells --mouse N --all` for the rest (~5 min/section). View one slice in `notebooks/cell_pipeline_one_slice.ipynb` |
-| `segmentation_alpha/` | Cell-level pilot: crops, StarDist/Cellpose environments, GFP tagging, napari notebooks. See `docs/gfp-cell-tagging.md` |
-| `tests/` | 29 tests, passing |
+| `src/fus/cells.py` | **Pipeline B**: per-ROI cell count and fraction GFP+ (cell mean anti-GFP > 4.05× the slice's background). **Run on all 16 slices** (2026-09-30); ~1–1.5 min per slice with one QuPath launch and parallel StarDist on the GPU env (`segmentation_alpha/.venv-stardist-gpu`). One slice in `notebooks/cell_pipeline_one_slice.ipynb` |
+| `segmentation_alpha/` | Cell-level pilot (crops, model comparison, threshold derivation, figures) and the model environments. Its own README |
+| `tests/` | 33 tests, passing |
 
 ## Results so far
 
@@ -52,6 +54,14 @@ Five Mouse 2 slices are low-signal (mean coverage < 0.2, a cutoff chosen after l
 probably cut outside the focal column. Mouse 2 T2 is the main exception: mid dose, low
 coverage. It's a right-side lateral target, and the head was rolled with the right side
 higher (Nick, 9/29).
+
+**Both pipelines, all 16 slices** (`results/histology/slices/README.md`): within-slice ρ with
+dose is positive in 11/11 clear slices for pixels (A, median +0.54) and 10/11 for cells (B, median
++0.61). The one B exception is Mouse 2 `slide04_s4`: +0.09 under A, −0.09 under B. Across the 96
+ROIs, B against A gives r = 0.98. Mouse 1's control T3 reads 0.7–1.3% GFP+ under B. The first
+production threshold (0.0575 on a percentile scale) gave 5–14% there, because Mouse 1's slice
+backgrounds (435–1,927 counts) are several times Mouse 2's (275); B now divides by each
+slice's own background.
 
 **Cell-level pilot** (`docs/gfp-cell-tagging.md`):
 - **Model choice:** on 500 µm of NeuN, StarDist finds 428 cells in 2 s and Cellpose-SAM 308
@@ -114,10 +124,16 @@ written into `docs/`**. Re-derive before citing:
   Click-based runs write `mouseNN_template_slots.csv`; don't overwrite the reference.
 - **Don't run `histology.tissue_mask` on a crop.** It separates tissue from glass by Otsu, and on
   an all-tissue crop it splits bright from dim tissue instead. Cut the section-level mask.
-- **The segmentation pilot has its own environments** (`segmentation_alpha/.venv` for Cellpose,
-  `.venv-stardist` for StarDist). The project `.venv` has neither.
-- **Full-resolution exports are 7 GB each**, in `data/processed/histology/Mouse_NN/full/`.
-  Delete them when done.
+- **The segmentation models have their own environments** in `segmentation_alpha/`:
+  `.venv-stardist-gpu` (TF 2.18 + tensorflow-metal; what `fus.cells` uses), `.venv-stardist`
+  (CPU) and `.venv` (Cellpose). The project `.venv` has none of them. tensorflow-metal fails
+  with TF 2.21, hence the pin. StarDist's slow step is its single-core outline merging, not
+  the network, which is why `fus.cells` runs one process per ROI.
+- **Pipeline B scores are fold over the slice's background.** Don't compare them with the
+  pilot's earlier 0.0575 percentile scale; that scale tagged 5–14% of Mouse 1's no-FUS control.
+- **Full-resolution exports are 7 GB each**, in `data/processed/histology/Mouse_NN/full/`
+  (`slide04_s3` is there now). Delete them when done. Pipeline B doesn't need them: it
+  exports only the ROI boxes and deletes them afterwards.
 - **`data/histology/Mouse_02.zip` (17.8 GB)** is still there after extraction.
 - **`docs/figures/histology-sections-overview.png` still shows 0.75 mm circles**, and no
   script makes it.
@@ -126,8 +142,7 @@ written into `docs/`**. Re-derive before citing:
 
 ## Next steps, in the order I would do them
 
-1. Check pipeline B on `slide04_s3` in `notebooks/cell_pipeline_one_slice.ipynb`, then run it on
-   every section (`python -m fus.cells --mouse 1 --all`, `--mouse 2 --all`; ~1.5 h).
+1. Look over the pipeline B figures (`results/histology/slices/*_cells.png`, `pixels_vs_cells.png`).
 2. Re-tag review verdicts, re-run the slice analysis, and send Nick an update with the
    two-animal result and the questions above.
 3. Hand-count the cell pilot (core, edge, background) and score StarDist plus the GFP+ calls.

@@ -1,9 +1,12 @@
 # Histology pipeline — GFP coverage per target
 
-**Status:** first pass on Mouse_01 (2026-09-16); orientation, delivery channel and
-focal-spot size confirmed by N. Todd on 2026-09-18; ROI radius moved to 1.0 mm and
-Mouse_02 exported and measured on 2026-09-30. **Mouse_02 is not yet mapped to targets**
-— see [Mouse_02](#mouse_02). Parameters still marked *provisional* have not been decided.
+**Status (2026-09-30):** both mice measured. Mouse_01 uses the leave-one-out GFP fit, the
+reference every Mouse_01 number in `docs/` comes from. All 16 usable sections of both mice
+are also measured in hand-placed ROIs (clicked orientation plus finetuned shapes; see
+[Mouse_02](#mouse_02)). This document is **pipeline A**, pixel coverage. **Pipeline B**
+counts GFP+ neurons in the same ROIs ([`gfp-cell-tagging.md`](gfp-cell-tagging.md)), and
+the two agree closely (r = 0.98 across 96 ROIs). Parameters still marked *provisional* have
+not been decided.
 
 This is the ground-truth half of the project, implementing Phase 2 of
 [`ground-truth-spec.md`](ground-truth-spec.md). It turns a whole-slide `.vsi` scan into

@@ -59,7 +59,7 @@ MEASURES = {
     "pixels": {"suffix": "", "name": "GFP coverage", "pipeline": "A",
                "what": "fraction of the ROI's pixels that are anti-GFP positive"},
     "cells": {"suffix": "_cells", "name": "Fraction of cells GFP+", "pipeline": "B",
-              "what": "fraction of NeuN cells in the ROI tagged GFP+ (mean normalised anti-GFP > 0.0575)"},
+              "what": "fraction of NeuN cells in the ROI tagged GFP+ (mean anti-GFP > 4.05x the slice's background)"},
 }
 M = MEASURES["pixels"]  # the measure being drawn; set in main()
 
@@ -245,8 +245,8 @@ def heatmap(d: pd.DataFrame):
             cb.ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
             cb.set_label(M["name"], color=INK_2)
     _header(fig, f"{M['name']} per slice and target (pipeline {M['pipeline']})",
-            f"{M['what'].capitalize()}, 1.74 mm ROIs. Columns: targets ordered by acoustic dose "
-            "(cumulative 2nd harmonic), low → high.")
+            f"{M['what'][0].upper() + M['what'][1:]}, 1.74 mm ROIs.\nColumns: targets ordered by "
+            "acoustic dose (cumulative 2nd harmonic), low → high.")
     _footer(fig, f"Low signal: slice mean pixel coverage < {LOW_SIGNAL_MEAN} (post hoc). "
             "Mouse 1 T1 got three sonications (doses summed).")
     return fig
@@ -361,6 +361,8 @@ def pixels_vs_cells(d: pd.DataFrame):
                    label=f"Mouse {mouse} ({m.section.nunique()} slices)")
     r = stats.pearsonr(use.pixel_coverage, use.cell_fraction).statistic
     ax.set(xlim=(-0.02, 1.02), ylim=(-0.02, 1.02))
+    ax.set_xticks(np.arange(0, 1.01, 0.25))
+    ax.set_yticks(np.arange(0, 1.01, 0.25))
     for axis in (ax.xaxis, ax.yaxis):
         axis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
     ax.set_xlabel("A: GFP+ pixel coverage", fontsize=12, color=INK, labelpad=6)
@@ -441,8 +443,10 @@ Across the six target means (z), ρ with dose: {"; ".join(means_line)}.
   after looking at the data. It flags {n_low} slice(s), probably cut outside most targets'
   focal column, and the same slices are set aside for both pipelines.
   {"Dropped (excluded or marked wrong): " + ", ".join(dropped) + "." if dropped else "No slice is excluded or marked wrong in `data/section_orientation.csv`."}
-- **Pipeline B's threshold** (0.0575) was set on one 3 mm crop of one section and is not yet
-  checked against a hand count (`docs/gfp-cell-tagging.md`).
+- **Pipeline B's threshold** (4.05× the slice's background, its median anti-GFP over tissue) was
+  set on one 3 mm crop of one section and is not yet checked against a hand count
+  (`docs/gfp-cell-tagging.md`). Dividing by each slice's background is what keeps Mouse 1's
+  no-FUS control near zero: its tissue is several times brighter than Mouse 2's.
 - **Mouse 1's correlation leans on the no-FUS control** (T3, dose 0) and on T1, whose
   dose is three sonications summed.
 - **Mouse 2 T2** (mid dose, low delivery) is the main exception. It's a right-side

@@ -4,12 +4,13 @@
 
 A 400 x 400 um window of the 3 mm crop (Mouse 2 slide04_s3), centred on the T3 ROI
 edge on the side away from the other targets, so the plume's inside and outside
-are both in frame. Writes to docs/figures/:
+are both in frame. Cells are tagged as in production (pipeline B, `fus.cells`): mean
+anti-GFP over the cell > `fus.cells.THRESHOLD` (4.05) x the section's background.
+Writes to docs/figures/:
 
-  gfp-tagging-stains.png   NeuN (grey, 0.4 opacity) + anti-GFP stain (green), additive,
-                           GFP on the section's normalised 0-1 scale
-  gfp-tagging-cells.png    the same window with the stains off: StarDist cells outlined
-                           yellow (GFP+) or magenta (GFP-) at the first-pass threshold
+  gfp-tagging-example.png  three panels: stains | tagged cells on the stains | cells only
+  gfp-tagging-stains.png   NeuN (grey, 0.4 opacity) + anti-GFP stain (green), additive
+  gfp-tagging-cells.png    stains off: StarDist cells outlined yellow (GFP+) or magenta (GFP-)
 
 napari can't screenshot a hidden window, so this reproduces its rendering: additive
 blending of each layer's colormap x opacity, the same contrast limits as
@@ -29,6 +30,8 @@ import numpy as np
 import pandas as pd
 import tifffile
 from scipy import ndimage as ndi
+
+from fus import cells as pipeline_b
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -83,6 +86,35 @@ def save(rgb, path, px_um, legend=None):
     plt.close(fig)
 
 
+def three_panel(stains, overlay, cells_only, path, px_um):
+    """Stains | tagged cells over the stains | cells only, titled, one shared scale bar."""
+    font = ["Helvetica Neue", "Arial", "DejaVu Sans"]
+    panels = [("NeuN + anti-GFP stain", stains), ("Tagged cells on the stains", overlay),
+              ("Tagged cells", cells_only)]
+    h, w = stains.shape[:2]
+    fig, axes = plt.subplots(1, 3, figsize=(3 * w / 300 + 0.4, h / 300 + 0.75), dpi=300,
+                             gridspec_kw={"wspace": 0.03})
+    fig.subplots_adjust(left=0.005, right=0.995, top=0.88, bottom=0.01)
+    for ax, (title, img) in zip(axes, panels):
+        ax.imshow(img, interpolation="nearest")
+        ax.set_axis_off()
+        ax.set_title(title, fontsize=8, family=font, loc="left", pad=3)
+    bar = 100 / px_um
+    x1, y = w - 0.05 * w, h - 0.06 * h
+    ax = axes[0]
+    ax.plot([x1 - bar, x1], [y, y], color="white", linewidth=2.5, solid_capstyle="butt")
+    ax.text(x1 - bar / 2, y - 0.025 * h, "100 µm", color="white", ha="center", va="bottom",
+            fontsize=6.5, family=font)
+    for i, (label, colour) in enumerate((("GFP+", YELLOW), ("GFP−", MAGENTA))):
+        yy = 0.06 * h + i * 0.07 * h
+        axes[2].add_patch(plt.Rectangle((0.04 * w, yy - 0.02 * h), 0.04 * h, 0.04 * h, fill=False,
+                                        edgecolor=colour, linewidth=1.5))
+        axes[2].text(0.04 * w + 0.06 * h, yy, label, color="white", va="center", fontsize=7,
+                     family=font)
+    fig.savefig(path, dpi=300, facecolor="white")
+    plt.close(fig)
+
+
 def main():
     info = json.loads((HERE / f"{STEM}.json").read_text())
     summary = json.loads((HERE / f"results/{STEM}_gfp_threshold.json").read_text())
@@ -102,9 +134,10 @@ def main():
     save(stains, OUT / "gfp-tagging-stains.png", px,
          legend=[("NeuN (CY5)", "#bdbdbd"), ("GFP stain (TRITC)", "#00ff00")])
 
-    # Cells: outlines on black, coloured by the first-pass tag.
+    # Cells: outlines, coloured by the production tag (fold over the section background).
     labels = labels_all[rs, cs]
-    positive = set(cells.label[cells.gfp_positive].astype(int))
+    threshold = pipeline_b.THRESHOLD
+    positive = set(cells.label[cells.gfp_fold > threshold].astype(int))
     edge = contours(labels)
     is_pos = np.isin(labels, list(positive))
     rgb = np.zeros(labels.shape + (3,), np.float32)
@@ -113,11 +146,16 @@ def main():
     save(rgb, OUT / "gfp-tagging-cells.png", px,
          legend=[("GFP+", YELLOW), ("GFP−", MAGENTA)])
 
+    overlay = stains.copy()
+    overlay[edge] = rgb[edge]
+    three_panel(stains, overlay, rgb, OUT / "gfp-tagging-example.png", px)
+
     ids = np.unique(labels[labels > 0])
     in_win = cells[cells.label.isin(ids)]
     print(f"window {WINDOW_UM:.0f} um at the T3 ROI edge: {len(in_win)} cells (incl. partial), "
-          f"{int(in_win.gfp_positive.sum())} GFP+ at threshold {summary['threshold']:.3f}")
-    print(f"wrote {OUT / 'gfp-tagging-stains.png'}\nwrote {OUT / 'gfp-tagging-cells.png'}")
+          f"{int((in_win.gfp_fold > threshold).sum())} GFP+ at {threshold}x background")
+    for name in ("gfp-tagging-example.png", "gfp-tagging-stains.png", "gfp-tagging-cells.png"):
+        print(f"wrote {OUT / name}")
 
 
 if __name__ == "__main__":

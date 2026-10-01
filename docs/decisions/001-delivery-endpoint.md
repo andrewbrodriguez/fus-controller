@@ -2,6 +2,13 @@
 
 **Status:** OPEN — the *endpoint* (area vs segmentation) is still undecided
 
+> **Update 2026-09-30, later: both measures now run on everything.** Pipeline B (cells) runs
+> on all 96 target ROIs of both mice alongside pipeline A (pixels), with cells tagged at 4.05×
+> their slice's background. The two agree closely: r = 0.98 across ROIs, and within-slice ρ
+> with dose is positive in 10/11 (B) vs 11/11 (A) slices with clear signal
+> (`results/histology/slices/README.md`). That makes the choice lower-stakes for the
+> dose–response, but **the pre-registered test still hasn't been run**: no blinded hand count.
+>
 > **Update 2026-09-30 (pilot, not the test).** A cell-level pipeline now exists for option B
 > ([`docs/gfp-cell-tagging.md`](../gfp-cell-tagging.md)). StarDist was chosen over
 > Cellpose-SAM for speed (428 vs 308 cells on 500 µm of NeuN, agreeing on 271). Each NeuN

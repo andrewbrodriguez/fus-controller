@@ -9,8 +9,8 @@ is tracked here, because it is small, text-like, and the key to everything else.
 ```
 data/
 ├── Mouse_Controller_Data.xlsx    tracked — experimental conditions for all targets
-├── section_orientation.csv       tracked — per-section front and notch clicks, from
-│                                 `python -m fus.orientation`; the Mouse 2+ join needs it
+├── section_orientation.csv       tracked — per-section centre, front and notch-side clicks,
+│                                 exclusions and review verdicts (notebooks/ingest_new_histology.ipynb)
 ├── roi_locations.csv             tracked — hand-finetuned T1–T6 shapes per section (export px),
 │                                 from the finetune step of notebooks/ingest_new_histology.ipynb
 ├── acoustic/                     git-ignored
@@ -18,6 +18,12 @@ data/
 │       ├── Mouse_Cntr_XX_BL.mat          baseline, before microbubbles
 │       ├── Mouse_Cntr_XX_TargetYY.mat    one per target (6 per mouse), ~0.4–0.6 GB
 │       └── Mouse_Cntr_XX_*.jpg           per-run spectrogram screenshots
+├── processed/histology/Mouse_NN/  git-ignored, all regenerable
+│   ├── ds4/                      4x-downsampled section exports (1.3 µm/px), what pipeline A measures
+│   ├── full/                     full-resolution exports (0.325 µm/px), ~7 GB each, made by
+│   │                             notebooks/view_slice.ipynb; delete when done
+│   └── cells/                    pipeline B per section: <section>_cells.csv (one row per cell),
+│                                 <section>_T<k>_labels.tif (StarDist outlines)
 └── histology/                    git-ignored
     ├── Mouse_01/
     │   ├── Image.vsi             Olympus whole-slide scan, 5 sections — open in QuPath

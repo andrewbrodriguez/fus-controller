@@ -41,20 +41,21 @@ This is one animal. The recording-to-target mapping and the choice of GFP channe
 
 ## Two animals, slice by slice
 
-Mouse 2 is the first clean animal: each target was sonicated once, at six different doses. Its 12 sections are oriented by hand (front, notch side, and hand-finetuned target circles in napari) and measured the same way as Mouse 1's. Within each slice, the higher-dose targets tend to carry more GFP. Across the 11 slices with clear signal, the rank correlation of coverage with dose is positive in all 11 (median ρ = +0.54). Five Mouse 2 slices carry little GFP anywhere, probably cut outside the focal column, and they're reported separately. This is still two animals, so it's a consistent within-animal pattern, not a population result; the figures and caveats are in [`results/histology/slices/README.md`](results/histology/slices/README.md).
+Mouse 2 is the first clean animal: each target was sonicated once, at six different doses. Its 12 sections are oriented by hand (front, notch side, and hand-finetuned target circles in napari) and measured the same way as Mouse 1's. Within each slice, the higher-dose targets tend to carry more GFP. Across the 11 slices with clear signal, the rank correlation of GFP+ pixel coverage with dose is positive in all 11 (median ρ = +0.54). Counting cells instead of pixels gives the same picture: the fraction of NeuN cells tagged GFP+ correlates with dose in 10 of 11 (median ρ = +0.61), and the two measures agree closely across all 96 target ROIs (r = 0.98). Five Mouse 2 slices carry little GFP anywhere, probably cut outside the focal column, and they're reported separately. This is still two animals, so it's a consistent within-animal pattern, not a population result; the figures and caveats are in [`results/histology/slices/README.md`](results/histology/slices/README.md).
 
-## From pixels to cells (pilot)
+## From pixels to cells
 
-Coverage counts GFP+ *pixels*, most of which are processes rather than cell bodies. The pilot below asks how many *neurons* took up the virus. It segments every NeuN-stained cell with StarDist, scores each by its mean anti-GFP intensity (normalised over the whole section), and tags it GFP+ above a threshold. In a 3 × 3 mm square around one Mouse 2 target, 16,723 cells are segmented. Essentially every neuron within 0.5 mm of the target centre is tagged (97–100%), falling to under 1% beyond 1.25 mm.
+Coverage counts GFP+ *pixels*, most of which are processes rather than cell bodies. A second pipeline counts *neurons*. It segments every NeuN-stained cell with StarDist, scores each by its mean anti-GFP intensity relative to its slice's background, and tags it GFP+ above 4.05× background.
 
 <p align="center">
-  <img src="docs/figures/gfp-tagging-stains.png" alt="400 micrometre square at the edge of a Mouse 2 target: NeuN in grey and the anti-GFP stain in green, bright on the right where the plume is." width="49%">
-  <img src="docs/figures/gfp-tagging-cells.png" alt="The same square with the stains hidden: each segmented neuron outlined yellow if tagged GFP-positive, mostly on the right, or magenta if negative, mostly on the left." width="49%">
+  <img src="docs/figures/gfp-tagging-example.png" alt="Three panels of the same 400 micrometre square at the edge of a Mouse 2 target. Left: NeuN in grey and the anti-GFP stain in green, bright on one side where the plume is. Middle: the same with every segmented neuron outlined, yellow where tagged GFP-positive and magenta where negative. Right: the outlines alone on black, yellow cells clustered on the plume side." width="100%">
 </p>
 
-*A 400 µm window on the edge of the target. Left: NeuN (grey) and the anti-GFP stain (green). Right: the same window with the stains off; each segmented cell is outlined yellow (GFP+) or magenta (GFP−).*
+*A 400 µm window on the edge of a Mouse 2 target, where the plume fades out. Left: NeuN (grey) and the anti-GFP stain (green). Middle and right: each segmented neuron outlined **yellow** (GFP+) or **magenta** (GFP−), over the stains and alone. 269 cells, 61 GFP+.*
 
-It has not yet been checked against a hand count. Method, numbers and caveats: [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
+In a 3 × 3 mm square around that target, 16,723 neurons are segmented. 97–100% are tagged within 0.5 mm of the target centre, falling to under 1% beyond 1.25 mm. Normalising to each slice's own background keeps Mouse 1's unsonicated control at about 1% GFP+.
+
+This runs as **pipeline B** (`python -m fus.cells`) on every target ROI of both mice, about 1–1.5 min per slice, alongside the pixel pipeline (A). The two agree closely (r = 0.98 across 96 ROIs). It hasn't been checked against a hand count yet. Method, numbers and caveats: [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
 
 ## Approach
 
@@ -85,8 +86,8 @@ conventions for anyone (or any agent) picking this up: [`AGENTS.md`](AGENTS.md).
 As of 2026-09-30, week ~5 of 13:
 - **Acoustics:** the feature extraction is built and reproduces the lab's numbers.
 - **Tissue:** 2 of 24 brains are imaged. Both (16 sections) are oriented by hand, measured, and joined to dose. Within slices, dose and delivery rise together in both animals.
-- **Cell level:** a segmentation and GFP-tagging pilot works on one section and still needs a hand count to validate it.
-- **Still open:** the capsid assignment per mouse, which marker the CY5 channel shows on Mouse 2, and section depth. 3 of 4 acoustic sessions aren't synced yet.
+- **Two delivery measures:** pixel coverage (pipeline A) and the fraction of neurons tagged GFP+ (pipeline B) run on every target ROI and agree closely. Pipeline B still needs a hand count to validate it.
+- **Still open:** the capsid assignment per mouse, which marker the CY5 channel shows on Mouse 2, section depth, and review verdicts for each slice (in place of a post hoc low-signal cutoff). 3 of 4 acoustic sessions aren't synced yet.
 
 The limiting factor is still tissue.
 
@@ -100,7 +101,7 @@ src/fus/        Analysis package — feature extraction, quantification, models
 scripts/        Helper scripts, incl. QuPath Groovy
 tests/          pytest suite
 notebooks/      Per-animal ingest (orient, finetune, measure, review), full-resolution slice viewer
-segmentation_alpha/  Cell segmentation + GFP tagging pilot (own envs for StarDist / Cellpose)
+segmentation_alpha/  Cell segmentation pilot and its environments (StarDist CPU/GPU, Cellpose)
 results/        Generated figures and model outputs
 docs/           Proposal and lab presentations
 notes/          Meeting notes and working log (`current.md` = state of play)
@@ -145,7 +146,14 @@ python -m fus.histology measure data/processed/histology/Mouse_01/ds4/*.ome.tif 
 
 It is a first pass with provisional parameters; see [`docs/histology-pipeline.md`](docs/histology-pipeline.md) for the method, the Mouse_01 results, and the open questions.
 
-For each new animal, run [`notebooks/ingest_new_histology.ipynb`](notebooks/ingest_new_histology.ipynb). It exports the sections, opens napari for the orientation clicks and optional finetuning, measures, and opens a review window. To inspect any section at full resolution, use [`notebooks/view_slice.ipynb`](notebooks/view_slice.ipynb). The cell-level pilot lives in [`segmentation_alpha/`](segmentation_alpha/); see [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
+For each new animal, run [`notebooks/ingest_new_histology.ipynb`](notebooks/ingest_new_histology.ipynb). It exports the sections, opens napari for the orientation clicks and optional finetuning, measures, and opens a review window. To inspect any section at full resolution, use [`notebooks/view_slice.ipynb`](notebooks/view_slice.ipynb). Pipeline B, the cell count, runs per section or per mouse:
+
+```bash
+.venv/bin/python -m fus.cells --mouse 2 --all          # ~1-1.5 min per section
+.venv/bin/python scripts/slices_dose_delivery.py       # both pipelines vs dose, per slice and pooled
+```
+
+It needs the StarDist environment in `segmentation_alpha/` (setup in [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md)). [`notebooks/cell_pipeline_one_slice.ipynb`](notebooks/cell_pipeline_one_slice.ipynb) shows both pipelines on one slice, and the pilot is described in [`segmentation_alpha/README.md`](segmentation_alpha/README.md).
 
 The `.mat` files are MATLAB v5 — read them with `scipy.io.loadmat`, not `h5py`. Whole-slide `.vsi` scans open in [QuPath](https://qupath.github.io/); [ImageJ/Fiji](https://imagej.net/software/fiji/) works for tile-level work.
 
