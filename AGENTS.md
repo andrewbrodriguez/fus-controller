@@ -13,7 +13,7 @@ Use `.venv/bin/python`. It is Python 3.12 with the project installed editable, s
 `PYTHONPATH` is needed. System `python3` is 3.9 and will not work.
 
 ```bash
-.venv/bin/python -m pytest tests -q          # 29 tests: geometry, orientation, ROIs
+.venv/bin/python -m pytest tests -q          # 33 tests: geometry, orientation, ROIs, cells
 ```
 
 Jupyter kernel: **Python 3.12 (fus-research .venv)**.
@@ -46,6 +46,10 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/benchmark_mouse01.py          # hand placement vs Mouse 1 answer key
 .venv/bin/python scripts/slices_dose_delivery.py       # per-slice + pooled dose vs coverage
 
+# pipeline B: ROI -> StarDist cells -> GFP-tagged cells (needs segmentation_alpha/.venv-stardist)
+.venv/bin/python -m fus.cells --mouse 2 --section slide04_s3     # ~5 min per section
+.venv/bin/python -m fus.cells --mouse 2 --all                    # every clicked section
+
 # cell-level pilot (own environments; see docs/gfp-cell-tagging.md)
 .venv/bin/python segmentation_alpha/make_crop.py 3000
 segmentation_alpha/.venv-stardist/bin/python segmentation_alpha/run_stardist.py segmentation_alpha/<crop>.ome.tif
@@ -65,7 +69,8 @@ segmentation_alpha/.venv-stardist/bin/python segmentation_alpha/run_stardist.py 
 | `data/` | Only the summary sheet is tracked; raw data is git-ignored (see `data/README.md`) |
 | `results/` | Generated CSVs and figures |
 | `src/fus/orientation.py`, `src/fus/rois.py` | napari tools: orientation clicks, review, finetuned target shapes |
-| `notebooks/` | `ingest_new_histology.ipynb` (per-animal workflow), `view_slice.ipynb` (full-resolution viewer) |
+| `src/fus/cells.py` | Pipeline B: per-ROI cell counts and GFP+ fraction (StarDist via `scripts/stardist_segment.py`) |
+| `notebooks/` | `ingest_new_histology.ipynb` (per-animal workflow), `cell_pipeline_one_slice.ipynb` (A vs B on one slice), `view_slice.ipynb` (full-resolution viewer) |
 | `segmentation_alpha/` | Cell segmentation + GFP tagging pilot; its own `.venv` (Cellpose) and `.venv-stardist` |
 
 ## Ground rules
