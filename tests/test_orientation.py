@@ -74,3 +74,35 @@ def test_mouse02_mirroring_uses_left_notch():
     below = o.Annotation(2, "s", (500.0, 500.0), (500.0, 100.0), (700.0, 500.0))
     above = o.Annotation(2, "s", (500.0, 500.0), (500.0, 100.0), (300.0, 500.0))
     assert o.is_mirrored(below, "right") and not o.is_mirrored(above, "right")
+
+
+@pytest.mark.parametrize("front, notch, flips", [
+    ((500.0, 100.0), (700.0, 500.0), False),  # front left, notch down: a pure rotation
+    ((500.0, 100.0), (300.0, 500.0), True),   # front left, notch up: needs a mirror
+    ((100.0, 500.0), (500.0, 100.0), False),  # already front up, notch left
+])
+def test_canonical_affine_puts_front_up_notch_left(front, notch, flips):
+    a = o.Annotation(2, "s", (500.0, 500.0), front, notch)
+    m = o.canonical_affine(a, scale=2.0)
+
+    def world(p):
+        return (m @ np.array([p[0] / 2, p[1] / 2, 1.0]))[:2]
+
+    assert world(a.centre) == pytest.approx([0, 0])
+    f, n = world(front), world(notch)
+    assert f[1] == pytest.approx(0, abs=1e-9) and f[0] < 0   # straight up
+    assert n[1] < 0 and abs(n[0]) < 1e-9                      # straight left (notch is square here)
+    assert (np.linalg.det(m[:2, :2]) < 0) == flips
+    assert abs(np.linalg.det(m[:2, :2])) == pytest.approx(1)  # no scaling: pixels untouched
+
+
+def test_update_sheet_leaves_other_fields_and_sections(tmp_path):
+    path = tmp_path / "sheet.csv"
+    a = o.Annotation(2, "s1", (1.0, 2.0), (0.0, 2.0), (1.0, 5.0), review="wrong")
+    b = o.Annotation(2, "s2", notes="keep me")
+    o.write_sheet({(2, "s1"): a, (2, "s2"): b}, path)
+    # an orientation window saving s1's clicks must not touch its verdict or s2
+    o.update_sheet((2, "s1"), path, centre=(9.0, 9.0), exclude=True)
+    back = o.read_sheet(path)
+    assert back[(2, "s1")].review == "wrong" and back[(2, "s1")].centre == (9.0, 9.0)
+    assert back[(2, "s2")].notes == "keep me"

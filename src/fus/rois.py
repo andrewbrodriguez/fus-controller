@@ -160,15 +160,6 @@ def finetune(paths, mice=None, sheet: Path = orientation.SHEET, locations: Path 
                                face_color=[1, 1, 0, 0.08], edge_width=4)
 
     lay, title, note, buttons = orientation._panel(viewer)
-    note("Each yellow shape is one target. With the <b>targets</b> layer selected "
-         "(press <b>S</b> for select mode):<br>"
-         "• click a shape, then drag it to move<br>"
-         "• drag a corner handle to resize (hold <b>Shift</b> to keep it round)<br>"
-         "• drag the handle above the box to rotate<br>"
-         "Moving to another section, or <b>Done</b>, saves this one. Hold <b>Space</b> "
-         "and drag to pan. "
-         "The ROI size is the measurement: resizing changes what \"coverage\" means "
-         "for that target, so keep 2 mm circles unless there's a reason not to.")
     (b_reset,) = buttons("Reset section to template")
     b_prev, b_save = buttons("◀ Previous [B]", "Save + next ▶ [Enter]")
     (b_done,) = buttons("Done — save and close")
@@ -234,7 +225,7 @@ def finetune(paths, mice=None, sheet: Path = orientation.SHEET, locations: Path 
             state["rois"][k] = rois
             show_rois(rois)
             refresh()
-        viewer.reset_view()
+        orientation._straighten(viewer, a, state["scale"])
 
     def keep_edits() -> bool:
         if not state.get("targets"):
