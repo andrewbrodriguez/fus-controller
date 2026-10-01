@@ -7,19 +7,26 @@ measures the same ROI by its cells:
 1. **ROI** -- the target's shape exactly as pipeline A uses it: the finetuned
    ellipse in ``data/roi_locations.csv`` if saved, else the template placed from
    the orientation clicks.
-2. **Export** the ROI's bounding box (plus a margin) at full resolution
-   (0.325 um/px) straight from the ``.vsi`` with QuPath's ``--crop``; ~11 s and
-   ~270 MB per target, deleted afterwards unless asked to keep.
-3. **Segment** NeuN (CY5) with StarDist 2D_versatile_fluo, in its own environment
-   (``scripts/stardist_segment.py``; `STARDIST_PYTHON`).
-4. **Tag** each cell whose centroid is inside the ROI: mean anti-GFP (TRITC)
-   over its pixels, normalised over the *whole section's* tissue (0 = 1st
-   percentile, 1 = 99.9th, linear), GFP+ above `THRESHOLD`.
+2. **Export** the six ROI bounding boxes (plus a margin) at full resolution
+   (0.325 um/px) straight from the ``.vsi``, in one QuPath launch
+   (``scripts/qupath/export_regions.groovy``), uncompressed -- they are temporary.
+3. **Segment** NeuN (CY5) with StarDist 2D_versatile_fluo
+   (``scripts/stardist_segment.py``), one process per ROI, each started as soon as
+   its crop is written. StarDist's network runs on the Apple GPU
+   (``.venv-stardist-gpu``: TensorFlow 2.18 + tensorflow-metal); its slow step, merging
+   candidate outlines, is single-core, so the six ROIs run side by side. GPU and CPU
+   give the same cells (5,717 of 5,717 matched on one crop).
+4. **Tag** each cell whose centroid is inside the ROI: its mean raw anti-GFP
+   (TRITC) divided by the section's **background** -- the median anti-GFP over the
+   section's tissue -- GFP+ above `THRESHOLD` (fold over background).
 
-`THRESHOLD` = 0.0575 is the log-Otsu split from the pilot's 3 x 3 mm crop around
-Mouse 2 slide04_s3 T3 (``segmentation_alpha/results/mouse02_slide04_s3_T3_3000um_gfp_threshold.json``,
-docs/gfp-cell-tagging.md). It is fixed here so every section is tagged on the same
-scale; it was set on one section of one animal and is not yet hand-validated.
+`THRESHOLD` = 4.05x background is the log-Otsu split of that score on the pilot's
+3 x 3 mm crop around Mouse 2 slide04_s3 T3 (``segmentation_alpha/results/
+mouse02_slide04_s3_T3_3000um_gfp_threshold.json`` -> ``fold``; docs/gfp-cell-tagging.md).
+Dividing by each section's own background is what lets one threshold work across
+animals: Mouse 1's un-transduced tissue is ~5x brighter than Mouse 2's, and the
+earlier percentile scale (0.0575) tagged 5-14% of its no-FUS control. It was set on
+one section of one animal and is not yet hand-validated.
 
 Outputs:
 
@@ -50,14 +57,17 @@ from scipy import ndimage as ndi
 from fus import histology, orientation, rois
 
 ROOT = histology.REPO_ROOT
-THRESHOLD = 0.0575
-NORM_PERCENTILES = (1.0, 99.9)
+THRESHOLD = 4.05          # fold over the section's background
+WORKERS = 6               # StarDist processes at once (one per ROI)
 MARGIN_UM = 30.0           # box margin so cells on the ROI edge are segmented whole
 DS4 = 4                    # the ds4 exports are 4x downsampled from full resolution
 NEUN, GFP = 3, 2           # channel order DAPI, FITC, TRITC, CY5
+_GPU_ENV = ROOT / "segmentation_alpha/.venv-stardist-gpu/bin/python"
 STARDIST_PYTHON = Path(os.environ.get(
-    "FUS_STARDIST_PYTHON", ROOT / "segmentation_alpha/.venv-stardist/bin/python"))
+    "FUS_STARDIST_PYTHON",
+    _GPU_ENV if _GPU_ENV.exists() else ROOT / "segmentation_alpha/.venv-stardist/bin/python"))
 SEGMENT_SCRIPT = ROOT / "scripts/stardist_segment.py"
+EXPORT_SCRIPT = ROOT / "scripts/qupath/export_regions.groovy"
 RESULTS = ROOT / "results/histology/cells"
 
 
@@ -91,12 +101,11 @@ def section_rois(mouse: int, section: str) -> tuple[dict[int, rois.Roi], str]:
     return rois.from_template(a, rois.export_pixel_um(ds4_path(mouse, section)), mirrored), "template"
 
 
-def section_scale(mouse: int, section: str) -> tuple[float, float, np.ndarray]:
-    """(lo, hi) of TRITC over the section's tissue, and the ds4 tissue mask."""
+def section_background(mouse: int, section: str) -> tuple[float, np.ndarray]:
+    """Median anti-GFP over the section's tissue (4x export), and the tissue mask."""
     sec = histology.load_section(ds4_path(mouse, section))
     tissue = histology.tissue_mask(sec)
-    lo, hi = np.percentile(sec.channels["TRITC"][tissue], NORM_PERCENTILES)
-    return float(lo), float(hi), tissue
+    return float(np.median(sec.channels["TRITC"][tissue])), tissue
 
 
 def box(roi: rois.Roi, full_um: float) -> tuple[int, int, int, int]:
@@ -107,31 +116,59 @@ def box(roi: rois.Roi, full_um: float) -> tuple[int, int, int, int]:
     return max(x, 0), max(y, 0), int(np.ceil(2 * ext)), int(np.ceil(2 * ext))
 
 
-def export_region(vsi: Path, series: int, xywh, dest: Path) -> None:
-    x, y, w, h = xywh
-    subprocess.run([histology._qupath(), "convert-ome", f"--series={series}", "-r", f"{x},{y},{w},{h}",
-                    "-c", "ZLIB", "--overwrite", str(vsi.resolve()), str(dest.resolve())],
-                   capture_output=True, check=True)
+def export_and_segment(vsi: Path, series: int, jobs: dict, verbose: bool = True) -> None:
+    """Export every ROI box in one QuPath launch; start StarDist on each as it lands.
 
-
-def segment(pairs: list[tuple[Path, Path]]) -> list[dict]:
-    """StarDist on NeuN for each (crop, labels) pair, in the StarDist environment."""
+    ``jobs`` maps target -> (xywh, crop path, labels path).
+    """
     if not STARDIST_PYTHON.exists():
         raise FileNotFoundError(f"StarDist environment not found at {STARDIST_PYTHON}; "
                                 "see docs/gfp-cell-tagging.md or set $FUS_STARDIST_PYTHON")
-    args = [str(STARDIST_PYTHON), str(SEGMENT_SCRIPT), "--channel", str(NEUN)]
-    for crop, labels in pairs:
-        args += [str(crop), str(labels)]
-    out = subprocess.run(args, capture_output=True, text=True, check=True).stdout
-    return [json.loads(line) for line in out.splitlines() if line.startswith("{")]
+    by_crop = {str(crop.resolve()): (t, labels) for t, (_, crop, labels) in jobs.items()}
+    specs = []
+    for xywh, crop, _ in jobs.values():
+        specs += ["-a", ",".join(map(str, xywh)) + "," + str(crop.resolve())]
+    exporter = subprocess.Popen(
+        [histology._qupath(), "script", "-a", str(vsi.resolve()), "-a", str(series),
+         "-a", "UNCOMPRESSED", *specs, str(EXPORT_SCRIPT)],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    running = []
+
+    def start(crop: str):
+        while len([p for p in running if p.poll() is None]) >= WORKERS:
+            time.sleep(0.5)
+        t, labels = by_crop[crop]
+        if verbose:
+            print(f"  T{t} exported -> segmenting", flush=True)
+        log = open(Path(str(labels)).with_suffix(".log"), "w")  # not a pipe: TF is chatty
+        running.append(subprocess.Popen(
+            [str(STARDIST_PYTHON), str(SEGMENT_SCRIPT), "--channel", str(NEUN), crop, str(labels)],
+            stdout=log, stderr=subprocess.STDOUT))
+        running[-1].log = log
+
+    for line in exporter.stdout:
+        if line.startswith("WROTE "):
+            start(line[6:].strip())
+    if exporter.wait() != 0:
+        raise RuntimeError(f"QuPath region export failed for {vsi.name} series {series}")
+    for p in running:
+        code = p.wait()
+        p.log.close()
+        if code != 0:
+            raise RuntimeError(f"StarDist failed; see {p.log.name}")
+    missing = [t for t, (_, _, labels) in jobs.items() if not labels.exists()]
+    if missing:
+        raise RuntimeError(f"no labels for targets {missing}")
 
 
-def tag(crop: Path, labels_path: Path, roi_full: rois.Roi, lo: float, hi: float,
+def tag(crop: Path, labels_path: Path, roi_full: rois.Roi, background: float,
         threshold: float = THRESHOLD) -> pd.DataFrame:
-    """One row per cell with its centroid inside ``roi_full`` (crop pixel coordinates)."""
+    """One row per cell with its centroid inside ``roi_full`` (crop pixel coordinates).
+
+    ``gfp_fold`` = the cell's mean raw anti-GFP / ``background``.
+    """
     with tifffile.TiffFile(crop) as tf:
-        gfp = tf.series[0].levels[0].asarray()[GFP].astype(np.float32)
-    gfp = (gfp - lo) / (hi - lo)
+        gfp = tf.series[0].levels[0].asarray()[GFP].astype(np.float32) / background
     labels = tifffile.imread(labels_path)
     ea, eb = roi_full.axes()
     rows = []
@@ -147,9 +184,9 @@ def tag(crop: Path, labels_path: Path, roi_full: rois.Roi, lo: float, hi: float,
         if u**2 + w**2 > 1:
             continue
         rows.append({"label": lab, "row": r, "col": c, "area_px": int(mask.sum()),
-                     "gfp_mean": float(gfp[sl][mask].mean())})
-    cells = pd.DataFrame(rows, columns=["label", "row", "col", "area_px", "gfp_mean"])
-    cells["gfp_positive"] = cells.gfp_mean > threshold
+                     "gfp_fold": float(gfp[sl][mask].mean())})
+    cells = pd.DataFrame(rows, columns=["label", "row", "col", "area_px", "gfp_fold"])
+    cells["gfp_positive"] = cells.gfp_fold > threshold
     return cells
 
 
@@ -159,7 +196,7 @@ def measure_section(mouse: int, section: str, threshold: float = THRESHOLD,
     t0 = time.time()
     vsi, series = source(mouse, section)
     shapes, origin = section_rois(mouse, section)
-    lo, hi, tissue = section_scale(mouse, section)
+    background, tissue = section_background(mouse, section)
     ds4_um = rois.export_pixel_um(ds4_path(mouse, section))
     full_um = ds4_um / DS4
     work = work_dir(mouse)
@@ -167,15 +204,12 @@ def measure_section(mouse: int, section: str, threshold: float = THRESHOLD,
 
     jobs = {}
     for t, roi in sorted(shapes.items()):
-        xywh = box(roi, full_um)
-        crop = work / f"{section}_T{t}.ome.tif"
-        if verbose:
-            print(f"{section} T{t}: exporting {xywh[2]} x {xywh[3]} px", flush=True)
-        export_region(vsi, series, xywh, crop)
-        jobs[t] = (xywh, crop, work / f"{section}_T{t}_labels.tif")
+        crop, labels = work / f"{section}_T{t}.ome.tif", work / f"{section}_T{t}_labels.tif"
+        labels.unlink(missing_ok=True)
+        jobs[t] = (box(roi, full_um), crop, labels)
     if verbose:
-        print(f"{section}: segmenting {len(jobs)} targets with StarDist", flush=True)
-    segment([(crop, lab) for _, crop, lab in jobs.values()])
+        print(f"{section}: exporting {len(jobs)} ROIs and segmenting", flush=True)
+    export_and_segment(vsi, series, jobs, verbose)
 
     summary, all_cells = [], []
     for t, (xywh, crop, lab_path) in jobs.items():
@@ -183,7 +217,7 @@ def measure_section(mouse: int, section: str, threshold: float = THRESHOLD,
         x, y = xywh[0], xywh[1]
         roi_full = rois.Roi(t, roi.slot, (roi.centre[0] * DS4 - y, roi.centre[1] * DS4 - x),
                             roi.semi_a * DS4, roi.semi_b * DS4, roi.angle_deg)
-        cells = tag(crop, lab_path, roi_full, lo, hi, threshold)
+        cells = tag(crop, lab_path, roi_full, background, threshold)
         cells["row"] += y
         cells["col"] += x
         cells["area_um2"] = cells.pop("area_px") * full_um**2
@@ -197,8 +231,8 @@ def measure_section(mouse: int, section: str, threshold: float = THRESHOLD,
             "roi_tissue_mm2": round(tissue_mm2, 3), "n_cells": n,
             "cells_per_mm2": round(n / tissue_mm2, 1) if tissue_mm2 else np.nan,
             "n_gfp_pos": pos, "fraction_gfp_pos": round(pos / n, 4) if n else np.nan,
-            "median_cell_gfp": round(float(cells.gfp_mean.median()), 4) if n else np.nan,
-            "threshold": threshold, "norm_lo": round(lo, 1), "norm_hi": round(hi, 1),
+            "median_cell_fold": round(float(cells.gfp_fold.median()), 3) if n else np.nan,
+            "threshold_fold": threshold, "background": round(background, 1),
         })
         if not keep_crops:
             crop.unlink(missing_ok=True)
@@ -239,12 +273,12 @@ def main(argv: list[str] | None = None) -> int:
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--section", nargs="+")
     g.add_argument("--all", action="store_true", help="every clicked, non-excluded section")
-    p.add_argument("--threshold", type=float, default=THRESHOLD)
+    p.add_argument("--threshold", type=float, default=THRESHOLD, help="fold over background")
     p.add_argument("--keep-crops", action="store_true")
     args = p.parse_args(argv)
     for section in (sections(args.mouse) if args.all else args.section):
         print(measure_section(args.mouse, section, args.threshold, args.keep_crops)
-              .drop(columns=["norm_lo", "norm_hi", "threshold"]).to_string(index=False))
+              .drop(columns=["threshold_fold"]).to_string(index=False))
     return 0
 
 

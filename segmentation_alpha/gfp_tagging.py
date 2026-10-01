@@ -20,6 +20,13 @@
    The first pass was going to be the reference; it was switched to log-Otsu after
    seeing the histogram (2026-09-30). The notebook can apply any threshold.
 
+**Fold over background** (2026-09-30, what pipeline B uses): each cell's mean raw
+anti-GFP divided by its section's background, the median anti-GFP over the
+section's tissue (4x export). Mouse 1's un-transduced tissue is ~5x brighter than
+Mouse 2's, so a threshold on the percentile scale above didn't transfer between
+animals; dividing by each section's own background does. Its log-Otsu split is
+`threshold_fold`, the constant in `fus.cells`.
+
 Writes results/<crop>_gfp_cells.csv, _gfp_reference.csv and _gfp_threshold.json.
 """
 
@@ -61,6 +68,7 @@ def section_scale(info: dict) -> tuple[float, float, np.ndarray, float]:
     sec = histology.load_section(ds4)
     tissue = histology.tissue_mask(sec)
     lo, hi = np.percentile(sec.channels["TRITC"][tissue], NORM_PERCENTILES)
+    section_scale.background = float(np.median(sec.channels["TRITC"][tissue]))
     return float(lo), float(hi), tissue, rois.export_pixel_um(ds4)
 
 
@@ -101,6 +109,7 @@ def main() -> None:
     labels = tifffile.imread(LABELS)
 
     lo, hi, section_tissue, ds4_um = section_scale(info)
+    background = section_scale.background
     gfp = (image[GFP].astype(np.float32) - lo) / (hi - lo)
     tissue = crop_mask(section_tissue, ds4_um, info)
 
@@ -111,10 +120,12 @@ def main() -> None:
             continue
         mask = labels[sl] == lab
         v = gfp[sl][mask]
+        raw = float(image[GFP][sl][mask].mean())
         r, c = ndi.center_of_mass(mask)
         rows.append({"label": lab, "row": sl[0].start + r, "col": sl[1].start + c,
                      "area_um2": float(mask.sum() * px_um**2),
-                     "gfp_mean": float(v.mean()), "gfp_sd": float(v.std())})
+                     "gfp_mean": float(v.mean()), "gfp_sd": float(v.std()),
+                     "gfp_fold": raw / background})
     cells = pd.DataFrame(rows)
 
     centres = target_centres(info, ds4_um)
@@ -141,6 +152,7 @@ def main() -> None:
     threshold_otsu = float(otsu(cells.gfp_mean.to_numpy()))
     threshold_log_otsu = float(10 ** otsu(np.log10(np.clip(cells.gfp_mean.to_numpy(), 1e-4, None))))
     threshold = threshold_log_otsu
+    threshold_fold = float(10 ** otsu(np.log10(np.clip(cells.gfp_fold.to_numpy(), 1e-3, None))))
     cells["gfp_positive"] = cells.gfp_mean > threshold
 
     out = HERE / "results"
@@ -161,6 +173,13 @@ def main() -> None:
             "where": f"cell-free tissue > {OFF_TARGET_MM} mm from every target",
             "fraction_of_crop": round(float(allowed.mean()), 3)},
         "threshold_otsu": round(threshold_otsu, 4),
+        "fold": {"background": round(background, 1),
+                 "background_is": "median anti-GFP over the section's tissue (4x export)",
+                 "threshold_fold": round(threshold_fold, 3),
+                 "gfp_positive": int((cells.gfp_fold > threshold_fold).sum()),
+                 "fraction_positive": round(float((cells.gfp_fold > threshold_fold).mean()), 3),
+                 "agreement_with_percentile_scale": round(float(
+                     ((cells.gfp_fold > threshold_fold) == cells.gfp_positive).mean()), 4)},
         "cells": int(len(cells)), "gfp_positive": int(cells.gfp_positive.sum()),
         "fraction_positive": round(float(cells.gfp_positive.mean()), 3),
     }
@@ -172,6 +191,7 @@ def main() -> None:
     for name, t in (("log_otsu", threshold_log_otsu), ("reference", threshold_ref), ("otsu", threshold_otsu)):
         if t is not None:
             profile[f"positive_{name}"] = (cells.gfp_mean > t).groupby(bands, observed=True).mean().round(4)
+    profile["positive_fold"] = (cells.gfp_fold > threshold_fold).groupby(bands, observed=True).mean().round(4)
     profile.index = profile.index.astype(str)
     profile.rename_axis("dist_mm").to_csv(out / f"{STEM}_gfp_profile.csv")
     print(json.dumps(summary, indent=2))

@@ -1,82 +1,166 @@
-section_s2 T1: exporting 5539 x 5539 px
-section_s2 T2: exporting 5539 x 5539 px
-section_s2 T3: exporting 5539 x 5539 px
-section_s2 T4: exporting 5539 x 5539 px
-section_s2 T5: exporting 5539 x 5539 px
-section_s2 T6: exporting 5539 x 5539 px
-section_s2: segmenting 6 targets with StarDist
-section_s2: done in 180 s
- mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_gfp
-     1 section_s2       1     1  finetuned           2.346     1940          827.0       1444            0.7443           0.1483
-     1 section_s2       2     2  finetuned           2.378     4193         1763.4       3119            0.7439           0.1274
-     1 section_s2       3     3  finetuned           2.378      678          285.1         96            0.1416           0.0336
-     1 section_s2       4     4  finetuned           2.337     1022          437.4        634            0.6204           0.1216
-     1 section_s2       5     5  finetuned           2.378     1781          749.0       1776            0.9972           0.2326
-     1 section_s2       6     6  finetuned           2.301      281          122.1        280            0.9964           0.1675
-section_s4 T1: exporting 5539 x 5539 px
-section_s4 T2: exporting 5539 x 5539 px
-section_s4 T3: exporting 5539 x 5539 px
-section_s4 T4: exporting 5539 x 5539 px
-section_s4 T5: exporting 5539 x 5539 px
-section_s4 T6: exporting 5539 x 5539 px
-section_s4: segmenting 6 targets with StarDist
-section_s4: done in 192 s
- mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_gfp
-     1 section_s4       1     1  finetuned           1.625     2318         1426.4       2109            0.9098           0.3377
-     1 section_s4       2     2  finetuned           2.378     2450         1030.4       2400            0.9796           0.1552
-     1 section_s4       3     3  finetuned           2.315     1305          563.7        176            0.1349           0.0435
-     1 section_s4       4     4  finetuned           2.339     1645          703.4       1644            0.9994           0.2567
-     1 section_s4       5     5  finetuned           2.378     1462          614.9       1445            0.9884           0.1508
-     1 section_s4       6     6  finetuned           2.378     1073          451.2        947            0.8826           0.1225
-section_s5 T1: exporting 5539 x 5539 px
-section_s5 T2: exporting 5539 x 5539 px
-section_s5 T3: exporting 5539 x 5539 px
-section_s5 T4: exporting 5539 x 5539 px
-section_s5 T5: exporting 5539 x 5539 px
-section_s5 T6: exporting 5539 x 5539 px
-section_s5: segmenting 6 targets with StarDist
-section_s5: done in 170 s
- mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_gfp
-     1 section_s5       1     4  finetuned           2.367     3101         1310.0       2469            0.7962           0.2859
-     1 section_s5       2     5  finetuned           2.378     1820          765.4       1371            0.7533           0.1279
-     1 section_s5       3     6  finetuned           2.123      549          258.6         29            0.0528           0.0383
-     1 section_s5       4     1  finetuned           2.355     2323          986.4       2261            0.9733           0.2505
-     1 section_s5       5     2  finetuned           2.226     2174          976.5          9            0.0041           0.0135
-     1 section_s5       6     3  finetuned           2.096      442          210.9          1            0.0023           0.0118
-section_s6 T1: exporting 5539 x 5539 px
-section_s6 T2: exporting 5539 x 5539 px
-section_s6 T3: exporting 5539 x 5539 px
-section_s6 T4: exporting 5539 x 5539 px
-section_s6 T5: exporting 5539 x 5539 px
-section_s6 T6: exporting 5539 x 5539 px
-section_s6: segmenting 6 targets with StarDist
-section_s6: done in 160 s
- mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_gfp
-     1 section_s6       1     4  finetuned           2.329     1076          461.9        966            0.8978           0.1671
-     1 section_s6       2     5  finetuned           2.378     1628          684.7       1200            0.7371           0.1112
-     1 section_s6       3     6  finetuned           2.378      914          384.4         42            0.0460           0.0263
-     1 section_s6       4     1  finetuned           2.034     1693          832.3       1516            0.8955           0.2743
-     1 section_s6       5     2  finetuned           2.378     1732          728.4       1693            0.9775           0.1088
-     1 section_s6       6     3  finetuned           2.378      609          256.1        229            0.3760           0.0455
-slide01_s2 T1: exporting 5539 x 5539 px
-slide01_s2 T2: exporting 5539 x 5539 px
-slide01_s2 T3: exporting 5539 x 5539 px
-slide01_s2 T4: exporting 5539 x 5539 px
-slide01_s2 T5: exporting 5539 x 5539 px
-slide01_s2 T6: exporting 5539 x 5539 px
-slide01_s2: segmenting 6 targets with StarDist
-slide01_s2: done in 306 s
- mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_gfp
-     2 slide01_s2       1     1  finetuned           2.378     6807         2862.7       3232            0.4748           0.0549
-     2 slide01_s2       2     2  finetuned           2.378     8501         3575.1       5909            0.6951           0.0751
-     2 slide01_s2       3     3  finetuned           2.378     1579          664.1        426            0.2698           0.0314
-     2 slide01_s2       4     4  finetuned           2.378     7173         3016.5       5148            0.7177           0.0866
-     2 slide01_s2       5     5  finetuned           2.378     7692         3234.9       2417            0.3142           0.0493
-     2 slide01_s2       6     6  finetuned           2.378     1664          699.8        131            0.0787           0.0345
-slide01_s3 T1: exporting 5539 x 5539 px
-slide01_s3 T2: exporting 5539 x 5539 px
-slide01_s3 T3: exporting 5539 x 5539 px
-slide01_s3 T4: exporting 5539 x 5539 px
-slide01_s3 T5: exporting 5539 x 5539 px
-slide01_s3 T6: exporting 5539 x 5539 px
-slide01_s3: segmenting 6 targets with StarDist
+slide01_s2: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide01_s2: done in 102 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide01_s2       1     1  finetuned           2.378     6807         2862.7        170            0.0250             1.374       499.0
+     2 slide01_s2       2     2  finetuned           2.378     8501         3575.1        981            0.1154             1.790       499.0
+     2 slide01_s2       3     3  finetuned           2.378     1579          664.1         94            0.0595             0.888       499.0
+     2 slide01_s2       4     4  finetuned           2.378     7173         3016.5        195            0.0272             2.028       499.0
+     2 slide01_s2       5     5  finetuned           2.378     7692         3234.9         46            0.0060             1.258       499.0
+     2 slide01_s2       6     6  finetuned           2.378     1664          699.8         16            0.0096             0.951       499.0
+slide01_s3: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide01_s3: done in 90 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide01_s3       1     1  finetuned           2.378     7190         3023.8       3245            0.4513             3.563       258.0
+     2 slide01_s3       2     2  finetuned           2.378     5960         2506.5       1350            0.2265             1.634       258.0
+     2 slide01_s3       3     3  finetuned           2.378     4498         1891.7       3966            0.8817            15.009       258.0
+     2 slide01_s3       4     4  finetuned           2.378     6973         2932.6       6315            0.9056            16.710       258.0
+     2 slide01_s3       5     5  finetuned           2.378     5245         2205.8        674            0.1285             2.008       258.0
+     2 slide01_s3       6     6  finetuned           2.378     4296         1806.7       3689            0.8587            16.641       258.0
+slide01_s4: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide01_s4: done in 76 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide01_s4       1     4  finetuned           2.231     4941         2214.8        579            0.1172             1.611       432.0
+     2 slide01_s4       2     5  finetuned           2.082     4931         2368.4         26            0.0053             1.242       432.0
+     2 slide01_s4       3     6  finetuned           1.946     3536         1817.3        386            0.1092             1.341       432.0
+     2 slide01_s4       4     1  finetuned           2.320     5788         2495.1       1906            0.3293             2.542       432.0
+     2 slide01_s4       5     2  finetuned           2.005     5641         2813.6       1907            0.3381             2.551       432.0
+     2 slide01_s4       6     3  finetuned           2.166     3111         1436.0       1304            0.4192             2.822       432.0
+slide02_s2: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide02_s2: done in 96 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide02_s2       1     4  finetuned           2.124     4950         2330.2        128            0.0259             1.708       364.0
+     2 slide02_s2       2     5  finetuned           2.378     7378         3103.0       3559            0.4824             3.934       364.0
+     2 slide02_s2       3     6  finetuned           1.982     2533         1278.2         59            0.0233             0.782       364.0
+     2 slide02_s2       4     1  finetuned           2.376     5398         2272.1        628            0.1163             2.727       364.0
+     2 slide02_s2       5     2  finetuned           2.374     6554         2760.7        209            0.0319             1.378       364.0
+     2 slide02_s2       6     3  finetuned           2.047     2828         1381.4         22            0.0078             0.526       364.0
+slide02_s3: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide02_s3: done in 102 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide02_s3       1     4  finetuned           2.378     6443         2709.7        121            0.0188             0.969       273.0
+     2 slide02_s3       2     5  finetuned           2.372     4206         1773.0         38            0.0090             0.810       273.0
+     2 slide02_s3       3     6  finetuned           2.378     4001         1682.7       1279            0.3197             2.202       273.0
+     2 slide02_s3       4     1  finetuned           2.378     8083         3399.5       4472            0.5533             4.759       273.0
+     2 slide02_s3       5     2  finetuned           2.378     6070         2552.8        364            0.0600             1.865       273.0
+     2 slide02_s3       6     3  finetuned           2.378     3563         1498.4       3307            0.9282            19.594       273.0
+slide02_s4: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide02_s4: done in 84 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide02_s4       1     4  finetuned           1.956     5574         2850.3       2451            0.4397             3.333       273.0
+     2 slide02_s4       2     5  finetuned           2.124     4293         2020.9       1284            0.2991             3.014       273.0
+     2 slide02_s4       3     6  finetuned           2.378     4317         1815.5       3770            0.8733            15.428       273.0
+     2 slide02_s4       4     1  finetuned           2.266     6143         2711.3       5583            0.9088            17.010       273.0
+     2 slide02_s4       5     2  finetuned           2.378     5328         2240.7        590            0.1107             2.204       273.0
+     2 slide02_s4       6     3  finetuned           2.378     4085         1718.0       3592            0.8793            16.282       273.0
+slide03_s2: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide03_s2: done in 87 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide03_s2       1     4  finetuned           2.378     6323         2659.3         66            0.0104             1.065       327.0
+     2 slide03_s2       2     5  finetuned           2.378     4734         1990.9         67            0.0142             1.137       327.0
+     2 slide03_s2       3     6  finetuned           2.378     3592         1510.7       2242            0.6242             5.658       327.0
+     2 slide03_s2       4     1  finetuned           2.378     7055         2967.2       5728            0.8119            14.286       327.0
+     2 slide03_s2       5     2  finetuned           2.378     5086         2139.0       1302            0.2560             2.233       327.0
+     2 slide03_s2       6     3  finetuned           2.378     3350         1408.9       3172            0.9469            21.071       327.0
+slide03_s3: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide03_s3: done in 82 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide03_s3       1     4  finetuned           2.378     6921         2910.8         13            0.0019             0.735       267.0
+     2 slide03_s3       2     5  finetuned           2.378     5851         2460.7         28            0.0048             0.857       267.0
+     2 slide03_s3       3     6  finetuned           2.378     4338         1824.4        358            0.0825             1.289       267.0
+     2 slide03_s3       4     1  finetuned           2.378     7216         3034.8       2673            0.3704             2.627       267.0
+     2 slide03_s3       5     2  finetuned           2.378     5785         2433.0        472            0.0816             1.445       267.0
+     2 slide03_s3       6     3  finetuned           2.378     5140         2161.7       2253            0.4383             3.434       267.0
+slide03_s4: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide03_s4: done in 74 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide03_s4       1     4  finetuned           2.154     3571         1657.8        433            0.1213             1.867       355.0
+     2 slide03_s4       2     5  finetuned           2.262     5636         2491.4       3369            0.5978             5.394       355.0
+     2 slide03_s4       3     6  finetuned           2.229     1909          856.3        161            0.0843             1.454       355.0
+     2 slide03_s4       4     1  finetuned           1.911     2321         1214.7         19            0.0082             0.824       355.0
+     2 slide03_s4       5     2  finetuned           2.142     4295         2005.5          6            0.0014             1.005       355.0
+     2 slide03_s4       6     3  finetuned           2.041     2634         1290.7         29            0.0110             0.990       355.0
+slide04_s2: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide04_s2: done in 93 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide04_s2       1     1  finetuned           2.378     6506         2736.3        215            0.0330             2.093       374.0
+     2 slide04_s2       2     2  finetuned           2.378     7922         3331.7       3635            0.4588             3.819       374.0
+     2 slide04_s2       3     3  finetuned           1.868     2152         1151.9         53            0.0246             0.727       374.0
+     2 slide04_s2       4     4  finetuned           2.378     6400         2691.7        767            0.1198             2.432       374.0
+     2 slide04_s2       5     5  finetuned           2.378     7184         3021.4        482            0.0671             2.060       374.0
+     2 slide04_s2       6     6  finetuned           1.424     1333          936.1         11            0.0083             0.651       374.0
+slide04_s4: exporting 6 ROIs and segmenting
+  T1 exported -> segmenting
+  T2 exported -> segmenting
+  T3 exported -> segmenting
+  T4 exported -> segmenting
+  T5 exported -> segmenting
+  T6 exported -> segmenting
+slide04_s4: done in 81 s
+ mouse    section  target  slot roi_source  roi_tissue_mm2  n_cells  cells_per_mm2  n_gfp_pos  fraction_gfp_pos  median_cell_fold  background
+     2 slide04_s4       1     4  finetuned           2.212     4417         1997.3       1856            0.4202             3.339       397.0
+     2 slide04_s4       2     5  finetuned           2.353     6005         2552.1       2476            0.4123             3.332       397.0
+     2 slide04_s4       3     6  finetuned           2.361     3694         1564.7       1627            0.4404             3.124       397.0
+     2 slide04_s4       4     1  finetuned           2.327     5627         2417.8        740            0.1315             1.958       397.0
+     2 slide04_s4       5     2  finetuned           2.378     4616         1941.4         25            0.0054             1.054       397.0
+     2 slide04_s4       6     3  finetuned           2.378     4601         1935.1        549            0.1193             1.461       397.0
+exit 0

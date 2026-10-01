@@ -22,6 +22,14 @@
     "fraction_of_crop": 0.056
   },
   "threshold_otsu": 0.2607,
+  "fold": {
+    "background": 275.0,
+    "background_is": "median anti-GFP over the section's tissue (4x export)",
+    "threshold_fold": 4.05,
+    "gfp_positive": 4448,
+    "fraction_positive": 0.266,
+    "agreement_with_percentile_scale": 0.9837
+  },
   "cells": 16723,
   "gfp_positive": 4721,
   "fraction_positive": 0.282
