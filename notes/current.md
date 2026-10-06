@@ -1,5 +1,8 @@
 # Where the project is — end of the 2026-09-30 session
 
+when is more mouse data coming? i think soon
+
+
 Week ~5 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
 
