@@ -1,4 +1,4 @@
-"""Dose vs delivery per slice, and pooled across slices and mice.
+"""Dose vs delivery: cumulative across slices (headline), per slice, and pooled.
 
     .venv/bin/python scripts/slices_dose_delivery.py
 
@@ -18,6 +18,16 @@ Slices are dropped if excluded or marked wrong in review. Of the rest, a slice i
 cutoff was chosen *after* looking at the per-slice table (2026-09-30), so every
 aggregate is reported with and without low-signal slices.
 
+**Cumulative across slices (the headline, per N. Todd, 2026-10-02).** Each target's
+delivery is summed over every slice of its animal, giving one number per target that
+approximates the transduced volume: total GFP+ cells (B) and total GFP+ area in mm²
+(A: pixel coverage × ROI tissue area). Low-signal slices stay in, since a slice that
+misses a target's focal column simply contributes little; no post hoc cutoff applies.
+Raw totals aren't comparable between animals (Mouse 1 has 4 slices, Mouse 2 has 12, and
+staining and section depth differ), so each target's total is divided by its animal's mean
+target total: 1.0 = that animal's average target. This cancels the slice count and anything
+else that scales a whole animal, and puts both mice on one axis for a pooled fit (12 targets).
+
 Standardising within a slice (z-score over its six targets) removes what a slice
 shares -- depth, staining, exposure -- and leaves how targets rank against each
 other, which is what dose should explain. Statistics treat slices, not
@@ -26,6 +36,9 @@ coverage vs dose; then how many slices are positive.
 
 Writes to ``results/histology/slices/``:
 
+  cumulative_dose_delivery.csv  one row per mouse x target, delivery summed over slices
+  cumulative_pooled.png         both mice on one axis, relative to each animal's mean target
+  cumulative.png                raw totals, one panel per mouse and pipeline
   slices_dose_delivery.csv      long table: one row per slice x target, both measures
   heatmap.png, per_slice.png, aggregate_standardized.png          pipeline A (pixels)
   heatmap_cells.png, per_slice_cells.png, aggregate_standardized_cells.png   pipeline B
@@ -109,11 +122,13 @@ def table(measure: str = "pixels") -> pd.DataFrame:
         d["mouse"] = mouse
         cells = ROOT / f"results/histology/cells/mouse{mouse:02d}_cell_rois.csv"
         if cells.exists():
-            b = pd.read_csv(cells)[["section", "target", "fraction_gfp_pos", "n_cells"]]
+            b = pd.read_csv(cells)[["section", "target", "fraction_gfp_pos", "n_cells",
+                                    "n_gfp_pos", "roi_tissue_mm2"]]
             d = d.merge(b.rename(columns={"fraction_gfp_pos": "cell_fraction"}),
                         on=["section", "target"], how="left")
         else:
             d["cell_fraction"], d["n_cells"] = np.nan, np.nan
+            d["n_gfp_pos"], d["roi_tissue_mm2"] = np.nan, np.nan
         parts.append(d)
     d = pd.concat(parts, ignore_index=True).rename(columns={"coverage": "pixel_coverage"})
     # Low signal is judged on pixel coverage, so both measures use the same slices.
@@ -141,6 +156,48 @@ def slice_name(mouse: int, section: str) -> str:
         slide, sec = section.split("_")
         return f"slide {int(slide[5:])} · {sec}"
     return section.removeprefix("section_")
+
+
+def cumulative(d: pd.DataFrame) -> pd.DataFrame:
+    """One row per mouse x target: delivery summed over every kept slice of that animal."""
+    use = d[(d.dropped == "") & d.n_gfp_pos.notna()].copy()
+    use["gfp_area_mm2"] = use.pixel_coverage * use.roi_tissue_mm2
+    c = (use.groupby(["mouse", "target"])
+            .agg(dose=("dose", "first"), n_sonications=("n_sonications", "first"),
+                 n_slices=("section", "nunique"), gfp_area_mm2=("gfp_area_mm2", "sum"),
+                 gfp_cells=("n_gfp_pos", "sum"), cells=("n_cells", "sum"))
+            .reset_index())
+    for col in CUMULATIVE:
+        c[f"{col}_rel"] = c[col] / c.groupby("mouse")[col].transform("mean")
+    return c
+
+
+CUMULATIVE = {"gfp_area_mm2": ("A", "GFP+ area, summed over slices (mm²)"),
+              "gfp_cells": ("B", "GFP+ cells, summed over slices")}
+
+
+def cumulative_fits(c: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for col, (pipe, _) in CUMULATIVE.items():
+        for mouse in MICE:
+            m = c[c.mouse == mouse]
+            fit = stats.linregress(m.dose, m[col])
+            rows.append({"pipeline": pipe, "measure": col, "mouse": mouse, "n": len(m),
+                         "slope": fit.slope, "intercept": fit.intercept, "r": fit.rvalue,
+                         "p": fit.pvalue, "rho": stats.spearmanr(m.dose, m[col]).statistic})
+    return pd.DataFrame(rows)
+
+
+def pooled_fits(c: pd.DataFrame) -> pd.DataFrame:
+    """Both mice together on the relative scale (each animal's mean target = 1)."""
+    rows = []
+    for col, (pipe, _) in CUMULATIVE.items():
+        for label, m in (("both", c), ("both, no control", c[~((c.mouse == 1) & (c.target == 3))])):
+            fit = stats.linregress(m.dose, m[f"{col}_rel"])
+            rows.append({"pipeline": pipe, "measure": col, "targets": label, "n": len(m),
+                         "slope": fit.slope, "intercept": fit.intercept, "r": fit.rvalue,
+                         "p": fit.pvalue, "rho": stats.spearmanr(m.dose, m[f"{col}_rel"]).statistic})
+    return pd.DataFrame(rows)
 
 
 def per_slice_rho(d: pd.DataFrame) -> pd.DataFrame:
@@ -345,6 +402,90 @@ def aggregate(d: pd.DataFrame, rho: pd.DataFrame):
     return fig
 
 
+def cumulative_figure(c: pd.DataFrame, fits: pd.DataFrame):
+    """Rows: pipeline A, B. Columns: mouse. One dot per target, OLS trend line per panel."""
+    fig, axes = plt.subplots(2, len(MICE), figsize=(9.6, 7.6), squeeze=False)
+    fig.subplots_adjust(left=0.1, right=0.98, top=0.86, bottom=0.1, hspace=0.42, wspace=0.22)
+    xmax = c.dose.max() * 1.1
+    for r, (col, (pipe, ylabel)) in enumerate(CUMULATIVE.items()):
+        for k, mouse in enumerate(MICE):
+            ax = axes[r, k]
+            _clean(ax)
+            m = c[c.mouse == mouse].sort_values("dose")
+            f = fits[(fits.measure == col) & (fits.mouse == mouse)].iloc[0]
+            colr = MOUSE_COLOR[mouse]
+            gx = np.array([0, xmax])
+            ax.plot(gx, f.intercept + f.slope * gx, color=colr, linewidth=2, alpha=0.55, zorder=2)
+            ax.scatter(m.dose, m[col], s=200, color=colr, edgecolors=SURFACE, linewidths=2, zorder=3)
+            for p in m.itertuples():
+                ax.annotate(str(p.target), (p.dose, getattr(p, col)), ha="center",
+                            va="center_baseline", fontsize=8.5, weight="bold", color="#ffffff", zorder=4)
+            top = max(m[col].max(), (f.intercept + f.slope * xmax)) * 1.12
+            ax.set_xlim(-0.1, xmax)
+            ax.set_ylim(min(0, f.intercept) - 0.04 * top, top)
+            ax.set_xticks(np.arange(0, xmax, 0.5))
+            ax.set_title(f"Mouse {mouse} · {int(m.n_slices.max())} slices · pipeline {pipe}",
+                         loc="left", fontsize=10, weight="bold", color=INK, pad=6)
+            ax.text(0.02, 0.97, f"r = {f.r:.2f}  (p = {f.p:.2g})\nρ = {f.rho:+.2f}\n"
+                    f"slope = {f.slope:,.3g} per unit dose", transform=ax.transAxes,
+                    ha="left", va="top", fontsize=8.5, color=INK_2)
+            if k == 0:
+                ax.set_ylabel(ylabel, fontsize=10, color=INK, labelpad=6)
+            if r == 1:
+                ax.set_xlabel("Acoustic dose (cumulative 2nd harmonic)", fontsize=10, color=INK)
+    _header(fig, "Cumulative delivery across slices vs acoustic dose",
+            "Each dot is a target (number), delivery summed over every slice of that animal. "
+            "Line: least squares, n = 6 per panel.")
+    _footer(fig, "Mouse 1 T3 is the no-FUS control at dose 0; Mouse 1 T1 = its three sonications at position 1 summed (Target1-3 recordings, per N. Todd 9/18; not the sheet). "
+            "Low-signal slices are included. Animals have different slice counts, so compare slopes "
+            "within a panel, not heights across.")
+    return fig
+
+
+def pooled_figure(c: pd.DataFrame, pf: pd.DataFrame):
+    """Both mice on one axis per pipeline: delivery relative to the animal's mean target."""
+    fig, axes = plt.subplots(1, 2, figsize=(11.2, 5.6), squeeze=False)
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.8, bottom=0.14, wspace=0.18)
+    xmax = c.dose.max() * 1.08
+    ymax = max(c[f"{col}_rel"].max() for col in CUMULATIVE) * 1.12
+    for k, (col, (pipe, ylabel)) in enumerate(CUMULATIVE.items()):
+        ax = axes[0, k]
+        _clean(ax)
+        ax.axhline(1, color=AXIS, linewidth=1, linestyle=":", zorder=1)
+        f = pf[(pf.measure == col) & (pf.targets == "both")].iloc[0]
+        fn = pf[(pf.measure == col) & (pf.targets == "both, no control")].iloc[0]
+        gx = np.array([0, xmax])
+        ax.plot(gx, f.intercept + f.slope * gx, color=INK_2, linewidth=2, alpha=0.7, zorder=2,
+                label="least squares, both mice")
+        for mouse in MICE:
+            m = c[c.mouse == mouse]
+            colr = MOUSE_COLOR[mouse]
+            ax.scatter(m.dose, m[f"{col}_rel"], s=200, color=colr, edgecolors=SURFACE,
+                       linewidths=2, zorder=3, label=f"Mouse {mouse} ({int(m.n_slices.max())} slices)")
+            for p in m.itertuples():
+                ax.annotate(str(p.target), (p.dose, getattr(p, f"{col}_rel")), ha="center",
+                            va="center_baseline", fontsize=8.5, weight="bold", color="#ffffff", zorder=4)
+        ax.set_xlim(-0.1, xmax)
+        ax.set_ylim(-0.08, ymax)
+        ax.set_xticks(np.arange(0, xmax, 0.5))
+        ax.set_title(f"Pipeline {pipe}: {ylabel.split(',')[0]}", loc="left", fontsize=10.5,
+                     weight="bold", color=INK, pad=6)
+        ax.text(0.98, 0.03, f"r = {f.r:.2f} (p = {f.p:.2g}), ρ = {f.rho:+.2f}, n = {f.n}\n"
+                f"without Mouse 1 control: r = {fn.r:.2f} (p = {fn.p:.2g}), n = {fn.n}",
+                transform=ax.transAxes, ha="right", va="bottom", fontsize=8.5, color=INK_2)
+        ax.set_xlabel("Acoustic dose (cumulative 2nd harmonic)", fontsize=10, color=INK)
+        if k == 0:
+            ax.set_ylabel("Delivery summed over slices,\nrelative to the animal's mean target",
+                          fontsize=10, color=INK, labelpad=6)
+            ax.legend(loc="upper left", frameon=False, fontsize=8.5)
+    _header(fig, "Cumulative delivery vs acoustic dose, both mice",
+            "Each dot is a target (number): delivery summed over every slice of its animal, divided "
+            "by that animal's mean target.\nDotted line: the animal's average target (1.0).")
+    _footer(fig, "Mouse 1 T3 is the no-FUS control at dose 0; Mouse 1 T1 = its three sonications at position 1 summed (Target1-3 recordings, per N. Todd 9/18; not the sheet). "
+            "Low-signal slices included.")
+    return fig
+
+
 def pixels_vs_cells(d: pd.DataFrame):
     """Pipeline B against pipeline A for every slice x target."""
     use = d[(d.dropped == "") & d.cell_fraction.notna()]
@@ -374,7 +515,7 @@ def pixels_vs_cells(d: pd.DataFrame):
     return fig
 
 
-def write_readme(results: dict) -> None:
+def write_readme(results: dict, c: pd.DataFrame, fits: pd.DataFrame, pf: pd.DataFrame) -> None:
     def line(sub):
         pos = int((sub.rho > 0).sum())
         return f"median ρ {sub.rho.median():+.2f}, positive in {pos}/{len(sub)}"
@@ -398,7 +539,18 @@ def write_readme(results: dict) -> None:
     dropped = sorted(set(d.loc[d.dropped != "", "section"]))
     header = " | ".join(f"Pipeline {MEASURES[m]['pipeline']}: {m}" for m in results)
 
-    text = f"""# Dose vs delivery, per slice and pooled
+    fit_rows = "\n".join(
+        f"| {f.pipeline} | {f.measure} | Mouse {f.mouse} | {f.slope:,.3g} | {f.r:+.2f} | {f.p:.2g} | {f.rho:+.2f} |"
+        for f in fits.itertuples())
+    pooled_rows = "\n".join(
+        f"| {f.pipeline} | {f.measure} | {f.targets} | {f.n} | {f.slope:.3g} | {f.r:+.2f} | {f.p:.2g} | {f.rho:+.2f} |"
+        for f in pf.itertuples())
+    m1 = c[(c.mouse == 1) & (c.target != 3)]
+    no_ctrl = "; ".join(
+        f"{CUMULATIVE[col][0]} r = {stats.pearsonr(m1.dose, m1[col]).statistic:+.2f}"
+        for col in CUMULATIVE)
+
+    text = f"""# Dose vs delivery: cumulative across slices, per slice, and pooled
 
 Generated by `scripts/slices_dose_delivery.py`; re-run it after re-measuring or
 re-reviewing. Dose = cumulative 2nd harmonic from the recordings. Delivery is
@@ -407,7 +559,35 @@ measured two ways in the same hand-finetuned 1.74 mm ROIs:
 - **Pipeline A, pixels:** {MEASURES["pixels"]["what"]}.
 - **Pipeline B, cells:** {MEASURES["cells"]["what"]}.
 
-## Figures
+## Headline: cumulative delivery across slices
+
+Following N. Todd (2026-10-02), each target's delivery is **summed over every slice** of its
+animal instead of treating each slice as its own measurement: total GFP+ cells (pipeline B)
+and total GFP+ area (pipeline A, coverage × ROI tissue area). All slices that aren't excluded
+or marked wrong are summed, including the low-signal ones, so no post hoc cutoff enters.
+
+Raw totals aren't comparable between animals (Mouse 1 has 4 slices and Mouse 2 has 12, and
+staining and section depth differ), so each total is divided by **its animal's mean target
+total**: 1.0 = that animal's average target. That cancels the slice count and anything else
+that scales a whole animal, and puts both mice on one axis. Figure: **`cumulative_pooled.png`**;
+table: `cumulative_dose_delivery.csv` (`*_rel` columns).
+
+| Pipeline | Measure | Targets | n | Slope (relative units per unit dose) | Pearson r | p | Spearman ρ |
+|---|---|---|---|---|---|---|---|
+{pooled_rows}
+
+The 12 points come from two animals, and the relative scale forces each animal's mean to 1,
+so p-values are optimistic: they treat targets as independent.
+
+Per animal, on raw totals (`cumulative.png`, n = 6 each):
+
+| Pipeline | Measure | Animal | Slope per unit dose | Pearson r | p | Spearman ρ |
+|---|---|---|---|---|---|---|
+{fit_rows}
+
+Mouse 1 without its no-FUS control (T3), 5 targets: {no_ctrl}.
+
+## Per-slice figures (secondary)
 
 Each pipeline has the same three figures; B's carry a `_cells` suffix.
 
@@ -449,6 +629,11 @@ Across the six target means (z), ρ with dose: {"; ".join(means_line)}.
   no-FUS control near zero: its tissue is several times brighter than Mouse 2's.
 - **Mouse 1's correlation leans on the no-FUS control** (T3, dose 0) and on T1, whose
   dose is three sonications summed.
+- **Mouse 1 T1's dose (2.44) is the actual dose at position 1**: the `Target1`, `Target2` and
+  `Target3` recordings (0.9462 + 0.5658 + 0.9293), all fired there per N. Todd (2026-09-18).
+  It comes from the recordings, not the summary sheet, whose Mouse 1 rows 3–6 are rotated
+  by one run (the sheet would give 2.83). Mouse 1 T2 is `Target2_Repeat`; T4–T6 are
+  `Target4`–`Target6`.
 - **Mouse 2 T2** (mid dose, low delivery) is the main exception. It's a right-side
   lateral target, and the head was rolled with the right side higher, so most
   slices probably miss its focal column.
@@ -478,12 +663,23 @@ def main():
             fig.savefig(OUT / f"{name}{info['suffix']}.png", dpi=170)
             plt.close(fig)
     full = table("pixels")
+    c = cumulative(full)
+    fits = cumulative_fits(c)
+    c.round(4).to_csv(OUT / "cumulative_dose_delivery.csv", index=False)
+    pf = pooled_fits(c)
+    fig = cumulative_figure(c, fits)
+    fig.savefig(OUT / "cumulative.png", dpi=170)
+    plt.close(fig)
+    fig = pooled_figure(c, pf)
+    fig.savefig(OUT / "cumulative_pooled.png", dpi=170)
+    plt.close(fig)
+    print(pf.round(3).to_string(index=False))
     full.drop(columns=["coverage", "slice_mean", "z"]).round(4).to_csv(OUT / "slices_dose_delivery.csv", index=False)
     if "cells" in results:
         fig = pixels_vs_cells(results["pixels"][0])
         fig.savefig(OUT / "pixels_vs_cells.png", dpi=170)
         plt.close(fig)
-        write_readme(results)
+        write_readme(results, c, fits, pf)
     print(f"wrote {', '.join(p.name for p in sorted(OUT.glob('*')))} to {OUT.relative_to(ROOT)}")
 
 
