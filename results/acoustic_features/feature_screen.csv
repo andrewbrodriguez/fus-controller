@@ -1,0 +1,16 @@
+feature,what,rho_with_2f_auc_36,rho_delivery_A,q2_gain_A,rho_delivery_B,q2_gain_B
+cum_2nd_harmonic,lab's cumulative 2nd-harmonic AUC (the baseline predictor),1.0,0.7273,,0.5636,
+n_bursts,sonicating bursts,0.5574,0.231,0.4676,0.1478,0.0121
+harmonic_goal,"controller setpoint, burst-weighted over recordings",0.6624,0.5853,0.6026,0.507,0.0583
+mean_voltage,mean drive voltage over sonicating bursts,0.2529,0.1727,0.3575,0.2273,-0.3042
+cum_voltage,summed drive voltage,0.6571,0.2909,0.2046,0.2091,0.1627
+f0_cum,summed received fundamental (fold over noise),0.4647,0.4364,-1.2107,0.2818,-0.7141
+h2_cum,summed 2nd-harmonic energy (fold over noise),0.8443,0.6545,0.0193,0.6182,-0.0335
+sub_cum,summed subharmonic energy,0.4787,0.1364,0.4889,0.1,-0.1845
+ultra_cum,summed ultraharmonic energy (3f0/2 + 5f0/2),0.5403,0.2455,0.3977,0.1727,0.119
+bb_cum,summed broadband energy (inertial cavitation),0.4532,0.1364,0.4725,0.1,0.0444
+h2_per_f0,median 2nd harmonic / fundamental: nonlinearity per unit received drive,0.3992,0.3455,-3.8111,0.2909,-0.4433
+h2_per_volt,median 2nd-harmonic amplitude per volt of drive,0.4277,0.2818,0.1265,0.3,0.0649
+h2_late_early,"2nd harmonic, last third / first third of the run (bubble clearance)",-0.498,-0.3273,-0.1604,-0.1091,-0.3066
+h2_cv,burst-to-burst CV of the 2nd harmonic (stability),0.0137,0.3455,-0.3276,0.3909,-0.4282
+interlock,1 if the wideband interlock lowered the goal in any recording,0.4102,0.6708,0.2666,0.2981,-0.2211
