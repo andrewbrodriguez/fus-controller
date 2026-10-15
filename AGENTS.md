@@ -47,6 +47,8 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/slices_dose_delivery.py       # per-slice + pooled dose vs coverage
 .venv/bin/python scripts/mouse02_reconstruction_3d.py  # 3D GIF; order assumed, spacing from atlas
 .venv/bin/python scripts/view_reconstruction_3d.py    # same, interactive (napari; GUI, run it yourself)
+.venv/bin/python scripts/sonication_eda.py           # design, controller tracking, noise floor (~40 s)
+.venv/bin/python scripts/aligned_sections.py         # every section re-rendered front-up, animal-left-left (~10 s)
 
 # pipeline B: ROI -> StarDist cells -> GFP-tagged cells (needs segmentation_alpha/.venv-stardist-gpu)
 .venv/bin/python -m fus.cells --mouse 2 --section slide04_s3     # ~1-1.5 min per section
