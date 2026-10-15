@@ -132,6 +132,21 @@ T5 0.37, T6 1.60 (interlock fired).
 - **Focal spot (9/18).** ~2 × 2 mm in x/y, ~3 mm in z; precise dimensions to come.
 - **Feature priority (9/18).** Cumulative 2nd-harmonic AUC first.
 
+- **Sonication EDA (10/15)** (`scripts/sonication_eda.py` → `results/acoustic_eda/README.md`).
+  This scripts most of "Findings that exist only here" below. Spreadsheet, mice 2–24: the
+  design (6 burst counts × 6 goals) explains R² 0.77 of log dose; 22% of the residual dose
+  and 41% of the residual drive voltage is animal-level; firing order = position for
+  every target. Raw recordings, mice 1–6: the controller settles at ~0.93× its goal at
+  every goal level; the interlock fired in 7/37 recordings; 2/37 hit the 0.125 V ceiling.
+
+- **Aligned section images (10/15)** (`scripts/aligned_sections.py` →
+  `results/histology/aligned/`). Every clicked section is re-rendered from its ds4 export as
+  a dorsal view: front up, animal's left on the left (Mouse 1 flipped, since its notch is on
+  the right), with ROIs labelled by target and coverage. There is one PNG per section and a
+  grid per mouse. Checks: T1–T3 land right and T1/T4 front in both mice, at matching positions;
+  green brightness inside each ROI ranks with its coverage (ρ 0.94 M2, 0.75 M1); outline
+  IoU median 0.73 (M2) and 0.67 (M1).
+
 ## Open — blocking or slowing
 
 1. **Re-tag the review verdicts** in the ingest notebook (step 6), so bad slices are excluded

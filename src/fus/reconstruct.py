@@ -108,8 +108,14 @@ def section_maps(mouse: int, names: list[str]) -> dict[str, dict]:
     return out
 
 
-def to_frame(a: orientation.Annotation, um: float):
-    """(export px -> frame mm) for points, and a resampler for binned maps into the frame."""
+def to_frame(a: orientation.Annotation, um: float, bin_: int = BIN, grid_mm: float = GRID_MM,
+             half_mm: float = HALF_MM):
+    """(export px -> frame mm) for points, and a resampler for binned maps into the frame.
+
+    ``um`` is the export pixel size, and ``bin_`` how many export pixels one input-map pixel
+    spans (16 for `section_maps`; 4 for pyramid level 2). The output grid is ``grid_mm`` per
+    pixel over +-``half_mm``.
+    """
     aff = orientation.canonical_affine(a)  # export px -> centred, front up, notch left (px)
     m, t = aff[:2, :2], aff[:2, 2]
     mm_per_px = um / 1000
@@ -117,14 +123,14 @@ def to_frame(a: orientation.Annotation, um: float):
     def point(p):
         return (m @ np.asarray(p, float) + t) * mm_per_px
 
-    n = int(round(2 * HALF_MM / GRID_MM))
-    u0 = -HALF_MM + GRID_MM / 2
-    # frame px (i, j) -> frame mm u -> export px m^T (u / mm_per_px - t) -> map px / BIN
-    matrix = m.T * GRID_MM / mm_per_px / BIN
-    offset = (m.T @ (np.full(2, u0) / mm_per_px - t)) / BIN
+    n = int(round(2 * half_mm / grid_mm))
+    u0 = -half_mm + grid_mm / 2
+    # frame px (i, j) -> frame mm u -> export px m^T (u / mm_per_px - t) -> map px / bin_
+    matrix = m.T * grid_mm / mm_per_px / bin_
+    offset = (m.T @ (np.full(2, u0) / mm_per_px - t)) / bin_
 
-    def resample(img):
-        return ndi.affine_transform(img, matrix, offset, output_shape=(n, n), order=1, cval=0.0)
+    def resample(img, order: int = 1):
+        return ndi.affine_transform(img, matrix, offset, output_shape=(n, n), order=order, cval=0.0)
 
     return point, resample
 
