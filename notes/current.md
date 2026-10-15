@@ -1,9 +1,6 @@
-# Where the project is — end of the 2026-09-30 session
+# Where the project is — updated 2026-10-15 (last working session 2026-10-06)
 
-when is more mouse data coming? i think soon
-
-
-Week ~5 of 13. This file is the moment-in-time picture; the durable method write-ups are in
+Week ~7 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
 
 ---
@@ -20,14 +17,62 @@ background). They agree at r = 0.98 across 96 ROIs. Within each slice, higher-do
 tend to carry more GFP in both animals: positive rank correlation in 11/11 slices with clear
 signal under A (median ρ +0.54) and 10/11 under B (+0.61). Neither measure has been checked
 against a hand count, and the review verdicts still need re-tagging. Tissue remains the
-limit: 2 of 24 brains imaged.
+limit: 2 of 24 brains imaged. More mice are expected soon, but no date has been confirmed.
+
+## Since 9/30
+
+- **Met N. Todd (10/2).** He asked for delivery **summed over all slices of an animal**
+  instead of normalised per slice. He also raised open questions: how to choose which
+  horizontal cut to analyse, and whether cuts are aligned or consistent across mice
+  (`notes/notes-for-next-time.txt`).
+- **Cumulative analysis** (`scripts/slices_dose_delivery.py`, `results/histology/slices/README.md`).
+  Each target's total GFP+ area (A) or GFP+ cells (B) is summed over every non-excluded
+  slice, low-signal ones included, then divided by its animal's mean target. Pooled over 12
+  targets: A r = +0.73 (p 0.0065), B r = +0.68 (p 0.016). Without the no-FUS control: A
+  +0.62, B +0.57. The p-values are optimistic, because the 12 points come from 2 animals.
+- **Acoustic features vs delivery** (`src/fus/features.py`, `scripts/acoustic_features_vs_delivery.py`,
+  `results/acoustic_features/README.md`). This compared 15 pre-registered features with
+  2f AUC alone, scored by leave-one-target-out predictions on 11 labelled targets. No
+  multi-feature model beats AUC convincingly. Log-ridge on A has Q² 0.30 vs AUC's 0.06,
+  but the gain has permutation p 0.23, and leaving out a whole mouse fails. Under B, AUC
+  alone is best (Q² 0.15, permutation p 0.04). Treat the feature screen as hypotheses
+  for the next animals.
+- **Housekeeping (10/15).** Deleted `data/histology/Mouse_02.zip`, after checking that all
+  32 files are extracted at matching sizes, and the full-resolution exports
+  `Mouse_02/full/` (`slide01_s2`, `slide04_s3`). `view_slice.ipynb` re-exports on demand.
+  The ROI size is quoted two ways, and both are right: r = 1.0 *template* mm
+  (`ROI_RADIUS_MM`) × 0.87 shrinkage = 0.87 mm radius, **1.74 mm diameter on the tissue**.
+  95 of 96 ROIs kept the default size; finetuning moved centres, not radii.
+- **3D reconstruction of Mouse 2 (10/15)** (`src/fus/reconstruct.py`; GIF:
+  `scripts/mouse02_reconstruction_3d.py`; interactive: `scripts/view_reconstruction_3d.py`;
+  output in `results/histology/reconstruction/`). The 12 pipeline-A maps are aligned by
+  the clicks, stacked, and Gaussian-blended in depth. Alignment checks out: per-ROI coverage from
+  the resampled maps matches the table (r = 1.00, max diff 0.01), and each target's ROI centre
+  varies by 0.06–0.21 mm SD across sections. **Spacing is inferred, ~93 µm** (73–139 µm over
+  shrinkage 0.82–0.91). Each section's tissue area is matched to Allen CCF horizontal-section
+  area: 47–69 mm² on tissue maps to 1.7–2.7 mm below the dorsal surface, all on the rising
+  dorsal side, consistent with both hippocampi and the cerebellum being present. So the 12
+  sections cover only about 1 mm of the ~3 mm focal column. Tears shrink area, so the
+  span is an upper bound. In tissue units the estimate is ~84 µm, but **the
+  default spacing is 250 µm** (Andrew thinks the sections are farther apart; 12 × 0.25 mm ≈
+  the 3 mm focal column). GFP depth off the planes is inferred by treating each positive
+  region as a sphere through its middle (`reconstruct.extrude`), which overstates depth
+  for sections that only grazed a plume. Anatomy is one opaque Allen horizontal section
+  (≈2.3 mm deep, fitted to the tissue outlines: scale 0.90, IoU 0.79), drawn under the stack.
+  A **dose-sphere layer** puts one sphere per target at mid-stack, sized by the 2f AUC
+  (volume ∝ dose, max r = 1 mm; `reconstruct.dose_spheres`), next to the GFP for comparison.
+  The GIF is now a dashboard. Beside the rotating 3D view are a top-down panel of the
+  *measured* GFP (max over sections, no depth inference) with dose circles, and bars of
+  cumulative delivery against dose share per target (Mouse 2: r = +0.79 A, +0.64 B,
+  n = 6). These panels are also saved as `mouse02_topdown.png`. **The order is still assumed** (filename order), and in that order
+  coverage jumps between slices (T6: .01 .87 .37 .02 .94 …). Don't choose the order from the GFP.
 
 ## What exists and is trusted
 
 | Piece | State |
 |---|---|
 | `src/fus/extract.py` | Python port of `nt_ExtractHarmonicData.m`. Run on 19 recordings from mice 1–3; all 15 that can be matched to a spreadsheet row unambiguously match it exactly (`docs/acoustic-extraction.md`) |
-| `src/fus/histology.py` | `.vsi` → per-target GFP coverage. ROI r = 1.0 mm. Placement by GFP fit (Mouse 1 reference), clicked template, or finetuned shapes (`analyse_section(..., template=, rois=)`). `export --prefix/--series` |
+| `src/fus/histology.py` | `.vsi` → per-target GFP coverage. ROI r = 1.0 template mm (1.74 mm diameter on tissue). Placement by GFP fit (Mouse 1 reference), clicked template, or finetuned shapes (`analyse_section(..., template=, rois=)`). `export --prefix/--series` |
 | `src/fus/orientation.py` | napari: `annotate` (click centre, front, notch side; the view straightens to front-up, notch-left) and `review` (✓/✗). Each window writes only its own fields, so two open windows can't overwrite each other |
 | `src/fus/rois.py` + `data/roi_locations.csv` | Hand-finetuned T1–T6 shapes per section, measured exactly as drawn. **All 16 sections finetuned** |
 | `data/section_orientation.csv` | Clicks for all 17 sections (Mouse 1 s3 excluded). **No review verdicts**: the ones given were lost to the overwrite bug, since fixed |
@@ -135,9 +180,8 @@ written into `docs/`**. Re-derive before citing:
 - **Pipeline B scores are fold over the slice's background.** Don't compare them with the
   pilot's earlier 0.0575 percentile scale; that scale tagged 5–14% of Mouse 1's no-FUS control.
 - **Full-resolution exports are 7 GB each**, in `data/processed/histology/Mouse_NN/full/`
-  (`slide04_s3` is there now). Delete them when done. Pipeline B doesn't need them: it
+  (none there now). Delete them when done. Pipeline B doesn't need them: it
   exports only the ROI boxes and deletes them afterwards.
-- **`data/histology/Mouse_02.zip` (17.8 GB)** is still there after extraction.
 - **`docs/figures/histology-sections-overview.png` still shows 0.75 mm circles**, and no
   script makes it.
 - **Use `.venv/bin/python`**: system `python3` is 3.9.
@@ -145,9 +189,10 @@ written into `docs/`**. Re-derive before citing:
 
 ## Next steps, in the order I would do them
 
-1. Look over the pipeline B figures (`results/histology/slices/*_cells.png`, `pixels_vs_cells.png`).
+1. Look over the pipeline B figures and the 10/6 ones (`cumulative_pooled.png`,
+   `results/acoustic_features/model_comparison.png`). No human has looked at them yet.
 2. Re-tag review verdicts, re-run the slice analysis, and send Nick an update with the
-   two-animal result and the questions above.
+   two-animal cumulative result and the questions above.
 3. Hand-count the cell pilot (core, edge, background) and score StarDist plus the GFP+ calls.
    That settles decision 001.
 4. Look at Mouse 1 T4 in the benchmark (the one failing check) and decide whether 0.10 is

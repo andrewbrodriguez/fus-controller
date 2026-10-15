@@ -45,6 +45,8 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/mouse02_dose_vs_coverage.py   # stops until orientation is recorded
 .venv/bin/python scripts/benchmark_mouse01.py          # hand placement vs Mouse 1 answer key
 .venv/bin/python scripts/slices_dose_delivery.py       # per-slice + pooled dose vs coverage
+.venv/bin/python scripts/mouse02_reconstruction_3d.py  # 3D GIF; order assumed, spacing from atlas
+.venv/bin/python scripts/view_reconstruction_3d.py    # same, interactive (napari; GUI, run it yourself)
 
 # pipeline B: ROI -> StarDist cells -> GFP-tagged cells (needs segmentation_alpha/.venv-stardist-gpu)
 .venv/bin/python -m fus.cells --mouse 2 --section slide04_s3     # ~1-1.5 min per section
@@ -69,6 +71,7 @@ segmentation_alpha/.venv-stardist/bin/python segmentation_alpha/run_stardist.py 
 | `data/` | Only the summary sheet is tracked; raw data is git-ignored (see `data/README.md`) |
 | `results/` | Generated CSVs and figures |
 | `src/fus/orientation.py`, `src/fus/rois.py` | napari tools: orientation clicks, review, finetuned target shapes |
+| `src/fus/reconstruct.py` | Loose 3D stack of one animal's sections: alignment by clicks, spacing from the Allen atlas, Gaussian blending in depth |
 | `src/fus/cells.py` | Pipeline B: per-ROI cell counts and GFP+ fraction (StarDist via `scripts/stardist_segment.py`) |
 | `notebooks/` | `ingest_new_histology.ipynb` (per-animal workflow), `cell_pipeline_one_slice.ipynb` (A vs B on one slice), `view_slice.ipynb` (full-resolution viewer) |
 | `segmentation_alpha/` | Cell segmentation pilot and the model environments: `.venv-stardist-gpu` (used by `fus.cells`), `.venv-stardist` (CPU), `.venv` (Cellpose). See its README |
