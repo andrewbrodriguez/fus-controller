@@ -41,6 +41,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from fus import archive
 from fus import extract
 from fus import orientation, rois
 from fus import histology
@@ -50,7 +51,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import mouse01_dose_vs_coverage as m1  # noqa: E402  (shared plot styling)
 
-ACOUSTIC = ROOT / "data" / "acoustic" / "20260611"
 SLOTS = ROOT / "results/histology/mouse02_template_slots.csv"
 OUT = ROOT / "results/histology/mouse02_dose_vs_coverage.csv"
 SCATTER = ROOT / "results/histology/mouse02_dose_delivery_scatter.png"
@@ -108,7 +108,8 @@ def main() -> None:
 
     rows = []
     for t in range(1, 7):
-        r = extract(ACOUSTIC / f"Mouse_Cntr_02_Target{t}.mat").to_dict()  # B3
+        with archive.paths(2, [f"Target{t}"]) as (path,):
+            r = extract(path).to_dict()  # B3
         row = {"target": t, "recording": f"Target{t}", "n_sections": len(use),
                "cum_2nd_harmonic": r["cum_2nd_harmonic_xlsx"],
                "bursts_x_goal": r["n_bursts"] * r["harmonic_setpoint"],

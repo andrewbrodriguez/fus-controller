@@ -13,7 +13,7 @@ Use `.venv/bin/python`. It is Python 3.12 with the project installed editable, s
 `PYTHONPATH` is needed. System `python3` is 3.9 and will not work.
 
 ```bash
-.venv/bin/python -m pytest tests -q          # 33 tests: geometry, orientation, ROIs, cells
+.venv/bin/python -m pytest tests -q          # 36 tests: geometry, orientation, ROIs, cells
 ```
 
 Jupyter kernel: **Python 3.12 (fus-research .venv)**.
@@ -22,8 +22,8 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 
 ```bash
 # acoustic: one recording, or a whole day to CSV
-.venv/bin/python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat
-.venv/bin/python -m fus data/acoustic/20260611/*_Target*.mat --csv results/day1.csv --quiet
+.venv/bin/python -m fus Mouse_Cntr_01_Target1          # read from data/acoustic/US_Data.zip
+.venv/bin/python -m fus --mouse 1 2 3 4 5 6 --csv results/day1.csv --quiet
 
 # tissue: export sections (needs QuPath 0.7), then measure
 .venv/bin/python -m fus.histology export data/histology/Mouse_01/Image.vsi \
@@ -47,7 +47,7 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/slices_dose_delivery.py       # per-slice + pooled dose vs coverage
 .venv/bin/python scripts/mouse02_reconstruction_3d.py  # 3D GIF; order assumed, spacing from atlas
 .venv/bin/python scripts/view_reconstruction_3d.py    # same, interactive (napari; GUI, run it yourself)
-.venv/bin/python scripts/sonication_eda.py           # design, controller tracking, noise floor (~40 s)
+.venv/bin/python scripts/sonication_eda.py           # design, controller, noise; all 24 mice from the zip (~6 min first run, then ~40 s)
 .venv/bin/python scripts/aligned_sections.py         # every section re-rendered front-up, animal-left-left (~10 s)
 
 # pipeline B: ROI -> StarDist cells -> GFP-tagged cells (needs segmentation_alpha/.venv-stardist-gpu)
@@ -73,6 +73,7 @@ segmentation_alpha/.venv-stardist/bin/python segmentation_alpha/run_stardist.py 
 | `data/` | Only the summary sheet is tracked; raw data is git-ignored (see `data/README.md`) |
 | `results/` | Generated CSVs and figures |
 | `src/fus/orientation.py`, `src/fus/rois.py` | napari tools: orientation clicks, review, finetuned target shapes |
+| `src/fus/archive.py` | Reads recordings straight out of `data/acoustic/US_Data.zip` (all 24 mice). The zip is the **only copy**: don't unpack it or keep extracted copies |
 | `src/fus/reconstruct.py` | Loose 3D stack of one animal's sections: alignment by clicks, spacing from the Allen atlas, Gaussian blending in depth |
 | `src/fus/cells.py` | Pipeline B: per-ROI cell counts and GFP+ fraction (StarDist via `scripts/stardist_segment.py`) |
 | `notebooks/` | `ingest_new_histology.ipynb` (per-animal workflow), `cell_pipeline_one_slice.ipynb` (A vs B on one slice), `view_slice.ipynb` (full-resolution viewer) |

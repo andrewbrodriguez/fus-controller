@@ -4,15 +4,18 @@ Examples
 --------
 Summarise one recording::
 
-    python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat
+    python -m fus Mouse_Cntr_01_Target1
+
+A name that isn't a file on disk is read from ``data/acoustic/US_Data.zip``
+(``fus.archive``). ``--mouse`` takes every recording of those mice.
 
 Show the MATLAB figures plus the window-placement diagnostic::
 
-    python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat --plot
+    python -m fus Mouse_Cntr_01_Target1 --plot
 
 Reduce a whole experiment day to one CSV row per target::
 
-    python -m fus data/acoustic/20260611/*_Target*.mat --csv results/day1.csv
+    python -m fus --mouse 1 2 3 4 5 6 --csv results/day1.csv
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ import csv
 import sys
 from pathlib import Path
 
+from . import archive
 from .extract import extract
 
 
@@ -31,7 +35,9 @@ def main(argv: list[str] | None = None) -> int:
         description="Extract per-burst cavitation metrics from FUS acoustic "
         "emission recordings (Python port of nt_ExtractHarmonicData.m).",
     )
-    parser.add_argument("files", nargs="+", type=Path, help=".mat recordings")
+    parser.add_argument("files", nargs="*", type=Path,
+                        help=".mat recordings, or names like Mouse_Cntr_01_Target1 (read from the archive)")
+    parser.add_argument("--mouse", type=int, nargs="+", help="every recording of these mice, from the archive")
     parser.add_argument(
         "--plot", action="store_true", help="show figures for each recording"
     )
@@ -55,13 +61,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    members = [m for m in archive.recordings() if m.mouse in set(args.mouse)] if args.mouse else []
     rows = []
-    for path in args.files:
-        if not path.exists():
-            print(f"skipping {path}: not found", file=sys.stderr)
-            continue
-
-        ex = extract(path, n_baseline=args.baseline)
+    for item in list(args.files) + members:
+        if isinstance(item, archive.Member) or not item.exists():
+            try:
+                member = item if isinstance(item, archive.Member) else archive.from_filename(item.name)
+            except FileNotFoundError:
+                print(f"skipping {item}: not found on disk or in the archive", file=sys.stderr)
+                continue
+            with archive.local_path(member) as tmp:
+                ex = extract(tmp, n_baseline=args.baseline)
+            path = Path(member.filename)
+        else:
+            path = item
+            ex = extract(path, n_baseline=args.baseline)
         rows.append(ex.to_dict())
         if not args.quiet:
             print(ex.summary())
