@@ -131,6 +131,19 @@ T5 0.37, T6 1.60 (interlock fired).
 - **Delivery measure (9/18).** The anti-GFP stain (TRITC), not native GFP.
 - **Focal spot (9/18).** ~2 × 2 mm in x/y, ~3 mm in z; precise dimensions to come.
 - **Feature priority (9/18).** Cumulative 2nd-harmonic AUC first.
+- **Answered 10/19** (Andrew, plus the Mouse 2 summary PDF, now `docs/lab/Mouse_02_Summary.pdf`;
+  email chain transcribed in `docs/lab/README.md`):
+  - **Capsid:** Mouse 2 is "AAV9-GFP @ 7.6e12 vg/kg" (summary PDF). **Assume AAV9 for every
+    animal**; the per-mouse capsid doesn't matter for this work (decision: Andrew). Note the
+    tension: up to ~28% GFP+ neurons near a target (pipeline B, `docs/gfp-cell-tagging.md`)
+    is high for AAV9 at this dose in the literature, which makes the hand count (open 2)
+    more important.
+  - **CY5 = NeuN** on Mouse 2 (labelled on the summary PDF). Pipeline B counts neurons.
+  - **No contrast MRI and no confocal.** Plan without either.
+  - **Exposures differ** between slides and animals and we live with it: compare
+    thresholded measures (A coverage, B per-slice fold), never raw intensity across slices.
+  - **Head position:** nothing assumed per animal beyond Nick's Mouse 2 remark (right side
+    higher).
 
 - **Sonication EDA (10/15)** (`scripts/sonication_eda.py` → `results/acoustic_eda/README.md`).
   This scripts most of "Findings that exist only here" below. Spreadsheet, mice 2–24: the
@@ -139,6 +152,26 @@ T5 0.37, T6 1.60 (interlock fired).
   every target. Raw recordings, mice 1–6: the controller settles at ~0.93× its goal at
   every goal level; the interlock fired in 7/37 recordings; 2/37 hit the 0.125 V ceiling.
 
+- **All 24 mice' recordings on disk (10/19).** `data/acoustic/US_Data.zip` (48.6 GB, from
+  Dropbox) is read in place by `fus.archive` and is the **only copy**: the old unpacked
+  `20260611/` folder was CRC-identical to it and was deleted, and every script (and
+  `python -m fus Mouse_Cntr_01_Target1`) reads from the zip. Regenerated doses and features
+  are identical. 27 GB free afterwards.
+  Every one of the 145 recordings was reduced into the burst cache, and **all 138 targets for
+  mice 2–24 match the sheet's cumulative 2nd harmonic to 4 decimals**. One file is misnamed:
+  Mouse 17's `Target5Repeat` is position 6 (goal, bursts and dose match the sheet's P6; the
+  lab's Reduced_ file says Target6). The controller findings hold in every session: it
+  settles at 0.90–0.93× the goal; 31–39% of recordings average in band; the interlock fired in
+  36/145 (25%). New: **voltage-ceiling hits rise across sessions, 2 → 1 → 4 → 8 of ~36**, so in
+  session 4, 22% of targets may not have reached their goal at 0.125 V.
+  (`results/acoustic_eda/README.md`, per-session table.)
+- **Target template and mask (10/20)** (`docs/lab/gABI_template_100um.nii`,
+  `Mask_AAVTargets.nii`; analysis in `docs/lab/README.md`). These are Nick's 9/18 files: the
+  Allen template plus six 2 mm target spheres, matching the `posx.xyz` plan exactly. New
+  information: **T1/T4 sit in anterior striatum, T2/T5 in lateral striatum/cortex, and T3/T6 in
+  thalamus (VPM)**. Focal centres are 2.9–3.7 mm below the dorsal surface, while our area
+  matching puts Mouse 2's sections at 1.7–2.7 mm, i.e. above most focal centres. Our assumed
+  pattern offset from the brain centre (1.6 plan mm) agrees with the mask within ~0.3 mm.
 - **Aligned section images (10/15)** (`scripts/aligned_sections.py` →
   `results/histology/aligned/`). Every clicked section is re-rendered from its ds4 export as
   a dorsal view: front up, animal's left on the left (Mouse 1 flipped, since its notch is on
@@ -154,11 +187,11 @@ T5 0.37, T6 1.60 (interlock fired).
    `scripts/slices_dose_delivery.py`; `scripts/mouse02_dose_vs_coverage.py` also needs ✓s.
 2. **Hand count for the cell pilot.** A blinded neuron and GFP+ count in a plume core, a
    plume edge and background. This is decision 001's pre-registered test.
-3. **Ask Nick:** the capsid per mouse (AAV9 vs AAV.CPP16), **which marker CY5 is on Mouse 2**
-   (NeuN, GFAP or S100β), section order and spacing, imaging exposure settings, and a resend
-   of the Mouse 2 summary PDF and the template/mask attachments.
+3. **Next email to Nick:** section protocol (thickness, spacing, order, starting depth) and
+   the next tissue. Laid out in [`next-email-todd.md`](next-email-todd.md). The template/mask
+   files are in `docs/lab/` (10/20).
 4. **Tissue throughput.** 2 of 24 brains.
-5. **Remaining acoustic sessions.** 3 of 4 days are still on Dropbox.
+5. ~~Remaining acoustic sessions~~ **Done 10/19**: all four sessions are in `data/acoustic/US_Data.zip`.
 6. **FITC-only signal at Mouse 1 T6.** Unexplained; `notebooks/view_slice.ipynb` can now show
    it at full resolution (`section_s4`).
 

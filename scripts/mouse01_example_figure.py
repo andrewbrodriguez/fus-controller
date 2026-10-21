@@ -28,12 +28,12 @@ import tifffile
 from matplotlib import patheffects
 from matplotlib.patches import Circle
 
+from fus import archive
 from fus import extract
 
 ROOT = Path(__file__).resolve().parents[1]
 SECTION = ROOT / "data/processed/histology/Mouse_01/ds4/section_s4.ome.tif"
 SLOTS = ROOT / "results/histology/mouse01_slots.csv"
-RECORDING = ROOT / "data/acoustic/20260611/Mouse_Cntr_01_Target1.mat"
 OUT = ROOT / "docs/figures/mouse01-example.png"
 
 SURFACE, INK, INK_2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
@@ -128,7 +128,8 @@ def main() -> None:
     ax.axis("off")
 
     # -- per-target rows: acoustic emission, then GFP close-up ---------------
-    ex = extract(RECORDING)
+    with archive.paths(1, ["Target1"]) as (path,):
+        ex = extract(path)
     norm = ex.metrics.normalised()
     t = ex.recording.burst_times
     db = 20 * np.log10(np.maximum(norm.area_2nd, 1e-12))

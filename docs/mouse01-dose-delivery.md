@@ -72,7 +72,7 @@ each, delivery does not rise with dose. See
 
 | Input | What it provides |
 |---|---|
-| `data/acoustic/20260611/Mouse_Cntr_01_Target*.mat` | Per-burst emission spectra and controller state for each sonication |
+| `Mouse_Cntr_01_Target*.mat` in `data/acoustic/US_Data.zip` | Per-burst emission spectra and controller state for each sonication |
 | `data/histology/Mouse_01/Image.vsi` | Whole-slide fluorescence scan: 5 sections, 4 channels, 0.325 µm/px |
 | `data/histology/Mouse_01_AAV_Images.pptx` | The lab's target diagram, plus burst count and goal written next to each target position |
 | `data/Mouse_Controller_Data.xlsx` | Per-sonication summary, including a `Brain Region` column |
@@ -310,6 +310,7 @@ are also told apart by filled vs. hollow markers.
 | A7 | TRITC is the delivery measure | **Confirmed** by N. Todd: use the GFP stain, not native GFP | Target 6 would move from lowest delivery (after the control) to highest |
 | A8 | All six targets lie at one depth (z = 0), so one horizontal section crosses all six at the same level | `posx.xyz` has z = 0 for every target | **Not true for Mouse 2**: N. Todd (2026-09-29) reports the head was rolled, right-side targets higher and left-side lower. Whether Mouse 1 was level is unknown. Where it isn't, one section samples the two sides at different depths, and the mean over sections (A3) mixes depths unevenly |
 | A9 | Notch is on the animal's right for Mouse 1, left from Mouse 2 on | N. Todd, 2026-09-18; for Mouse 2 he first said bottom right, then corrected it to left on 2026-09-29, noting it "makes more sense with the delivery and harmonic doses" | That reasoning uses the dose–delivery relationship this project is trying to measure, so the notch itself should be checked in the images before Mouse 2 is used as evidence |
+| A10 | Every animal received the same virus, AAV9-GFP at 7.6e12 vg/kg | Stated on the Mouse 2 summary (`docs/lab/Mouse_02_Summary.pdf`); assumed for the rest (Andrew, 2026-10-19). The lab's slides mention a 12/12 AAV9/AAV.CPP16 split with no per-mouse list | Within-animal comparisons are unaffected. Pooled comparisons across animals would mix capsids, and absolute GFP+ fractions would need per-capsid reading |
 | — | Circle radius 1.0 mm, threshold 5 SD, background σ 1 mm | Radius: half the ~2 mm lateral focal spot (N. Todd, 9/18; precise dimensions to follow). Threshold and σ chosen before any coverage was computed | Threshold: target means shift by up to 4 percentage points at 4 or 6 SD. The FITC ranking is identical; in TRITC, targets 2 and 4 swap at 6 SD (they are level at 5). Radius: going from 0.75 to 1.0 mm lowered every sonicated target (T1 0.82 → 0.66) without reordering them. σ has not been tested at other values |
 
 ---

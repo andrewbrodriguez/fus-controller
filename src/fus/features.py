@@ -22,7 +22,9 @@ harmonic. Target-level features are then fixed in :data:`FEATURES` -- chosen fro
 the physics before looking at delivery, so they can be screened honestly.
 
 >>> from fus.features import target_features
->>> target_features(["data/acoustic/20260611/Mouse_Cntr_02_Target4.mat"])
+>>> from fus import archive
+>>> with archive.paths(2, ["Target4"]) as paths:
+...     target_features(paths)
 """
 
 from __future__ import annotations

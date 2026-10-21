@@ -67,16 +67,16 @@ This runs as **pipeline B** (`python -m fus.cells`) on every target ROI of both 
 
 ## Study design
 
-24 mice × 6 targets, exposure duration crossed against controller setpoint, in two capsid cohorts:
+24 mice × 6 targets, exposure duration crossed against controller setpoint:
 
 | Factor | Levels |
 |---|---|
 | Harmonic goal (setpoint) | 0.55, 0.65, 0.75, 0.85, 0.95, 1.05 |
 | Number of bursts | 57 – 255 |
 | Brain region | 6 targets per animal |
-| Capsid | AAV9 (12 mice), AAV.CPP16 (12 mice) |
+| Virus | AAV9-GFP, 7.6e12 vg/kg (Mouse 2 summary); assumed the same for every animal |
 
-The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The virus is delivered by tail vein immediately after sonication. The capsid split comes from the lab's controller-study slides (`docs/lab/ControllerStudy_Plots.pptx`); `Mouse_Controller_Data.xlsx` does not yet record which mouse received which, and any delivery model needs that as a factor.
+The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The virus is delivered by tail vein immediately after sonication. The lab's controller-study slides (`docs/lab/ControllerStudy_Plots.pptx`) list an AAV9 and an AAV.CPP16 cohort of 12 each, but no per-mouse assignment exists. We assume AAV9 throughout (decided 2026-10-19), which doesn't affect the within-animal dose–delivery comparisons.
 
 ## Project status
 
@@ -87,7 +87,7 @@ As of 2026-09-30, week ~5 of 13:
 - **Acoustics:** the feature extraction is built and reproduces the lab's numbers.
 - **Tissue:** 2 of 24 brains are imaged. Both (16 sections) are oriented by hand, measured, and joined to dose. Within slices, dose and delivery rise together in both animals.
 - **Two delivery measures:** pixel coverage (pipeline A) and the fraction of neurons tagged GFP+ (pipeline B) run on every target ROI and agree closely. Pipeline B still needs a hand count to validate it.
-- **Still open:** the capsid assignment per mouse, which marker the CY5 channel shows on Mouse 2, section depth, and review verdicts for each slice (in place of a post hoc low-signal cutoff). 3 of 4 acoustic sessions aren't synced yet.
+- **Still open:** the section protocol (thickness, spacing, order) and review verdicts for each slice (in place of a post hoc low-signal cutoff). 3 of 4 acoustic sessions aren't synced yet.
 
 The limiting factor is still tissue.
 
@@ -130,9 +130,9 @@ Then sync the Dropbox `US_Data` and `IF_Data` folders into `data/acoustic/` and 
 Summarise a single recording, or reduce a whole experiment day to one row per target:
 
 ```bash
-python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat
-python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat --plot
-python -m fus data/acoustic/20260611/*_Target*.mat --csv results/day1.csv --quiet
+python -m fus Mouse_Cntr_01_Target1
+python -m fus Mouse_Cntr_01_Target1 --plot
+python -m fus --mouse 1 2 3 4 5 6 --csv results/day1.csv --quiet
 ```
 
 `src/fus/extract.py` is a documented port of the lab's `nt_ExtractHarmonicData.m`. It reproduces the `Cumulative 2nd Harmonic`, `Mean Voltage`, and `Cumulative Voltage` columns of `Mouse_Controller_Data.xlsx` exactly, verified against 15 targets from the 2026-06-11 session.

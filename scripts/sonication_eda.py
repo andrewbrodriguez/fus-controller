@@ -9,11 +9,13 @@ Two sources, two levels:
   This level covers the design (programmed bursts x harmonic goal), how much of the
   realised dose the design explains, animal-level vs target-level variation, firing
   order, and the reference target.
-* **Raw recordings, mice 1-6** (``data/acoustic/20260611``): one row per burst. This level
+* **Raw recordings, mice 1-24** (``data/acoustic/US_Data.zip``, read without unpacking via
+  ``fus.archive``): one row per burst. This level
   covers what the controller did: its own online harmonic reading (``posx.data.HH``, the
   value it compares with the goal band), drive voltage, the online wideband reading
   against the interlock threshold, and the receiver noise floor from the zero-volt
-  bursts. Burst tables are cached in ``data/processed/acoustic/`` (~1 s per file).
+  bursts. Burst tables are cached in ``data/processed/acoustic/`` (~2.5 s per recording,
+  ~6 min for all 145; only recordings missing from the cache are read).
 
 Writes ``results/acoustic_eda/``: figures, ``recordings.csv`` (one row per recording) and
 ``README.md`` with the numbers quoted.
@@ -29,14 +31,15 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 import pandas as pd
 
+from fus import archive
 from fus.extract import extract
 
 ROOT = Path(__file__).resolve().parents[1]
 SHEET = ROOT / "data/Mouse_Controller_Data.xlsx"
-ACOUSTIC = ROOT / "data/acoustic/20260611"
 CACHE = ROOT / "data/processed/acoustic"
 OUT = ROOT / "results/acoustic_eda"
 
@@ -240,59 +243,96 @@ def _datenum(x: float) -> dt.datetime:
     return dt.datetime.fromordinal(int(x)) + dt.timedelta(days=x % 1) - dt.timedelta(days=366)
 
 
-def recording_paths() -> list[Path]:
-    return sorted(p for p in ACOUSTIC.glob("Mouse_Cntr_0[1-6]_Target*.mat"))
+# Mouse 17's sixth recording is saved as Target5Repeat. Its goal (0.85), bursts (120) and
+# dose (1.4193) are the sheet's position 6 exactly, and the lab's Reduced_ file is Target6.
+MISNAMED = {(17, "Target5Repeat"): 6}
+
+
+def _position(mouse: int, name: str) -> int:
+    """Recording -> brain position. TargetN = position N except Mouse 1 (data/README.md)
+    and the misnamed Mouse 17 file above."""
+    if (mouse, name) in MISNAMED:
+        return MISNAMED[(mouse, name)]
+    return MOUSE1_POSITION[name] if mouse == 1 else int(name[len("Target")])
 
 
 def burst_tables() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """(bursts, recordings), cached. One row per burst / per recording."""
+    """(bursts, recordings), cached. One row per burst / per recording.
+
+    The cache is filled incrementally: only archive recordings not already in it are read,
+    and it is saved after each one, so an interrupted run resumes."""
     bpath, rpath = CACHE / "bursts.csv", CACHE / "recordings.csv"
-    if bpath.exists() and rpath.exists():
-        return pd.read_csv(bpath), pd.read_csv(rpath)
+    have_b = pd.read_csv(bpath) if bpath.exists() else pd.DataFrame()
+    have_r = pd.read_csv(rpath) if rpath.exists() else pd.DataFrame()
+    done = set(zip(have_r["mouse"], have_r["recording"])) if len(have_r) else set()
+    todo = [m for m in archive.recordings() if (m.mouse, m.recording) not in done]
+    for k, member in enumerate(todo, 1):
+        print(f"  [{k}/{len(todo)}] {member.filename}", flush=True)
+        b, r = _read_recording(member)
+        have_b = pd.concat([have_b, b], ignore_index=True)
+        have_r = pd.concat([have_r, r], ignore_index=True)
+        CACHE.mkdir(parents=True, exist_ok=True)
+        have_b.to_csv(bpath, index=False)
+        have_r.to_csv(rpath, index=False)
+    return have_b, have_r
+
+
+def _read_recording(member: archive.Member) -> tuple[pd.DataFrame, pd.DataFrame]:
     rows, recs = [], []
-    for path in recording_paths():
-        print(f"  {path.name}")
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            ex = extract(path)
-        r = ex.recording
-        name = path.stem.split("_", 3)[3]          # Target4, Target2_Repeat
-        mouse = int(path.stem.split("_")[2])
-        position = MOUSE1_POSITION[name] if mouse == 1 else int(name.replace("Target", ""))
-        last = np.atleast_1d(r.raw.posx.data)[-1]
-        hh = np.asarray(last.HH, float).ravel()
-        wb = np.asarray(last.WB, float).ravel()
-        volts = r.drive_voltage[:, 0] if r.drive_voltage is not None else np.full(r.n_bursts, np.nan)
-        norm = ex.metrics.normalised()
-        n = min(len(hh), len(wb), len(volts), r.n_bursts)
-        p = r.raw.posx
-        goal = np.atleast_1d(r.harmonic_goal).astype(float)
-        cur = np.atleast_1d(r.current_harmonic_goal).astype(float)
-        nb = r.n_baseline
-        recs.append({
-            "mouse": mouse, "recording": name, "position": position,
-            "time": _datenum(float(np.atleast_1d(r.raw.niscope.tracktime)[0])).isoformat(),
-            "goal_lo": goal[0], "goal_hi": goal[-1], "goal_end_lo": cur[0], "goal_end_hi": cur[-1],
-            "interlock": r.goal_was_reduced, "n_bursts": r.n_bursts, "n_baseline": nb,
-            "programmed": r.programmed_bursts, "max_v_allowed": float(getattr(p, "MaxV1", np.nan)),
-            "start_v": float(getattr(p, "StartV1", np.nan)), "wb_thresh": float(getattr(p, "WBthresh", np.nan)),
-            "noise_h2": float(ex.metrics.area_2nd[:nb].mean()),
-            "noise_wb": float(ex.metrics.area_wb[:nb].mean()),
-            "cum_h2": ex.to_dict()["cum_2nd_harmonic_xlsx"],
-        })
-        for i in range(n):
-            rows.append({"mouse": mouse, "recording": name, "burst": i, "baseline": i < nb,
-                         "volt": volts[i], "hh": hh[i], "wb": wb[i],
-                         "h2_norm": norm.area_2nd[i], "wb_norm": norm.area_wb[i]})
-    b, rec = pd.DataFrame(rows), pd.DataFrame(recs)
-    CACHE.mkdir(parents=True, exist_ok=True)
-    b.to_csv(bpath, index=False)
-    rec.to_csv(rpath, index=False)
-    return b, rec
+    with archive.local_path(member) as path, warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        ex = extract(path)
+    r = ex.recording
+    name, mouse = member.recording, member.mouse
+    position = _position(mouse, name)
+    last = np.atleast_1d(r.raw.posx.data)[-1]
+    hh = np.asarray(last.HH, float).ravel()
+    wb = np.asarray(last.WB, float).ravel()
+    volts = r.drive_voltage[:, 0] if r.drive_voltage is not None else np.full(r.n_bursts, np.nan)
+    norm = ex.metrics.normalised()
+    n = min(len(hh), len(wb), len(volts), r.n_bursts)
+    p = r.raw.posx
+    goal = np.atleast_1d(r.harmonic_goal).astype(float)
+    cur = np.atleast_1d(r.current_harmonic_goal).astype(float)
+    nb = r.n_baseline
+    recs.append({
+        "mouse": mouse, "recording": name, "position": position,
+        "time": _datenum(float(np.atleast_1d(r.raw.niscope.tracktime)[0])).isoformat(),
+        "goal_lo": goal[0], "goal_hi": goal[-1], "goal_end_lo": cur[0], "goal_end_hi": cur[-1],
+        "interlock": r.goal_was_reduced, "n_bursts": r.n_bursts, "n_baseline": nb,
+        "programmed": r.programmed_bursts, "max_v_allowed": float(getattr(p, "MaxV1", np.nan)),
+        "start_v": float(getattr(p, "StartV1", np.nan)), "wb_thresh": float(getattr(p, "WBthresh", np.nan)),
+        "noise_h2": float(ex.metrics.area_2nd[:nb].mean()),
+        "noise_wb": float(ex.metrics.area_wb[:nb].mean()),
+        "cum_h2": ex.to_dict()["cum_2nd_harmonic_xlsx"],
+    })
+    for i in range(n):
+        rows.append({"mouse": mouse, "recording": name, "burst": i, "baseline": i < nb,
+                     "volt": volts[i], "hh": hh[i], "wb": wb[i],
+                     "h2_norm": norm.area_2nd[i], "wb_norm": norm.area_wb[i]})
+    return pd.DataFrame(rows), pd.DataFrame(recs)
+
+
+SESSIONS = {1: "2026-06-11", 2: "2026-06-16", 3: "2026-07-01", 4: "2026-07-07"}
+
+
+def session(mouse) -> int:
+    """Four sessions of six mice each (archive folders 061126, 061626, 070126, 070726)."""
+    return (np.asarray(mouse) - 1) // 6 + 1
+
+
+def dose_check(rec: pd.DataFrame, d: pd.DataFrame) -> pd.DataFrame:
+    """Each target's dose from the recordings (repeats summed) against the sheet, mice 2-24."""
+    ours = rec[rec["mouse"] != 1].groupby(["mouse", "position"], as_index=False)["cum_h2"].sum()
+    j = ours.merge(d[["mouse", "position", "cum_h2"]], on=["mouse", "position"], how="outer",
+                   suffixes=("_rec", "_sheet"), indicator=True)
+    j["diff"] = j["cum_h2_rec"] - j["cum_h2_sheet"]
+    return j
 
 
 def controller_metrics(b: pd.DataFrame, rec: pd.DataFrame) -> pd.DataFrame:
     rec = rec.copy()
+    rec["session"] = session(rec["mouse"])
     rec["time"] = pd.to_datetime(rec["time"])
     rec["order"] = rec.groupby("mouse")["time"].rank().astype(int)
     out = []
@@ -329,16 +369,21 @@ def steady_state(b: pd.DataFrame, cm: pd.DataFrame) -> dict:
         skew.append(stats.skew(a))
     rel_mean = np.array(rel_mean)
     half = (cm["goal_hi"] - cm["goal_lo"]).to_numpy() / 2 / ((cm["goal_lo"] + cm["goal_hi"]) / 2).to_numpy()
+    cm["hh_rel"] = rel_mean
+    cm["band_half_rel"] = (cm["goal_hi"] - cm["goal_lo"]) / 2 / ((cm["goal_lo"] + cm["goal_hi"]) / 2)
     return {"mean_rel": float(np.median(rel_mean)), "median_rel": float(np.median(rel_med)),
             "skew": float(np.median(skew)), "mean_in_band": float(np.mean(np.abs(rel_mean - 1) <= half))}
 
 
-def trace_figure(b: pd.DataFrame, rec: pd.DataFrame, col: str, ylabel: str, path: Path, band: bool):
+def trace_figure(b: pd.DataFrame, rec: pd.DataFrame, col: str, ylabel: str, path: Path, band: bool,
+                 sess: int):
+    ymax = b.loc[~b["baseline"], col].quantile(0.995) * 1.08   # all sessions, so they compare
+    rec = rec[rec["session"] == sess]
+    b = b[b["mouse"].isin(rec["mouse"])]
     mice = sorted(rec["mouse"].unique())
     ncol = int(rec.groupby("mouse").size().max())
     fig, axes = plt.subplots(len(mice), ncol, figsize=(2.0 * ncol, 1.45 * len(mice)),
                              facecolor=SURFACE, sharey=True, squeeze=False)
-    ymax = b.loc[~b["baseline"], col].quantile(0.995) * 1.08
     for i, m in enumerate(mice):
         rr = rec[rec["mouse"] == m].sort_values("order")
         for j in range(ncol):
@@ -367,7 +412,8 @@ def trace_figure(b: pd.DataFrame, rec: pd.DataFrame, col: str, ylabel: str, path
             a.tick_params(labelsize=6)
             if j == 0:
                 a.set_ylabel(f"M{m}", fontsize=8, color=INK, rotation=0, ha="right", va="center")
-    title(fig, f"{ylabel} per burst, mice 1–6 (rows), recordings in firing order (columns)",
+    title(fig, f"{ylabel} per burst, session {sess} ({SESSIONS[sess]}): mice {mice[0]}–{mice[-1]} "
+          "(rows), recordings in firing order (columns)",
           ("Blue band = goal deadband; orange = band after the interlock lowered it. "
            "Vertical line = end of zero-volt baseline bursts.") if band else
           "Dashed = the controller's voltage ceiling (MaxV1). Vertical line = end of baseline bursts.")
@@ -397,34 +443,196 @@ def controller_summary_figure(cm: pd.DataFrame, path: Path):
             a.axhline(1, color=AXIS, lw=0.8)
         a.set_xlabel("harmonic goal", fontsize=8, color=INK_2)
         a.set_title(lab, fontsize=8.5, color=INK, loc="left")
-    title(fig, "Controller performance per recording vs goal (mice 1–6)",
+    title(fig, f"Controller performance per recording vs goal (mice {cm['mouse'].min()}–{cm['mouse'].max()})",
           "Ringed points in the last panel reached the voltage ceiling.")
     fig.tight_layout(rect=(0, 0, 1, 0.88))
     fig.savefig(path, dpi=130, facecolor=SURFACE)
     plt.close(fig)
 
 
-def noise_figure(cm: pd.DataFrame, path: Path):
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.6), facecolor=SURFACE)
-    for a, col, lab in ((axes[0], "noise_h2", "2nd-harmonic band"), (axes[1], "noise_wb", "wideband")):
-        style(a)
-        for m, s in cm.sort_values("order").groupby("mouse"):
-            rel = s[col] / s[col].iloc[0]
-            a.plot(s["order"], rel, color=MUTED, lw=0.9, marker="o", ms=3)
-            a.text(s["order"].iloc[-1] + 0.1, rel.iloc[-1], f"M{m}", fontsize=7, color=INK_2,
-                   va="center")
-        a.axhline(1, color=AXIS, lw=0.8)
-        a.set_xlabel("firing order within the session", fontsize=8, color=INK_2)
-        a.set_ylabel("baseline level ÷ first recording", fontsize=8, color=INK_2)
-        a.set_title(f"Receiver noise floor, {lab} (zero-volt bursts)", fontsize=9, color=INK, loc="left")
-    title(fig, "Does the normalisation baseline drift through a session? (mice 1–6)",
-          "Every recording is normalised by its own zero-volt bursts, so drift here rescales its dose.")
+def dose_vs_exposure(b: pd.DataFrame, cm: pd.DataFrame, mpa_per_v: float) -> pd.DataFrame:
+    """Per sonication: applied exposure (peak pressure summed over sonicating bursts) and the
+    2nd-harmonic dose. Pressure is drive voltage x the sheet's fixed MPa/V conversion."""
+    s = b[~b["baseline"]].groupby(["mouse", "recording"])["volt"].sum().rename("cum_v").reset_index()
+    d = cm.merge(s, on=["mouse", "recording"])
+    d["exposure_mpa"] = d["cum_v"] * mpa_per_v
+    return d
+
+
+def dose_vs_exposure_figure(d: pd.DataFrame, path: Path) -> dict:
+    """Simplest view for the lab: 2nd-harmonic AUC against the acoustic exposure applied."""
+    from scipy import stats
+    x, y = np.log10(d["exposure_mpa"]), np.log10(d["cum_h2"])
+    fit = stats.linregress(x, y)
+    resid = 10 ** (y - (fit.intercept + fit.slope * x))
+    lo, hi = np.percentile(resid, [10, 90])
+    fig, a = plt.subplots(figsize=(6.8, 5.2), facecolor=SURFACE)
+    style(a)
+    a.set_xscale("log")
+    a.set_yscale("log")
+    gx = np.logspace(x.min() - 0.05, x.max() + 0.05, 50)
+    gy = 10 ** (fit.intercept + fit.slope * np.log10(gx))
+    a.fill_between(gx, gy * lo, gy * hi, color=BLUES[0], lw=0, zorder=1,
+                   label=f"middle 80% of sonications ({lo:.2f}–{hi:.2f}× the trend)")
+    a.plot(gx, gy, color=INK_2, lw=1.5, zorder=2, label=f"trend (log–log, r = {fit.rvalue:.2f})")
+    a.scatter(d["exposure_mpa"], d["cum_h2"], s=22, color=BLUE, edgecolor=SURFACE, lw=0.6, zorder=3,
+              label="one sonication")
+    a.set_xlabel("acoustic exposure applied: peak pressure summed over bursts (MPa × bursts)",
+                 fontsize=8.5, color=INK_2)
+    a.set_ylabel("2nd-harmonic dose (cumulative AUC, sheet units)", fontsize=8.5, color=INK_2)
+    a.legend(loc="upper left", frameon=False, fontsize=7.5)
+    a.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:g}"))
+    a.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:g}"))
+    spread = hi / lo
+    title(fig, "More exposure gives more 2nd-harmonic dose, but loosely",
+          f"{len(d)} sonications, {d['mouse'].nunique()} mice. At a given exposure, the dose varies "
+          f"~{spread:.1f}× (10th–90th percentile).\nPressure = drive voltage × the sheet's fixed "
+          "MPa/V conversion.")
     fig.tight_layout(rect=(0, 0, 1, 0.86))
+    fig.savefig(path, dpi=160, facecolor=SURFACE)
+    plt.close(fig)
+    return {"exp_r": fit.rvalue, "exp_slope": fit.slope, "exp_lo": lo, "exp_hi": hi, "exp_spread": spread}
+
+
+def controller_headline_figure(cm: pd.DataFrame, path: Path):
+    """One figure for the lab: where the controller settles vs its goal, and how often it ran
+    out of headroom (voltage ceiling) or tripped the interlock, per session."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(12, 4.9), facecolor=SURFACE,
+                               gridspec_kw={"width_ratios": [1.45, 1]})
+    goal = ((cm["goal_lo"] + cm["goal_hi"]) / 2).round(2)
+    real = cm["hh_rel"] * goal
+    rng = np.random.default_rng(2)
+    x = goal + rng.normal(0, 0.008, len(cm))
+    style(a)
+    g = np.array([0.5, 1.1])
+    a.fill_between(g, g - 0.05, g + 0.05, color=BLUES[0], lw=0, label="goal band (±0.05)")
+    a.plot(g, g, color=INK_2, lw=1, ls="--", label="goal")
+    ratio = float(np.median(cm["hh_rel"]))
+    a.plot(g, ratio * g, color=ORANGE, lw=2, label=f"median settled level ({ratio:.2f}× goal)")
+    cap = cm["at_v_cap"].to_numpy()
+    a.scatter(x[~cap], real[~cap], s=20, color=BLUE, edgecolor=SURFACE, lw=0.6, zorder=3,
+              label="one sonication")
+    a.scatter(x[cap], real[cap], s=34, color=BLUE, edgecolor=INK, lw=1.1, zorder=4,
+              label="reached the 0.125 V ceiling")
+    worst = cm.assign(real=real).sort_values("hh_rel").iloc[0]
+    a.annotate(f"M{worst.mouse} {worst.recording}: ceiling + interlock,\nsettled at {worst.hh_rel:.2f}× goal",
+               (goal[worst.name], worst.real), xytext=(0.66, 0.2), fontsize=7.5, color=INK_2,
+               arrowprops={"arrowstyle": "-", "color": AXIS, "lw": 0.8})
+    a.set_xlim(0.5, 1.1)
+    a.set_ylim(0, 1.3)
+    a.set_xticks(GOALS)
+    a.set_xlabel("harmonic goal (band midpoint)", fontsize=8.5, color=INK_2)
+    a.set_ylabel("online 2nd harmonic after the ramp (mean)", fontsize=8.5, color=INK_2)
+    inband = float((np.abs(cm["hh_rel"] - 1) <= cm["band_half_rel"]).mean())
+    a.set_title(f"Settles below goal at every setpoint; {inband:.0%} of sonications average inside the band",
+                fontsize=9, color=INK, loc="left")
+    a.legend(loc="lower right", frameon=False, fontsize=7.5)   # data-free corner
+
+    style(b)
+    sess = sorted(cm["session"].unique())
+    xs = np.arange(len(sess))
+    w = 0.36
+    series = [("at_v_cap", "reached voltage ceiling", BLUE), ("interlock", "interlock fired", ORANGE)]
+    for k, (col, lab, colr) in enumerate(series):
+        frac = [cm.loc[cm["session"] == s, col].mean() for s in sess]
+        cnt = [int(cm.loc[cm["session"] == s, col].sum()) for s in sess]
+        bars = b.bar(xs + (k - 0.5) * (w + 0.02), frac, w, color=colr, label=lab, zorder=3)
+        for bar, f, c in zip(bars, frac, cnt):
+            b.text(bar.get_x() + bar.get_width() / 2, f + 0.008, f"{c}", ha="center", va="bottom",
+                   fontsize=7.5, color=INK_2)
+    n = [int((cm["session"] == s).sum()) for s in sess]
+    b.set_xticks(xs, [f"S{s}\n{SESSIONS[s][5:]}\nmice {6 * s - 5}–{6 * s}" for s in sess], fontsize=7.5)
+    b.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1, decimals=0))
+    b.set_ylabel(f"share of sonications (n = {min(n)}–{max(n)} per session)", fontsize=8.5, color=INK_2)
+    b.set_title("Ceiling hits climb across sessions (count on each bar)", fontsize=9, color=INK, loc="left")
+    b.legend(loc="upper left", frameon=False, fontsize=7.5)
+    b.set_ylim(0, max(0.45, b.get_ylim()[1]))
+    title(fig, f"Controller behaviour across all {len(cm)} sonications ({cm['mouse'].nunique()} mice, "
+          f"{len(sess)} sessions)",
+          "Online 2nd harmonic = the controller's own per-burst reading, averaged from when it first "
+          "reaches the band. Ringed points ran at the 0.125 V ceiling.")
+    fig.tight_layout(rect=(0, 0, 1, 0.9), w_pad=2.5)
+    fig.savefig(path, dpi=160, facecolor=SURFACE)
+    plt.close(fig)
+
+
+def noise_figure(cm: pd.DataFrame, path: Path):
+    sessions = sorted(cm["session"].unique())
+    fig, axes = plt.subplots(2, len(sessions), figsize=(3.4 * len(sessions), 6.4), facecolor=SURFACE,
+                             sharey="row", squeeze=False)
+    for row, (col, lab) in enumerate((("noise_h2", "2nd-harmonic band"), ("noise_wb", "wideband"))):
+        for k, sess in enumerate(sessions):
+            a = axes[row, k]
+            style(a)
+            for m, s in cm[cm["session"] == sess].sort_values("order").groupby("mouse"):
+                rel = s[col] / s[col].iloc[0]
+                a.plot(s["order"], rel, color=MUTED, lw=0.9, marker="o", ms=3)
+                a.text(s["order"].iloc[-1] + 0.1, rel.iloc[-1], f"M{m}", fontsize=6.5, color=INK_2,
+                       va="center")
+            a.axhline(1, color=AXIS, lw=0.8)
+            if row == 1:
+                a.set_xlabel("recording order within the mouse", fontsize=8, color=INK_2)
+            if k == 0:
+                a.set_ylabel(f"{lab}\nbaseline ÷ first recording", fontsize=8, color=INK_2)
+            a.set_title(f"session {sess} ({SESSIONS[sess]})" if row == 0 else "", fontsize=9,
+                        color=INK, loc="left")
+    title(fig, "Does the normalisation baseline drift through a session? (receiver noise floor, zero-volt bursts)",
+          "Every recording is normalised by its own zero-volt bursts, so drift here rescales its dose.")
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
     fig.savefig(path, dpi=130, facecolor=SURFACE)
     plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
+
+
+def dose_line(dc: pd.DataFrame) -> str:
+    both = dc[dc["_merge"] == "both"]
+    ok = (both["diff"].abs() < 5e-4).sum()
+    bad = both[both["diff"].abs() >= 5e-4]
+    only_r = dc[dc["_merge"] == "left_only"]
+    only_s = dc[dc["_merge"] == "right_only"]
+    s = (f"{ok} of {len(both)} targets (mice 2–24) match the sheet's cumulative 2nd harmonic "
+         f"to 4 decimals")
+    if len(bad):
+        s += "; mismatches: " + ", ".join(
+            f"M{r.mouse} P{r.position} ({r.cum_h2_rec:.3f} vs {r.cum_h2_sheet:.3f})" for r in bad.itertuples())
+    if len(only_r):
+        s += "; only in recordings: " + ", ".join(f"M{r.mouse} P{r.position}" for r in only_r.itertuples())
+    if len(only_s):
+        s += "; only in the sheet: " + ", ".join(f"M{r.mouse} P{r.position}" for r in only_s.itertuples())
+    return s + "."
+
+
+def irregular(cm: pd.DataFrame) -> str:
+    out = []
+    for m, s in cm.groupby("mouse"):
+        names = set(s["recording"])
+        missing = [f"Target{k}" for k in range(1, 7) if f"Target{k}" not in names]
+        extra = sorted(names - {f"Target{k}" for k in range(1, 7)})
+        if (m, "Target5Repeat") in MISNAMED and "Target5Repeat" in names:
+            out.append(f"M{m} Target5Repeat is position 6 (misnamed: goal, bursts and dose match "
+                       "the sheet's position 6, and the lab's Reduced_ file is Target6)")
+            continue
+        if missing or extra:
+            out.append(f"M{m}" + (f" has no {', '.join(missing)}" if missing else "")
+                       + (" and" if missing and extra else "")
+                       + (f" has {', '.join(extra)}" if extra else ""))
+    return "; ".join(out) + "." if out else "none."
+
+
+def session_table(cm: pd.DataFrame) -> str:
+    rows = ["| Session | Mice | Recordings | Online harmonic ÷ goal (median) | Recordings averaging in band "
+            "| Interlock | At V ceiling | Ceiling (V) | Noise-floor CV |",
+            "|---|---|---|---|---|---|---|---|---|"]
+    for sess, s in cm.groupby("session"):
+        inb = (np.abs(s["hh_rel"] - 1) <= s["band_half_rel"]).mean()
+        ncv = s.groupby("mouse")["noise_h2"].apply(lambda x: x.std() / x.mean()).median()
+        vmax = ", ".join(f"{v:g}" for v in sorted(s["max_v_allowed"].unique()))
+        rows.append(f"| {sess} ({SESSIONS[sess]}) | {s['mouse'].min()}–{s['mouse'].max()} | {len(s)} "
+                    f"| {s['hh_rel'].median():.2f} | {inb:.0%} | {int(s['interlock'].sum())} "
+                    f"| {int(s['at_v_cap'].sum())} | {vmax} | {ncv:.0%} |")
+    return "\n".join(rows)
 
 
 def readme(f: dict, cm: pd.DataFrame) -> str:
@@ -464,13 +672,20 @@ Generated by `scripts/sonication_eda.py`. Exploratory: nothing here is a pre-reg
   {f['mpa_ratio_spread']:.1e}). It is a conversion, not a measurement; don't use it as a
   separate predictor.
 
-## Raw recordings, mice 1–6 ({n} recordings)
+## Raw recordings, mice {cm['mouse'].min()}–{cm['mouse'].max()} ({n} recordings, {cm['session'].nunique()} sessions)
 
-Online harmonic (`HH`) is the controller's own reading, on the goal's scale.
-`recordings.csv` has every number per recording.
+Read from `data/acoustic/US_Data.zip` (`fus.archive`). Online harmonic (`HH`) is the
+controller's own reading, on the goal's scale. `recordings.csv` has every number per recording.
 
-- **Traces:** `controller_harmonic.png` (online harmonic with the goal band) and
-  `controller_voltage.png` (drive voltage with the ceiling).
+- **Recordings vs the sheet** (`dose_check.csv`): {dose_line(f['dose_check'])}
+- **Irregular recordings:** {irregular(cm)}
+- **Dose vs exposure** (`dose_vs_exposure.png`, the simplest figure for the lab): log 2nd-harmonic\n  dose against peak pressure summed over bursts gives r = {f['exp_r']:.2f} (slope {f['exp_slope']:.2f}); at a\n  given exposure the middle 80% of sonications span {f['exp_lo']:.2f}–{f['exp_hi']:.2f}× the trend (~{f['exp_spread']:.1f}×).\n- **Headline** (`controller_headline.png`, for the lab): settled level vs goal for every sonication, and
+  ceiling/interlock rates per session.
+- **Traces**, one figure per session: `controller_harmonic_s1.png` … `_s4.png` (online harmonic
+  with the goal band) and `controller_voltage_s1.png` … (drive voltage with the ceiling).
+
+{session_table(cm)}
+
 - **Ramp:** median {cm['ramp_bursts'].median():.0f} sonicating bursts to first reach the band
   (range {cm['ramp_bursts'].min():.0f}–{cm['ramp_bursts'].max():.0f}). Starting voltage
   {cm['start_v'].median():g} V, ceiling {cm['max_v_allowed'].median():g} V.
@@ -499,9 +714,10 @@ Online harmonic (`HH`) is the controller's own reading, on the goal's scale.
 
 ## Caveats
 
-- Sheet-level numbers exclude Mouse 1. Raw-level numbers cover mice 1–6 only, which is the
-  only acoustic session on disk; 3 of 4 days are still on Dropbox.
-- Capsid cohort isn't in the sheet, so none of this is split by capsid.
+- Sheet-level numbers exclude Mouse 1; raw-level numbers include it (positions from the
+  operator log, `docs/mouse01-dose-delivery.md`).
+- Every animal is assumed to have received AAV9 (notes/current.md, 2026-10-19), so nothing is
+  split by capsid.
 """
 
 
@@ -512,11 +728,20 @@ def main() -> int:
     sheet_figures(d, facts)
     b, rec = burst_tables()
     cm = controller_metrics(b, rec)
-    facts.update(steady_state(b, cm))
+    facts.update(steady_state(b, cm))   # also adds hh_rel per recording
     cm.to_csv(OUT / "recordings.csv", index=False)
-    trace_figure(b, cm, "hh", "Online 2nd harmonic", OUT / "controller_harmonic.png", band=True)
-    trace_figure(b, cm, "volt", "Drive voltage (V)", OUT / "controller_voltage.png", band=False)
+    for sess in sorted(cm["session"].unique()):
+        trace_figure(b, cm, "hh", "Online 2nd harmonic", OUT / f"controller_harmonic_s{sess}.png",
+                     band=True, sess=sess)
+        trace_figure(b, cm, "volt", "Drive voltage (V)", OUT / f"controller_voltage_s{sess}.png",
+                     band=False, sess=sess)
+    dc = dose_check(rec, d)
+    dc.to_csv(OUT / "dose_check.csv", index=False)
+    facts["dose_check"] = dc
     controller_summary_figure(cm, OUT / "controller_summary.png")
+    controller_headline_figure(cm, OUT / "controller_headline.png")
+    dx = dose_vs_exposure(b, cm, facts["mpa_ratio"])
+    facts.update(dose_vs_exposure_figure(dx, OUT / "dose_vs_exposure.png"))
     noise_figure(cm, OUT / "noise_floor.png")
     (OUT / "README.md").write_text(readme(facts, cm))
     print((OUT / "README.md").read_text())

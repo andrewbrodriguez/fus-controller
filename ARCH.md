@@ -31,7 +31,11 @@ deferred — the lab asked to lead with cumulative 2nd-harmonic AUC.
 **Settled with the PI on 2026-09-18:** recording→target mapping, the notch for section
 orientation, the anti-GFP stain as the delivery measure, and a ~2 × 2 × 3 mm focal spot.
 
-**Open:** capsid assignment per mouse; which marker CY5 shows on Mouse 2; review verdicts
+**Settled 2026-10-19:** assume AAV9 for every animal (Mouse 2's summary says AAV9-GFP at
+7.6e12 vg/kg); CY5 is NeuN; no contrast MRI or confocal; exposures vary and are handled by
+per-slice normalisation.
+
+**Open:** section protocol (thickness, spacing, order); review verdicts
 (lost to a since-fixed bug); a hand count for the cell pilot (decision 001); tissue
 throughput this term; the remaining acoustic sessions.
 

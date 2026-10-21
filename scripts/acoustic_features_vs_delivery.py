@@ -50,10 +50,10 @@ from sklearn.linear_model import LinearRegression, RidgeCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
+from fus import archive
 from fus.features import FEATURES, target_features
 
 ROOT = Path(__file__).resolve().parents[1]
-ACOUSTIC = ROOT / "data/acoustic/20260611"
 DELIVERY = ROOT / "results/histology/slices/cumulative_dose_delivery.csv"
 OUT = ROOT / "results/acoustic_features"
 CACHE = OUT / "target_features.csv"
@@ -86,12 +86,9 @@ def features() -> pd.DataFrame:
     rows = []
     for mouse, targets in RECORDINGS.items():
         for target, files in targets.items():
-            paths = [ACOUSTIC / f"Mouse_Cntr_{mouse:02d}_{f}.mat" for f in files]
-            if not all(p.exists() for p in paths):
-                print(f"  mouse {mouse} target {target}: recording missing, skipped")
-                continue
             print(f"  mouse {mouse} target {target} ({', '.join(files)})")
-            rows.append({"mouse": mouse, "target": target, **target_features(paths)})
+            with archive.paths(mouse, files) as paths:
+                rows.append({"mouse": mouse, "target": target, **target_features(paths)})
     d = pd.DataFrame(rows)
     OUT.mkdir(parents=True, exist_ok=True)
     d.to_csv(CACHE, index=False)

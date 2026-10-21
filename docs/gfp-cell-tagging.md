@@ -110,9 +110,8 @@ git-ignored.
   overall, but many individual cells don't match, which fits each colour being in focus at
   a different depth. This was measured once in the 500 µm crop and isn't scripted.
   Segmentation therefore uses NeuN alone.
-- **What CY5 shows on Mouse 2 is unconfirmed.** Our docs call it NeuN on the basis of
-  Mouse 1, but the lab's protocol uses CY5 for NeuN, GFAP or S100β depending on the panel.
-  Ask Nick before reading these as neurons.
+- **CY5 is NeuN on Mouse 2**, confirmed by the lab's summary (`docs/lab/Mouse_02_Summary.pdf`,
+  2026-09-29). The protocol allows GFAP or S100β on CY5, so check each new animal's panel.
 - **One crop, one section, one animal.** Nothing here has been run across targets or mice.
 
 ## In production: pipeline B

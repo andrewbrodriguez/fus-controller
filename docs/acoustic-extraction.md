@@ -79,7 +79,7 @@ python -m fus <files...> [options]
 ### Summarise one recording
 
 ```bash
-python -m fus data/acoustic/20260611/Mouse_Cntr_01_Target1.mat
+python -m fus Mouse_Cntr_01_Target1
 ```
 
 ```
@@ -125,7 +125,7 @@ When the safety interlock fired during a run, the summary says so:
 ### Reduce a whole experiment day
 
 ```bash
-python -m fus data/acoustic/20260611/*_Target*.mat --csv results/day1.csv --quiet
+python -m fus --mouse 1 2 3 4 5 6 --csv results/day1.csv --quiet
 ```
 
 One row per target, ready to join against `Mouse_Controller_Data.xlsx`. Loading is
@@ -155,7 +155,8 @@ python -m fus <file.mat> --save-plots results/figures  # PNG
 ```python
 from fus import extract
 
-ex = extract("data/acoustic/20260611/Mouse_Cntr_01_Target1.mat")
+with archive.paths(1, ["Target1"]) as (path,):   # from data/acoustic/US_Data.zip
+    ex = extract(path)
 
 print(ex.summary())
 

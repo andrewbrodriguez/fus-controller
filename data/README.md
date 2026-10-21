@@ -14,7 +14,9 @@ data/
 ├── roi_locations.csv             tracked — hand-finetuned T1–T6 shapes per section (export px),
 │                                 from the finetune step of notebooks/ingest_new_histology.ipynb
 ├── acoustic/                     git-ignored
-│   └── <YYYYMMDD>/               one folder per experiment day, 6 mice each
+│   └── US_Data.zip               all 4 sessions as received from Dropbox (48.6 GB, stored, not
+│                                 compressed). The ONLY copy: never unpack it; read it with
+│                                 fus.archive. Inside, one folder per day (MMDDYY_FUS_AAV_Controller):
 │       ├── Mouse_Cntr_XX_BL.mat          baseline, before microbubbles
 │       ├── Mouse_Cntr_XX_TargetYY.mat    one per target (6 per mouse), ~0.4–0.6 GB
 │       └── Mouse_Cntr_XX_*.jpg           per-run spectrogram screenshots
@@ -33,10 +35,20 @@ data/
         └── _Control_02_Slide_0{1-4}_/    tile stacks
 ```
 
-Currently synced locally: **one** acoustic day (`20260611`, mice 1–6) and **two**
-imaged mice (`Mouse_01`, and `Mouse_02` from 2026-09-29). Mouse 2's recordings are in the
-6/11 session, so both halves exist for it. The summary sheet covers **24 mice × 6
-targets**, so the remaining acoustic days still need to be pulled from Dropbox.
+On disk: **all four acoustic sessions** (2026-10-19, `US_Data.zip`: 06-11 mice 1–6, 06-16
+mice 7–12, 07-01 mice 13–18, 07-07 mice 19–24; 145 sonication recordings) and **two** imaged
+mice (`Mouse_01`, and `Mouse_02` from 2026-09-29). The zip's `Mouse_Controller_Data.xlsx` and
+`nt_ExtractHarmonicData.m` are byte-identical to the copies here. The previously unpacked
+`20260611/` folder was CRC-identical to the zip's 06-11 folder and was deleted on 2026-10-19,
+so there is one copy of every recording. Day-3 and day-4 baselines are named `_Baseline`
+rather than `_BL`. Mouse 17's `Target5Repeat.mat` is position 6 (`scripts/sonication_eda.py`).
+
+```python
+from fus import archive
+for m in archive.recordings():            # Member(day, mouse, recording, ...)
+    with archive.local_path(m) as path:   # temporary copy (~0.3 s), deleted after
+        ex = extract(path)
+```
 
 ## Which recording went where
 

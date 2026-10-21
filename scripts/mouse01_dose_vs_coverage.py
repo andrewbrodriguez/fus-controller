@@ -40,11 +40,11 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from fus import archive
 from fus import extract
 from fus.histology import slot_to_target
 
 ROOT = Path(__file__).resolve().parents[1]
-ACOUSTIC = ROOT / "data" / "acoustic" / "20260611"
 SLOTS = ROOT / "results" / "histology" / "mouse01_slots.csv"
 OUT = ROOT / "results" / "histology" / "mouse01_dose_vs_coverage"
 SCATTER = ROOT / "results" / "histology" / "mouse01_dose_delivery_scatter.png"
@@ -82,9 +82,9 @@ def coverage_by_target(sections: pd.DataFrame) -> pd.DataFrame:
 
 def recordings() -> dict[str, dict]:
     out = {}
-    for path in sorted(ACOUSTIC.glob("Mouse_Cntr_01_Target*.mat")):
-        r = extract(path).to_dict()
-        out[path.stem.removeprefix("Mouse_Cntr_01_")] = r
+    for m in (m for m in archive.recordings() if m.mouse == 1):
+        with archive.local_path(m) as path:
+            out[m.recording] = extract(path).to_dict()
     return out
 
 

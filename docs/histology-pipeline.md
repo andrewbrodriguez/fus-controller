@@ -308,5 +308,6 @@ turned 180°.
    unknown, and which sections fall inside the 3 mm focal column is therefore unknown.
 2. **What the FITC-only signal is** at target 6 (autofluorescence, blood, or failed
    staining).
-3. **Imaging settings** — whether exposure is held fixed across sessions, which any
-   intensity comparison between animals depends on.
+3. **Imaging settings** — not fixed across slides or animals (accepted 2026-10-19). Compare
+   thresholded measures only (coverage over a per-section background; B's per-slice fold),
+   never raw intensity between sections.

@@ -190,7 +190,8 @@ exactly how a spurious result gets published.
 
 1. **Is there any reason segmentation must be the primary endpoint** that isn't captured
    above — a reviewer expectation, a comparison to another group's work, a planned figure?
-2. **Is confocal time available** for a subset? Z-stacks would remove the `z = 1`
+2. **Is confocal time available** for a subset? *No (2026-10-19), so the hand count on
+   widefield is the validation.* Z-stacks would remove the `z = 1`
    objection to B outright and would make cell-type specificity properly quantifiable.
 3. **Is the 0.85 threshold the right bar**, or should it be stricter given this feeds a
    published dose-response?

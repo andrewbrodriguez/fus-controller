@@ -5,7 +5,9 @@ raw per-burst acoustic emission spectra to cavitation metrics that can be
 regressed against delivered AAV.
 
 >>> from fus import extract
->>> ex = extract("data/acoustic/20260611/Mouse_Cntr_01_Target1.mat")
+>>> from fus import archive
+>>> with archive.paths(1, ["Target1"]) as (path,):
+...     ex = extract(path)
 >>> print(ex.summary())
 """
 

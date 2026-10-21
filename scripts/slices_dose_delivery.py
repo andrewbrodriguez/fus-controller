@@ -58,10 +58,10 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from fus import archive
 from fus import extract, orientation
 
 ROOT = Path(__file__).resolve().parents[1]
-ACOUSTIC = ROOT / "data/acoustic/20260611"
 OUT = ROOT / "results/histology/slices"
 DOSES = OUT / "doses.csv"
 MICE = (1, 2)
@@ -102,7 +102,8 @@ def doses() -> pd.DataFrame:
     rows = []
     for mouse, targets in RECORDINGS.items():
         for target, files in targets.items():
-            recs = [extract(ACOUSTIC / f"Mouse_Cntr_{mouse:02d}_{f}.mat").to_dict() for f in files]
+            with archive.paths(mouse, files) as paths:
+                recs = [extract(p).to_dict() for p in paths]
             rows.append({"mouse": mouse, "target": target,
                          "dose": sum(r["cum_2nd_harmonic_xlsx"] for r in recs),
                          "n_sonications": len(files)})
