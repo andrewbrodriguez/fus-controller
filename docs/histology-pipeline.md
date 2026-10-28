@@ -304,8 +304,12 @@ turned 180°.
 
 ## Still open
 
-1. **Section order and depth** — series 2–6 need not be in depth order, the spacing is
-   unknown, and which sections fall inside the 3 mm focal column is therefore unknown.
+1. **Section order and depth.** Partly answered (N. Todd, 2026-10-23, pending confirmation
+   with Josh): sections are **30 µm** thick and **~360 µm apart** (every 12th kept). Mouse 2's
+   12 are "two pairs of 6, some are adjacent", which probably means two offset series of 6.
+   The order on the slides, the starting depth, and Mouse 1's protocol are still unknown, so
+   which sections fall inside the 3 mm focal column is still unknown.
+   `fus.reconstruct` still uses its 250 µm default.
 2. **What the FITC-only signal is** at target 6 (autofluorescence, blood, or failed
    staining).
 3. **Imaging settings** — not fixed across slides or animals (accepted 2026-10-19). Compare

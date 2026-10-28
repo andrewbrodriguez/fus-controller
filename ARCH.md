@@ -24,9 +24,9 @@ Moment-in-time detail, including blockers and next steps: [`notes/current.md`](n
 hand orientation and finetuning, the per-slice dose analysis, a full-resolution viewer, the
 cell pipeline (B) on a GPU StarDist environment, 33 tests, and method docs are all in place.
 
-**Behind plan, and the limiting factor:** tissue. Two of 24 brains are imaged, and one of four
-acoustic sessions is synced. The subharmonic/ultraharmonic work in phase 1 was deliberately
-deferred — the lab asked to lead with cumulative 2nd-harmonic AUC.
+**Behind plan, and the limiting factor:** tissue. Two of 24 brains are imaged, four more are
+being imaged on 2026-10-26, and all four acoustic sessions are processed. The
+subharmonic/ultraharmonic work in phase 1 was deliberately deferred — the lab asked to lead with cumulative 2nd-harmonic AUC.
 
 **Settled with the PI on 2026-09-18:** recording→target mapping, the notch for section
 orientation, the anti-GFP stain as the delivery measure, and a ~2 × 2 × 3 mm focal spot.
@@ -35,9 +35,12 @@ orientation, the anti-GFP stain as the delivery measure, and a ~2 × 2 × 3 mm f
 7.6e12 vg/kg); CY5 is NeuN; no contrast MRI or confocal; exposures vary and are handled by
 per-slice normalisation.
 
-**Open:** section protocol (thickness, spacing, order); review verdicts
-(lost to a since-fixed bug); a hand count for the cell pilot (decision 001); tissue
-throughput this term; the remaining acoustic sessions.
+**Answered 2026-10-23:** sections are 30 µm thick, ~360 µm apart (pending confirmation);
+four more brains are being imaged 10/26. All four acoustic sessions were processed on 10/19.
+
+**Open:** how to normalise delivery across animals (call with N. Todd, 10/28); section
+order and starting depth; review verdicts (lost to a since-fixed bug); a hand count for the
+cell pilot (decision 001).
 
 ## Description
 An independent study bridging computational modeling with wet-lab biological measurement, applying machine learning and signal processing to a translational medicine problem. The blood-brain barrier (BBB) is a major obstacle for delivering novel gene therapies (AAVs) to the central nervous system. Focused Ultrasound BBB (FUS-BBB) opening is a promising, non-invasive technique that uses targeted acoustic waves and circulating microbubbles to temporarily increase BBB permeability. This project designs a dynamic feedback controller that processes acoustic emissions in real time to predict and control the quantity of AAV delivered to the brain.

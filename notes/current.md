@@ -1,6 +1,6 @@
-# Where the project is — updated 2026-10-15 (last working session 2026-10-06)
+# Where the project is — updated 2026-10-25
 
-Week ~7 of 13. This file is the moment-in-time picture; the durable method write-ups are in
+Week ~9 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
 
 ---
@@ -17,7 +17,25 @@ background). They agree at r = 0.98 across 96 ROIs. Within each slice, higher-do
 tend to carry more GFP in both animals: positive rank correlation in 11/11 slices with clear
 signal under A (median ρ +0.54) and 10/11 under B (+0.61). Neither measure has been checked
 against a hand count, and the review verdicts still need re-tagging. Tissue remains the
-limit: 2 of 24 brains imaged. More mice are expected soon, but no date has been confirmed.
+limit: 2 of 24 brains imaged. **Four more are sectioned and stained and are being imaged Mon
+10/26.** Call with N. Todd **Wed 10/28, 4:30** (proposed) on normalising delivery across
+animals; prep is in [`meeting_10-28.md`](meeting_10-28.md).
+
+## Since 10/20
+
+- **Emailed Nick 10/20; he replied 10/23** (thread in `docs/lab/README.md`):
+  - **Four brains** are being imaged 10/26.
+  - **Sections:** 30 µm thick, ~360 µm apart (to be confirmed with Josh). Mouse 2 is "two
+    pairs of 6, some are adjacent".
+  - **Metrics:** his preferred outcome measures are GFP+ cells summed over sections, then
+    area above a per-mouse threshold (non-GFP ROI mean + 1–2 SD), then background-normalised
+    mean intensity.
+  - **Ceiling hits:** he read them as time-within-session. They weren't; see the meeting note.
+- **Checked 10/25** (not yet scripted; listed under "Findings that exist only here"):
+  - Raw totals don't compare across mice.
+  - ΣGFP+ ÷ ΣNeuN needs no per-animal rescale and correlates best: r = +0.77 pooled.
+  - Ceiling hits are mostly at the lateral targets.
+  - NeuN profiles hint at three adjacent pairs in Mouse 2.
 
 ## Since 9/30
 
@@ -187,10 +205,11 @@ T5 0.37, T6 1.60 (interlock fired).
    `scripts/slices_dose_delivery.py`; `scripts/mouse02_dose_vs_coverage.py` also needs ✓s.
 2. **Hand count for the cell pilot.** A blinded neuron and GFP+ count in a plume core, a
    plume edge and background. This is decision 001's pre-registered test.
-3. **Next email to Nick:** section protocol (thickness, spacing, order, starting depth) and
-   the next tissue. Laid out in [`next-email-todd.md`](next-email-todd.md). The template/mask
-   files are in `docs/lab/` (10/20).
-4. **Tissue throughput.** 2 of 24 brains.
+3. **Cross-animal normalisation**, the agenda for 10/28 ([`meeting_10-28.md`](meeting_10-28.md)).
+   Decide the metric and threshold rule **before** measuring the four new brains.
+   **Still open on sectioning:** which Mouse 2 sections pair up, the cutting order, the
+   starting depth, and Mouse 1's protocol. The email went out 10/20 ([`next-email-todd.md`](next-email-todd.md)).
+4. **Tissue throughput.** 2 of 24 brains imaged; 4 more due after 10/26.
 5. ~~Remaining acoustic sessions~~ **Done 10/19**: all four sessions are in `data/acoustic/US_Data.zip`.
 6. **FITC-only signal at Mouse 1 T6.** Unexplained; `notebooks/view_slice.ipynb` can now show
    it at full resolution (`section_s4`).
@@ -208,6 +227,17 @@ written into `docs/`**. Re-derive before citing:
   conversions, so don't use them as independent predictors.
 - The dose→emission slope by region runs from 88 (region 2) to 183 (region 6).
 - Stored burst count = programmed + 15 for mice 1–6 and + 12 for mice 7–24.
+- **(10/25) Cross-animal delivery**, from `results/histology/slices/cumulative_dose_delivery.csv`,
+  12 targets. Pooled r with dose for ΣGFP+ cells ÷ ΣNeuN cells is +0.77 (+0.69 without the
+  control; ρ +0.84). That beats dividing by each animal's mean target (+0.68). Raw totals
+  give +0.09 (cells) and +0.31 (area), because Mouse 1 has 4 slices and Mouse 2 has 12, and
+  NeuN per ROI per slice is ~1,600 (M1) vs ~5,100 (M2).
+- **(10/25) Ceiling hits by position** (`results/acoustic_eda/recordings.csv`, mice 2–24): P1–P6
+  had 0, 6, 1, 0, 5 and 3 hits of 23. Lateral P2/P5 account for 11/46 against 4/92 elsewhere
+  (Fisher p 0.001). Lateral hits per session were 1, 1, 3 and 6.
+- **(10/25) Candidate adjacent Mouse 2 pairs** (NeuN-count profile over the six ROIs, r ≥ 0.98):
+  slide01_s2↔slide04_s2, slide01_s3↔slide04_s3, slide02_s3↔slide02_s4. Weak evidence; ask
+  Josh, and don't set the order from it.
 - DAPI vs NeuN in the 500 µm crop: no global shift (~1 px), but many individual cells don't
   line up. That fits each colour being in focus at a different depth.
 
@@ -239,14 +269,15 @@ written into `docs/`**. Re-derive before citing:
 
 1. Look over the pipeline B figures and the 10/6 ones (`cumulative_pooled.png`,
    `results/acoustic_features/model_comparison.png`). No human has looked at them yet.
-2. Re-tag review verdicts, re-run the slice analysis, and send Nick an update with the
-   two-animal cumulative result and the questions above.
+2. **Call with Nick 10/28** (`meeting_10-28.md`). Settle the cross-animal metric and
+   thresholds, then script them into `scripts/slices_dose_delivery.py`, and ingest the four
+   new brains under those rules. Re-tag review verdicts first.
 3. Hand-count the cell pilot (core, edge, background) and score StarDist plus the GFP+ calls.
    That settles decision 001.
 4. Look at Mouse 1 T4 in the benchmark (the one failing check) and decide whether 0.10 is
    the right tolerance.
 5. Script the spreadsheet EDA into `docs/controller-data-eda.md`.
-6. When new tissue arrives: `notebooks/ingest_new_histology.ipynb`.
+6. When new tissue arrives (imaging 10/26): `notebooks/ingest_new_histology.ipynb`.
 7. Later: port the feature extraction to MATLAB for the lab.
 
 ## Deliverable and timing

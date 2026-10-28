@@ -383,6 +383,8 @@ week 11.
 6. Were all animals stained and imaged in one batch, or several, and is imaging exposure
    fixed across sessions?
 7. Realistic tissue throughput this term (§12). Two more datasets are expected shortly.
-8. Section order, spacing, and which sections fall inside the 3 mm focal column.
+8. Section order, spacing, and which sections fall inside the 3 mm focal column. *Partly
+   answered 2026-10-23: 30 µm sections, ~360 µm apart (to be confirmed with Josh); Mouse 2 is
+   probably two offset series of 6. Order and starting depth are still open.*
 9. Is there an untreated animal or another negative reference for the threshold (§8)?
    Mouse 1's no-FUS control exists only because of the targeting mistake.

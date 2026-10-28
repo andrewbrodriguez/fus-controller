@@ -1,5 +1,10 @@
 # Next email to Dr. Todd
 
+> **Sent 2026-10-20** in a shortened form. It left out the Mouse 17 rename, Mouse 6 T2, the
+> depth-mismatch detail, and which mice come next. Nick replied 10/23; the thread is
+> transcribed in `docs/lab/README.md`, and follow-up is in `notes/meeting_10-28.md`. Kept for
+> the record.
+
 ## Draft (2026-10-20)
 
 Attach:

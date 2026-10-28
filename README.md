@@ -87,7 +87,7 @@ As of 2026-09-30, week ~5 of 13:
 - **Acoustics:** the feature extraction is built and reproduces the lab's numbers.
 - **Tissue:** 2 of 24 brains are imaged. Both (16 sections) are oriented by hand, measured, and joined to dose. Within slices, dose and delivery rise together in both animals.
 - **Two delivery measures:** pixel coverage (pipeline A) and the fraction of neurons tagged GFP+ (pipeline B) run on every target ROI and agree closely. Pipeline B still needs a hand count to validate it.
-- **Still open:** the section protocol (thickness, spacing, order) and review verdicts for each slice (in place of a post hoc low-signal cutoff). 3 of 4 acoustic sessions aren't synced yet.
+- **Still open:** the section order and starting depth (thickness 30 µm and spacing ~360 µm per N. Todd, 2026-10-23, pending confirmation), how to normalise delivery across animals, and review verdicts for each slice (in place of a post hoc low-signal cutoff). All four acoustic sessions (24 mice) are processed.
 
 The limiting factor is still tissue.
 

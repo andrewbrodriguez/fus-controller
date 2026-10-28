@@ -45,3 +45,39 @@ Transcribed from a screenshot on 2026-10-19; the screenshot was then deleted.
   with the delivery and harmonic doses for the different targets. Updated pdf attached. Also
   looks like there was some rotation in this mouse, with the right side targets being
   higher and the left side targets being lower."
+
+## Email chain (A. Rodriguez ↔ N. Todd, re "Updates and questions")
+
+Transcribed from the thread Andrew pasted on 2026-10-25. Meeting prep: `notes/meeting_10-28.md`.
+
+- **2026-10-20 8:16 pm, Andrew → Nick.** Sent a shortened version of the draft in
+  `notes/next-email-todd.md`, with two figures attached (`cumulative_pooled.png` and
+  `dose_vs_exposure.png`). It covered the cumulative result (r = 0.73 area, 0.68 cells; 0.62 /
+  0.57 without the control) and dose vs exposure (r = 0.77, ~2.7× spread), and asked about
+  normalising across mice, sectioning, ceiling hits and the next mouse. It left out the Mouse 17
+  rename, Mouse 6 T2, and the depth mismatch.
+- **2026-10-23 5:51 pm, Nick → Andrew.**
+  - **Tissue:** "Josh just finished sectioning and staining more brains - I believe 4 more,
+    which I am going to image on Monday [10/26]."
+  - **Metrics:** three candidate outcome metrics:
+    - **Number of GFP+ cells:** "add up across sections within fixed area ROIs and Total
+      #cells is comparable across targets and mice."
+    - **Area above threshold:** fixed ROIs summed over sections, giving total area or volume.
+      The threshold can't be shared across mice: "put an ROI in a non-GFP region, get the
+      average signal for that mouse and set the threshold at something like 1 or 2 stds above
+      the mean."
+    - **Mean GFP signal:** normalise by the same non-GFP ROI's mean. Combining across sections
+      is "tricky … We can discuss this one more."
+    - He also linked a ChatGPT answer (`chatgpt.com/s/t_6adbc746e6f88191b670ac2f47a896e5`,
+      "Normalize GFP intensity"). Not transcribed: the page doesn't render without logging in.
+  - **Sectioning:** "Section thickness is 30 microns. For spacing, I believe they are 12 * 30
+    um = 360 microns apart. But let me confirm with Josh. Although, for mouse 2 where we you
+    have 12 sections, I think you got two pairs of 6, some are adjacent."
+  - **Ceiling:** "I wouldn't have predicted it would be related to time in the session - if
+    anything I would think intensity would go down as microbubble dose builds up with
+    multiple sonication targets." He read "later sessions" as later *within* a session, but the
+    email meant the four surgery days.
+  - **Next step:** "Let's find a time to chat over zoom next week for more on #1. I can do most
+    times M - W."
+- **2026-10-24 11:28 am, Andrew → Nick.** Proposed Wednesday 10/28 at 4:30. No confirmation in
+  the pasted thread.
