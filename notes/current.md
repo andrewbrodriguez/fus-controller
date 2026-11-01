@@ -1,4 +1,4 @@
-# Where the project is — updated 2026-10-25
+# Where the project is — updated 2026-11-01
 
 Week ~9 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
@@ -20,6 +20,36 @@ against a hand count, and the review verdicts still need re-tagging. Tissue rema
 limit: 2 of 24 brains imaged. **Four more are sectioned and stained and are being imaged Mon
 10/26.** Call with N. Todd **Wed 10/28, 4:30** (proposed) on normalising delivery across
 animals; prep is in [`meeting_10-28.md`](meeting_10-28.md).
+
+## Since 10/28 (updated 2026-11-01)
+
+- **Mice 3, 4, 5 imaged and measured.** Raw scans are in `data/histology/Mouse_0{3,4,5}/`, and
+  exports in `data/processed/histology/.../ds4`. The new format is one section per `.vsi`, named
+  `Image_Cntr_<mouse>.<well>.<slide>_<scan>` (export prefix `w<well>sl<slide>_<scan>`).
+  There are **three channels, CY5/TRITC/FITC, with no DAPI**: `export_sections` and `fus.cells`
+  now pick channels by name, not by position.
+- **Section counts:** Mouse 3 has 7 (2 excluded), Mouse 4 has 5 (1 excluded) and Mouse 5 has
+  3 (1 excluded). The excluded sections have no note saying why. Andrew clicked, finetuned
+  and reviewed all of them (✓). Mouse 5 has well 10 only. Every QuPath reader finds just these
+  three scans. N. Todd said more Mouse 5 data is "in there" in QuPath; ask him which file.
+  **Mouse 6's zip was empty**, so email Nick. Mouse 3's `_Image_Cntr_3.11.2_03_/` also holds a
+  stray `_Image_Cntr 3.10.2_01_` stack and a `.vsi` that won't open.
+- **Pipelines A and B were run on all 11 new sections; `scripts/slices_dose_delivery.py` now covers
+  Mice 1–5** (`results/histology/slices/README.md`):
+  - Within-slice ρ with dose is positive in 17/17 clear slices under A and 16/17 under B
+    (median +0.60 and +0.61), and in 25/27 and 24/27 counting every slice.
+  - Pooled over 30 targets: ΣGFP+/ΣNeuN r = +0.66, area ÷ animal mean +0.61, cells ÷ animal
+    mean +0.56.
+  - Per mouse, ΣGFP+/ΣNeuN r runs from +0.64 to +0.85.
+  - Mouse 4 is the weakest: area r = +0.45 (its T3, dose 2.59, is high, but T2 is high in two
+    T2-only sections).
+  - **The cross-animal metric is still not decided.** The pooled figure shows all three side by
+    side.
+- **Coverage varies a lot between sections, most likely because of cut depth.** Sections with more
+  tissue carry more GFP. Some sections show only T2, in Mouse 4 and in Mouse 2 alike;
+  that suggests the lateral plumes reach higher, into cortex. This is a hypothesis, not tested.
+- **Meeting 10/28 (raw notes in `meeting_10-28.md`):** the final batch's virus is "AVcpp16".
+  That contradicts the assume-AAV9 rule; find out which mice it covers.
 
 ## Since 10/20
 

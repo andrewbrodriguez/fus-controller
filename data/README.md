@@ -32,8 +32,17 @@ data/
     │   └── _Image_/              tile stacks (.ets) backing the .vsi
     └── Mouse_02/
         ├── Control_02_Slide_0{1-4}.vsi   one scan per slide, 3 sections each
-        └── _Control_02_Slide_0{1-4}_/    tile stacks
+        ├── _Control_02_Slide_0{1-4}_/    tile stacks
+    ├── Mouse_0{3,4,5,6}_IF_Images.pptx   lab IF slide decks, 2026-11-01 (images only, no text):
+    │                         7, 5, 3 and 2 images, matching the scans for Mice 3-5
+    └── Mouse_0{3,4,5}/           received 2026-11-01; Mouse 6's zip was empty
+        ├── Image_Cntr[_ ]<mouse>.<well>.<slide>_<scan>.vsi   one section each, CY5/TRITC/FITC
+        │                         (no DAPI); export prefix w<well>sl<slide>_<scan>
+        └── *_01_Overview.vsi     slide overviews, no sections (skipped on export)
 ```
+
+Sections: Mouse 3 has 7, Mouse 4 has 5, Mouse 5 has 3. Mouse 3's `_Image_Cntr_3.11.2_03_/` also
+holds a stray `_Image_Cntr 3.10.2_01_/` tile stack and a `.vsi` that won't open (asked N. Todd).
 
 On disk: **all four acoustic sessions** (2026-10-19, `US_Data.zip`: 06-11 mice 1–6, 06-16
 mice 7–12, 07-01 mice 13–18, 07-07 mice 19–24; 145 sonication recordings) and **two** imaged

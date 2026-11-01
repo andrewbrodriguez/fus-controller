@@ -32,7 +32,7 @@ One mouse, one AAV injection, six planned targets. At **target 1** the controlle
 That is the whole premise: where the acoustic signal says the BBB opened, the virus got in. The open question — and the reason this project exists — is ***how much***. Plotting all six Mouse 1 targets, acoustic dose against delivery:
 
 <p align="center">
-  <img src="docs/figures/mouse01-dose-delivery-scatter.png" alt="Scatter of cumulative second-harmonic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line; r = 0.85" width="560">
+  <img src="results/histology/mouse01_dose_delivery_scatter.png" alt="Scatter of cumulative second-harmonic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line; r = 0.85" width="560">
 </p>
 
 The r = 0.85 comes almost entirely from the two ends: the unsonicated control, and target 1, which was sonicated three times. Among the four targets sonicated once (2, 4, 5 and 6), doses between 0.95 and 1.35 produced anywhere from 18% to 48% coverage, with no clear trend. That scatter is what a delivery-aware controller has to learn, and it takes more animals than one to learn it.

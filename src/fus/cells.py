@@ -61,7 +61,7 @@ THRESHOLD = 4.05          # fold over the section's background
 WORKERS = 6               # StarDist processes at once (one per ROI)
 MARGIN_UM = 30.0           # box margin so cells on the ROI edge are segmented whole
 DS4 = 4                    # the ds4 exports are 4x downsampled from full resolution
-NEUN, GFP = 3, 2           # channel order DAPI, FITC, TRITC, CY5
+NEUN, GFP = "CY5", "TRITC"  # by name: Mice 1-2 have DAPI, Mouse 3 on does not
 _GPU_ENV = ROOT / "segmentation_alpha/.venv-stardist-gpu/bin/python"
 STARDIST_PYTHON = Path(os.environ.get(
     "FUS_STARDIST_PYTHON",
@@ -83,9 +83,7 @@ def source(mouse: int, section: str) -> tuple[Path, int]:
     """The .vsi and series a section was exported from (section_s4, slide01_s3, ...)."""
     prefix, series = re.fullmatch(r"(.+)_s(\d+)", section).groups()
     raw = ROOT / f"data/histology/Mouse_{mouse:02d}"
-    if prefix == "section":
-        return raw / "Image.vsi", int(series)
-    return next(raw.glob(f"*Slide_{int(prefix.removeprefix('slide')):02d}.vsi")), int(series)
+    return histology.find_vsi(raw, prefix), int(series)
 
 
 def section_rois(mouse: int, section: str) -> tuple[dict[int, rois.Roi], str]:
@@ -154,7 +152,7 @@ def export_and_segment(vsi: Path, series: int, jobs: dict, verbose: bool = True)
             print(f"  T{t} exported -> segmenting", flush=True)
         log = open(Path(str(labels)).with_suffix(".log"), "w")  # not a pipe: TF is chatty
         running.append(subprocess.Popen(
-            [str(STARDIST_PYTHON), str(SEGMENT_SCRIPT), "--channel", str(NEUN), crop, str(labels)],
+            [str(STARDIST_PYTHON), str(SEGMENT_SCRIPT), "--channel", str(histology.channel_names(crop).index(NEUN)), crop, str(labels)],
             stdout=log, stderr=subprocess.STDOUT, env=_child_env()))
         running[-1].log = log
 
@@ -180,7 +178,8 @@ def tag(crop: Path, labels_path: Path, roi_full: rois.Roi, background: float,
     ``gfp_fold`` = the cell's mean raw anti-GFP / ``background``.
     """
     with tifffile.TiffFile(crop) as tf:
-        gfp = tf.series[0].levels[0].asarray()[GFP].astype(np.float32) / background
+        gfp = tf.series[0].levels[0].asarray()[histology.channel_names(crop).index(GFP)]
+        gfp = gfp.astype(np.float32) / background
     labels = tifffile.imread(labels_path)
     ea, eb = roi_full.axes()
     rows = []

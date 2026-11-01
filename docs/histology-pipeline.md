@@ -103,7 +103,7 @@ untreated animal or a second negative region.
 
 ## Mouse_01 results
 
-![Section s4: GFP+ masks and the six ROIs](figures/histology-s4-slots.png)
+![Section s4: GFP+ masks and the six ROIs](../results/histology/figures/section_s4_slots.png)
 
 Section s4. Left: NeuN (log) with the GFP+ union. Middle and right: GFP+ masks per
 channel. Slot 3 reads 0.0 % (FITC) and 1.9 % (TRITC). Slot 6 is 76 % in FITC and 6.7 %

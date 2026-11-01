@@ -16,3 +16,18 @@ mouse,section,centre_row,centre_col,front_row,front_col,notch_row,notch_col,excl
 2,slide04_s2,3876.4,3590.4,-128.9,3061.0,3254.1,7047.8,,,typed 2026-09-30: notch bottom-right; automatic fit poor (scale 1.22; slot 2 off tissue); little GFP - outside focal column?; review of old GFP-fit placement: wrong
 2,slide04_s3,3917.7,3256.5,2571.7,7560.3,7832.2,4387.4,,,typed 2026-09-30: notch bottom; notch at bottom middle; automatic fit looked right; review of old GFP-fit placement: wrong
 2,slide04_s4,4214.3,4404.8,180.0,4948.2,3769.7,354.1,,,typed 2026-09-30: notch bottom-left; automatic fit looked right; review of old GFP-fit placement: wrong
+3,w10sl1_01_s2,3718.0,1897.3,2335.7,6340.2,484.5,552.1,,ok,
+3,w10sl1_02_s0,2854.2,2435.8,4795.3,5434.8,-155.0,4911.0,,ok,
+3,w10sl1_03_s0,,,,,,,yes,,
+3,w10sl2_02_s0,4522.2,4415.5,727.6,2507.7,6241.4,830.6,,ok,
+3,w11sl1_02_s0,4650.5,4823.6,2476.4,839.5,909.1,6724.7,,ok,
+3,w11sl2_02_s0,4775.3,4537.9,281.6,5080.0,5140.2,8260.1,,ok,
+3,w11sl2_03_s0,,,,,,,yes,,
+4,w10sl1_02_s0,5672.5,3655.9,318.6,2001.7,4231.7,7480.1,,ok,
+4,w10sl2_02_s0,,,,,,,yes,,
+4,w11sl1_02_s0,6373.1,3878.9,1368.3,4822.4,5579.3,-194.0,,ok,
+4,w11sl1_03_s0,4705.3,3264.3,644.7,6495.9,1159.5,-591.9,,ok,
+4,w11sl2_02_s0,5962.8,3894.4,924.9,5258.4,6908.7,7956.6,,ok,
+5,w10sl1_02_s0,4683.8,5702.4,301.6,2441.0,2506.5,9055.7,,ok,
+5,w10sl1_03_s0,,,,,,,yes,,
+5,w10sl2_02_s0,3405.8,1815.2,4621.9,6670.7,7608.4,465.0,,ok,

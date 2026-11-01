@@ -17,7 +17,7 @@ Moment-in-time detail, including blockers and next steps: [`notes/current.md`](n
 |---|---|---|
 | 1 — Preparation & data (wk 1–4) | Import, filter, feature extraction | **Done and ahead.** `nt_ExtractHarmonicData.m` ported to Python and reproduces the lab's numbers exactly; harmonic and wideband bands, cumulative dose, interlock detection |
 | 2 — Experimental (wk 5–8) | In vivo work, sectioning, staining, microscopy | **Partly, out of order.** Two brains measured (16 sections), oriented and finetuned by hand in napari; hand placement passes 4 of 5 checks against Mouse 1's answer key. Two delivery measures run on every target ROI: pixel coverage (A) and GFP+ neuron fraction (B, StarDist on NeuN), which agree at r = 0.98. B is not yet hand-validated |
-| 3 — Integration & ML (wk 9–12) | Align ground truth to acoustics, fit a model | **Started early.** Dose and delivery are joined per slice for both mice and both measures: within-slice ρ is positive in 11/11 slices with clear signal (A) and 10/11 (B). No model yet — two animals |
+| 3 — Integration & ML (wk 9–12) | Align ground truth to acoustics, fit a model | **Started early.** Dose and delivery are joined per slice for five mice (1–5) and both measures: within-slice ρ is positive in 17/17 slices with clear signal (A) and 16/17 (B); pooled ΣGFP+/ΣNeuN vs dose r = +0.66 over 30 targets. No model yet |
 | 4 — Report (wk 13) | Draft manuscript | Not started |
 
 **Ahead of plan:** the computational side. Feature extraction, the histology pipeline with

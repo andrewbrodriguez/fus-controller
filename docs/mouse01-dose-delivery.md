@@ -26,7 +26,7 @@ plotted.
 
 ## The result
 
-![Scatter of acoustic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line](figures/mouse01-dose-delivery-scatter.png)
+![Scatter of acoustic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line](../results/histology/mouse01_dose_delivery_scatter.png)
 
 | | Value |
 |---|---|
@@ -159,7 +159,7 @@ radius of 1.0 mm — half the ~2 mm lateral focal spot — scaled by the fitted 
 
 Coverage is the fraction of tissue pixels inside the circle that are GFP+.
 
-![Section s4 with the six target circles and the GFP+ masks for each channel](figures/histology-s4-slots.png)
+![Section s4 with the six target circles and the GFP+ masks for each channel](../results/histology/figures/section_s4_slots.png)
 
 ### 2e. All five sections
 
@@ -269,7 +269,7 @@ also writes the joined table to `results/histology/mouse01_dose_vs_coverage.csv`
 
 ### All combinations
 
-![Four panels: two mappings × two dose measures, both GFP channels](figures/mouse01-dose-coverage-grid.png)
+![Four panels: two mappings × two dose measures, both GFP channels](../results/histology/mouse01_dose_vs_coverage.png)
 
 - **Columns** are measured and prescribed dose.
 - **Markers:** filled blue = TRITC (number = target), hollow orange = FITC for the same
