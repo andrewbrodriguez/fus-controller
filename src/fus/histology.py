@@ -59,6 +59,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from glob import glob
@@ -163,14 +164,27 @@ def list_series(vsi: str | Path) -> list[dict]:
     raise RuntimeError(f"no series listing in QuPath output for {vsi}")
 
 
+def is_fluorescence(series: dict) -> bool:
+    """A scanned section rather than a label/overview image (those are Red/Green/Blue)."""
+    return not set(series["channels"]) <= {"Red", "Green", "Blue"}
+
+
+def channel_names(path: str | Path) -> list[str]:
+    """Channel names of an OME-TIFF, in stored order."""
+    with tifffile.TiffFile(path) as tf:
+        return [chunk.split('Name="', 1)[1].split('"', 1)[0]
+                for chunk in tf.ome_metadata.split("<Channel ")[1:]]
+
+
 def export_sections(
     vsi: str | Path, out_dir: str | Path, downsample: float = 4, prefix: str = "section",
     series: int | None = None,
 ) -> list[Path]:
     """Write each fluorescence section of a ``.vsi`` as a pyramidal OME-TIFF.
 
-    Sections are the series with more than 3 channels (the label and overview
-    images are RGB). Output is ``<prefix>_s<series>.ome.tif``. At the default
+    Sections are the fluorescence series (`is_fluorescence`; the label and overview
+    images are RGB). Mice 1-2 have DAPI, FITC, TRITC, CY5; from Mouse 3 on there is no
+    DAPI, so count channels by name, not number. Output is ``<prefix>_s<series>.ome.tif``. At the default
     4x a section is ~9000 px square at 1.3 um/px, ~0.4 GB compressed. Mouse_01
     is one ``.vsi``; later animals come as one ``.vsi`` per slide, whose series
     numbers repeat, so give each slide its own ``prefix`` (e.g. ``slide01``).
@@ -180,7 +194,7 @@ def export_sections(
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
     for s in list_series(vsi):
-        if len(s["channels"]) <= 3 or (series is not None and s["index"] != series):
+        if not is_fluorescence(s) or (series is not None and s["index"] != series):
             continue
         dest = out_dir / f"{prefix}_s{s['index']}.ome.tif"
         subprocess.run(
@@ -201,6 +215,41 @@ def export_sections(
         )
         written.append(dest)
     return written
+
+
+#: Scan names from Mouse 3 on: ``Image_Cntr_<mouse>.<well>.<slide>_<scan>.vsi`` (N. Todd,
+#: 2026-10-28: "mouse.well.slide_section"); some have a space for the first underscore.
+_CNTR_SCAN = re.compile(r"Image_Cntr[_ ](\d+)\.(\d+)\.(\d+)_(\d+)$")
+
+
+def is_overview(vsi: str | Path) -> bool:
+    """Slide-overview scans (``..._01_Overview.vsi``) hold no fluorescence sections."""
+    return Path(vsi).stem.endswith("Overview")
+
+
+def slide_prefix(vsi: str | Path) -> str:
+    """Export prefix for one ``.vsi``, unique within its animal and free of dots.
+
+    ``Image.vsi`` (Mouse 1) -> ``section``; ``Control_02_Slide_01.vsi`` -> ``slide01``;
+    ``Image_Cntr_3.10.1_02.vsi`` -> ``w10sl1_02`` (well 10, slide 1, scan 02).
+    `orientation.section_name` cuts at the first dot, so the prefix must not have one.
+    """
+    stem = Path(vsi).stem
+    if m := _CNTR_SCAN.search(stem):
+        _, well, slide, scan = m.groups()
+        return f"w{int(well)}sl{int(slide)}_{scan}"
+    if m := re.search(r"Slide_?0*(\d+)", stem):
+        return f"slide{int(m.group(1)):02d}"
+    return "section"
+
+
+def find_vsi(raw_dir: str | Path, prefix: str) -> Path:
+    """Inverse of `slide_prefix`: the ``.vsi`` under ``raw_dir`` a prefix came from."""
+    hits = [p for p in Path(raw_dir).rglob("*.vsi")
+            if not is_overview(p) and slide_prefix(p) == prefix]
+    if len(hits) != 1:
+        raise FileNotFoundError(f"{len(hits)} .vsi files in {raw_dir} give prefix {prefix!r}")
+    return hits[0]
 
 
 # ---------------------------------------------------------------------------

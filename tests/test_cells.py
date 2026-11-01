@@ -21,16 +21,20 @@ def test_box_clipped_at_image_origin():
     assert x == 0 and y == 0
 
 
-def test_tag_counts_centroids_inside_roi_and_thresholds(tmp_path):
-    image = np.zeros((4, 200, 200), np.uint16)
+@pytest.mark.parametrize("names", [["DAPI", "FITC", "TRITC", "CY5"],   # Mice 1-2
+                                   ["CY5", "TRITC", "FITC"]])          # Mouse 3 on: no DAPI
+def test_tag_counts_centroids_inside_roi_and_thresholds(tmp_path, names):
+    gfp_index = names.index("TRITC")
+    image = np.zeros((len(names), 200, 200), np.uint16)
     labels = np.zeros((200, 200), np.uint16)
     labels[95:105, 95:105] = 1    # centre: bright
     labels[60:70, 95:105] = 2     # inside: dim
     labels[5:15, 5:15] = 3        # outside the ROI
-    image[2][labels == 1] = 1000
-    image[2][labels == 2] = 120
-    image[2][labels == 3] = 1000
-    tifffile.imwrite(tmp_path / "crop.ome.tif", image, ome=True, metadata={"axes": "CYX"})
+    image[gfp_index][labels == 1] = 1000
+    image[gfp_index][labels == 2] = 120
+    image[gfp_index][labels == 3] = 1000
+    tifffile.imwrite(tmp_path / "crop.ome.tif", image, ome=True,
+                     metadata={"axes": "CYX", "Channel": {"Name": names}})
     tifffile.imwrite(tmp_path / "labels.tif", labels)
     roi = rois.Roi(1, 1, (100.0, 100.0), 50.0, 50.0)
     out = cells.tag(tmp_path / "crop.ome.tif", tmp_path / "labels.tif", roi, background=100.0)
