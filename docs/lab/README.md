@@ -29,8 +29,8 @@ Two checks against our assumptions:
   fits. That agrees within ~0.3 mm, which the hand finetuning of the ROIs absorbs.
 - **Section depth.** `fus.reconstruct` matches Mouse 2's tissue areas to atlas depths of
   1.7–2.7 mm. The focal centres here are 2.9–3.7 mm deep, so if both hold, the sections cut the
-  upper half of each focus, and T3/T6 (deepest) only its top. This is asked of N. Todd in
-  `notes/next-email-todd.md`.
+  upper half of each focus, and T3/T6 (deepest) only its top. Asked of N. Todd in the 10/20
+  email; still open (cut depth range is asked again in `notes/next-email-todd.md`, 11/01 draft).
 
 ## Email chain (N. Todd → A. Rodriguez, re "Project update: mouse 1 results and a few questions")
 
@@ -50,8 +50,8 @@ Transcribed from a screenshot on 2026-10-19; the screenshot was then deleted.
 
 Transcribed from the thread Andrew pasted on 2026-10-25. Meeting prep: `notes/meeting_10-28.md`.
 
-- **2026-10-20 8:16 pm, Andrew → Nick.** Sent a shortened version of the draft in
-  `notes/next-email-todd.md`, with two figures attached (`cumulative_pooled.png` and
+- **2026-10-20 8:16 pm, Andrew → Nick.** Sent a shortened version of the 10/20 draft
+  (`git show 21146b6:notes/next-email-todd.md`; the file now holds the 11/01 draft), with two figures attached (`cumulative_pooled.png` and
   `dose_vs_exposure.png`). It covered the cumulative result (r = 0.73 area, 0.68 cells; 0.62 /
   0.57 without the control) and dose vs exposure (r = 0.77, ~2.7× spread), and asked about
   normalising across mice, sectioning, ceiling hits and the next mouse. It left out the Mouse 17

@@ -1,127 +1,93 @@
 # Next email to Dr. Todd
 
-> **Sent 2026-10-20** in a shortened form. It left out the Mouse 17 rename, Mouse 6 T2, the
-> depth-mismatch detail, and which mice come next. Nick replied 10/23; the thread is
-> transcribed in `docs/lab/README.md`, and follow-up is in `notes/meeting_10-28.md`. Kept for
-> the record.
+> **Draft, 2026-11-01. Not sent.** Andrew's wording, with the results section filled in. The
+> email that actually went out on 10/20, and Dr. Todd's 10/23 reply, are transcribed in
+> `docs/lab/README.md`. The 10/28 call notes are in `notes/meeting_10-28.md`.
 
-## Draft (2026-10-20)
+## Attach
 
-Attach:
+1. `results/histology/slices/pooled_gfp_fraction.png`: Σ GFP+ neurons ÷ Σ NeuN neurons in
+   each target's ROI, summed over slices, against dose. All 5 mice, 30 targets.
+2. `results/histology/slices/reference_normalised.png`: Mice 2–5. Left panel: the same
+   measure. Right panel: every target divided by its own mouse's shared target (120 bursts,
+   goal 0.75).
 
-1. `results/histology/slices/cumulative_pooled.png`: delivery summed over every slice vs dose
-2. `results/acoustic_eda/dose_vs_exposure.png`: 2nd-harmonic dose vs applied acoustic exposure, all 145
-   sonications (the more detailed `controller_headline.png` is there if he asks)
+## Draft
 
-> **Subject:** Update: cumulative delivery over all slices, acoustic dose across 24 mice
+Andrew's final wording (2026-11-01).
+
+> **Subject:** Mice 3–5 results + Mouse 6 files missing
 >
 > Hi Dr. Todd,
 >
-> Two quick results and a few questions.
+> Thanks for sending the new brains. I've run Mice 3, 4 and 5 through alignment and
+> measurement. A few things to sort out first, then results.
 >
-> **1. Delivery summed over every slice (figure 1).** As you suggested, I now sum each
-> target's delivery over all slices of the animal, rather than normalising per slice. Across
-> the 12 targets in Mice 1 and 2, cumulative 2nd-harmonic dose tracks delivery: r = 0.73 for
-> GFP+ area and r = 0.68 for GFP+ neurons (0.62 and 0.57 without Mouse 1's no-FUS control).
-> To put both mice on one axis, each animal's totals are divided by its mean target. It's
-> only two animals, so I'm treating it as a consistent pattern rather than a fitted model.
+> Data questions:
 >
-> **2. Acoustic dose across all 24 mice (figure 2).** I pulled all four sessions from Dropbox
-> and reprocessed every recording. All 138 target doses for mice 2–24 match the spreadsheet
-> to four decimals. Figure 2 plots each sonication's 2nd-harmonic AUC against the acoustic
-> exposure applied (peak pressure summed over bursts). They track each other (r = 0.77 on
-> log axes), but loosely: at the same exposure, the harmonic dose varies about 2.7×
-> (10th–90th percentile). The applied energy alone doesn't pin down the bubble response,
-> which is the case for measuring it.
+> 1. Mouse 6: The Mouse_Cntr_06 folder came through empty on my end in Dropbox, although the
+>    Mouse 6 slide deck has 2 images. Could you re-upload the scans? I know you also mentioned
+>    something about the slices being in the same file.
 >
-> Two controller observations: it settles at about 0.92× its goal at every setpoint, and it
-> hits the 0.125 V ceiling more often in later sessions (2, 1, 4 and 8 of ~36). Mouse 6
-> Target 2 hit the ceiling and the interlock, and ended at about 0.09× its goal, so it is
-> close to an unsonicated target.
+> 2. Mice 3, 4, and 5 are supposed to have 7, 5, and 3 images each correct? I ended up using
+>    5, 4, and 2 respectively. With respect to this within mouse 3 inside
+>    _Image_Cntr_3.11.2_03_ there's an extra tile folder (_Image_Cntr 3.10.2_01_, 1.1 GB) and
+>    a .vsi that won't open. Is a 3.10.2_01 scan missing?
 >
-> Small thing: Mouse 17's `Target5Repeat.mat` is position 6 (it matches the spreadsheet's
-> position 6 exactly, and your reduced file is named Target6). It may be worth renaming
-> on Dropbox.
+> 3. On the virus, the mice after mouse 6 all received AVcpp16 correct?
 >
-> **Questions**
-> 1. **Normalising across mice:** have you come up with any good ways to normalise delivery
->    across animals? Right now I divide each animal's totals by its mean target, which
->    removes anything that scales a whole brain (slice count, staining, exposure) but also
->    removes real between-animal differences. One option I'm considering is the reference
->    target every mouse has (120 bursts at goal 0.75), as an internal standard. I'm curious
->    what you'd prefer.
-> 2. **Sectioning:** for Mouse 2 and later mice, what is the section thickness, how far
->    apart are the mounted sections (consecutive or every Nth), and do Slide 1 → 4 and the
->    three sections on each slide run dorsal → ventral? Roughly how deep does the series
->    start, and was the protocol the same for every mouse? Your target mask puts the focal
->    centres about 3–3.7 mm below the dorsal surface, but matching Mouse 2's section areas to
->    the Allen atlas puts its 12 sections at roughly 1.7–2.7 mm, above most of the foci. Does
->    that fit how they were cut? This would tell us which slices fall inside the focal column,
->    and whether cuts are comparable across mice.
-> 3. **Ceiling hits:** is the rise in voltage-ceiling hits in the later sessions expected
->    (animal size, coupling, transducer)?
-> 4. **Next tissue:** when is the next batch of brains likely, how many, and which mice? Same
->    layout as Mouse 2? Mice 6 and 20 would be especially useful because of the
->    capped/failed targets above.
+> Some results from Mice 1-5:
+>
+> I'm using 27 sections across the five mice (4, 12, 5, 4 and 2), with all others being a bit
+> too messy to use. For the first result, it is the fraction of neurons that are GFP+ in each
+> target's ROI: GFP+ neurons summed over all of a mouse's sections, divided by all neurons in
+> the same ROIs. Because it's a fraction of the neurons actually present, it corrects for
+> ROIs that run off the tissue edge, for some targets holding fewer neurons, and for
+> differences in cell counts between mice.
+>
+> Pooled across all mice (figure 1): across the 30 targets, delivery tracks acoustic dose at
+> r = 0.66 (0.65 without Mouse 1's no-FUS control). Within each mouse, r ranges from 0.64 to
+> 0.85. See this attached as pooled_gfp_fraction.png.
+>
+> The second figure is normalized by the shared target we discussed. Mouse 1 is left out,
+> because its shared treatment went into a site that also got two other sonications. The
+> shared target received similar doses in Mice 2–5 (0.83–1.07), but its delivery ranges from
+> 1.6% to 46% GFP+. The two lowest are both at T1, which reads low in all three new mice.
+> Dividing by those near-zero values inflates everything else (up to 24x in Mouse 3), and the
+> pooled correlation drops from 0.65 to 0.45. My read is that the new mice's sections may not
+> reach the anterior targets, rather than delivery being low there. See this attached as
+> reference_normalized.png.
+>
+> Let me know once mouse 6 is in the Dropbox and if those image counts sound correct to you.
 >
 > Thanks,
 > Andrew
 
-Before sending: look at both figures (no person has viewed them yet).
+## Before sending
 
+- [ ] Look at both figures. No person has seen them yet.
+- [ ] The email names `reference_normalized.png`, but the file is `reference_normalised.png`.
+      Rename one so they match.
+- [ ] Optional: "drops from 0.65 (Mice 2–5)". Figure 2 leaves out Mouse 1, so its starting r
+      is 0.65, not figure 1's 0.66.
 
+## Where each number comes from
 
----
+| Claim | Source |
+|---|---|
+| 27 sections: 4, 12, 5, 4, 2 | `data/section_orientation.csv` (of 32 exported; excluded 1, 0, 2, 1, 1) |
+| 7, 5, 3 images in the decks | `data/histology/Mouse_0{3,4,5}_IF_Images.pptx`; also the number of scans received |
+| r = 0.66 / 0.65, 30 targets | `results/histology/slices/README.md`, `gfp_fraction` rows |
+| Per-mouse r 0.64–0.85 | `cumulative_dose_delivery.csv`, Pearson of `gfp_cells / cells` with dose per mouse (M1 0.75, M2 0.82, M3 0.85, M4 0.64, M5 0.70) |
+| Shared target 1.6–46%, doses 0.83–1.07 | `results/histology/slices/reference_target.csv` |
+| 24× and 0.65 → 0.45 | `results/histology/slices/reference_normalised.csv`, 20 non-shared targets, Mice 2–5 (normalised r on a log scale) |
 
-## Background notes
+## Left out on purpose (bring to a call if useful)
 
-Drafted 2026-10-19. Settled already, so don't ask again: the capsid (assume AAV9 for every
-animal; it doesn't matter for our analysis), CY5 = NeuN (his Mouse 2 summary), no contrast
-MRI, no confocal, and the exposures (we normalise per slice). The raw acoustic files are on
-Dropbox and Andrew is pulling them. Head position per animal is **not** an ask yet, and we
-assume nothing about it.
-
-## 1. How the sections were cut
-
-Lower priority for the dose–delivery analysis, but it is the one thing that turns the 3D
-reconstruction from a sketch into a measurement, and it answers his own question about
-whether cuts are consistent across mice. For Mouse 2, and whether it holds for later mice:
-
-1. **Section thickness** (µm).
-2. **Which sections were kept.** Consecutive sections, or every Nth? If every Nth, what is N,
-   or equivalently, how far apart are neighbouring mounted sections?
-3. **Order.** Do `Slide_01` → `Slide_04`, and the three sections on each slide (left → right?
-   top → bottom?), run dorsal → ventral in cutting order?
-4. **Starting depth.** Roughly how far below the dorsal surface the first kept section is,
-   or which landmark it starts at.
-5. **Was the same protocol used for every mouse?** If not, it will be recorded per animal.
-
-Why we're asking: the brain-size estimate from the Allen atlas puts the 12 Mouse 2 sections
-within ~1 mm of depth (~85–95 µm apart), which would cover only a third of the ~3 mm focal
-column. If they are ~250 µm apart they span the whole column. The answer decides which
-slices sit inside the focus and whether summing over slices means the same thing in every
-mouse.
-
-## 2. Next tissue
-
-1. **When** is the next batch of brains likely, and **how many**?
-2. **Which mice**, in what order? Anything known about each (damage, missing sections)?
-3. Same file layout as Mouse 2 (one `.vsi` per slide, 3 sections each, notch on the left)?
-
-The draft manuscript is due at the end of reading period, so whether we have 4 or 12
-animals by December changes how the paper is framed.
-
-## To include as updates (not questions)
-
-- Two-animal cumulative result: 2f AUC vs delivery summed over slices, 12 targets,
-  r = +0.73 (pixels, A) and +0.68 (GFP+ neurons, B); +0.62 / +0.57 without the no-FUS
-  control. Two animals, so the p-values are optimistic. Source:
-  `results/histology/slices/README.md`.
-- One figure, after a human has looked at it: `results/histology/reconstruction/mouse02_topdown.png`
-  or `results/histology/aligned/mouse02_grid.png`.
-- Controller behaviour, all 145 recordings (mice 1–24): it settles at ~0.92× the harmonic
-  goal in every session, only 34% of recordings average inside the band, and the interlock
-  fired in 36/145. Voltage-ceiling hits climb across sessions (2, 1, 4, 8 of ~36); is that
-  expected (older mice, thicker skulls, coupling)? Source: `results/acoustic_eda/README.md`.
-- Housekeeping: Mouse 17's `Target5Repeat.mat` is really position 6 (it matches the sheet's
-  P6 exactly). Worth a rename on Dropbox so nobody else trips on it.
+- **Summed GFP intensity** instead of cell counts: better within a mouse (median ρ 0.83 vs
+  0.77), worse pooled, because exposure differs between slides. Saturation hasn't been
+  checked.
+- **Mouse 5's "extra data in QuPath":** every QuPath reader finds only 3 sections, and the
+  deck has 3 images. Question 2 covers it implicitly.
+- **CY5 = NeuN without DAPI** on the new scans: assumed, as for Mouse 2.
+- **Mouse 17's `Target5Repeat.mat`** is really position 6. A rename on Dropbox would help.

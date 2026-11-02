@@ -238,7 +238,7 @@ T5 0.37, T6 1.60 (interlock fired).
 3. **Cross-animal normalisation**, the agenda for 10/28 ([`meeting_10-28.md`](meeting_10-28.md)).
    Decide the metric and threshold rule **before** measuring the four new brains.
    **Still open on sectioning:** which Mouse 2 sections pair up, the cutting order, the
-   starting depth, and Mouse 1's protocol. The email went out 10/20 ([`next-email-todd.md`](next-email-todd.md)).
+   starting depth, and Mouse 1's protocol. Asked 10/20; asked again in the 11/01 draft ([`next-email-todd.md`](next-email-todd.md)).
 4. **Tissue throughput.** 2 of 24 brains imaged; 4 more due after 10/26.
 5. ~~Remaining acoustic sessions~~ **Done 10/19**: all four sessions are in `data/acoustic/US_Data.zip`.
 6. **FITC-only signal at Mouse 1 T6.** Unexplained; `notebooks/view_slice.ipynb` can now show

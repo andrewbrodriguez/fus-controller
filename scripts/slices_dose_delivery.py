@@ -39,6 +39,7 @@ Writes to ``results/histology/slices/``:
 
   cumulative_dose_delivery.csv  one row per mouse x target, delivery summed over slices
   cumulative_pooled.png         all mice on one axis: two rescaled measures and the GFP+ fraction
+  pooled_gfp_fraction.png       the GFP+ fraction of neurons alone (sum GFP+ / sum NeuN), all mice
   cumulative.png                raw totals, one panel per mouse and pipeline
   slices_dose_delivery.csv      long table: one row per slice x target, both measures
   heatmap.png, per_slice.png, aggregate_standardized.png          pipeline A (pixels)
@@ -507,6 +508,45 @@ def pooled_figure(c: pd.DataFrame, pf: pd.DataFrame):
     return fig
 
 
+def fraction_figure(c: pd.DataFrame, pf: pd.DataFrame):
+    """The proposed cross-animal measure alone: sum GFP+ / sum NeuN per target, all mice."""
+    fig, ax = plt.subplots(figsize=(8.6, 6.2))
+    fig.subplots_adjust(left=0.1, right=0.97, top=0.8, bottom=0.14)
+    _clean(ax)
+    f = pf[(pf.measure == "gfp_fraction") & (pf.targets == "all")].iloc[0]
+    fn = pf[(pf.measure == "gfp_fraction") & (pf.targets == "all, no control")].iloc[0]
+    xmax = c.dose.max() * 1.08
+    gx = np.array([0, xmax])
+    ax.plot(gx, f.intercept + f.slope * gx, color=INK_2, linewidth=2, alpha=0.7, zorder=2,
+            label="least squares, all mice")
+    for mouse in MICE:
+        m = c[c.mouse == mouse]
+        colr = MOUSE_COLOR[mouse]
+        ax.scatter(m.dose, m.gfp_fraction, s=210, color=colr, edgecolors=SURFACE, linewidths=2,
+                   zorder=3, label=f"Mouse {mouse} ({int(m.n_slices.max())} slices)")
+        for p in m.itertuples():
+            ax.annotate(str(p.target), (p.dose, p.gfp_fraction), ha="center", va="center_baseline",
+                        fontsize=8.5, weight="bold", color="#ffffff", zorder=4)
+    ax.set_xlim(-0.1, xmax)
+    ax.set_ylim(-0.03, c.gfp_fraction.max() * 1.12)
+    ax.set_xticks(np.arange(0, xmax, 0.5))
+    ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+    ax.set_xlabel("Acoustic dose (cumulative 2nd harmonic)", fontsize=11, color=INK, labelpad=6)
+    ax.set_ylabel("Neurons GFP+ in the ROI, summed over slices\n(Σ GFP+ cells ÷ Σ NeuN cells)",
+                  fontsize=11, color=INK, labelpad=6)
+    ax.tick_params(labelsize=9.5, labelcolor=INK_2)
+    ax.text(0.98, 0.03, f"r = {f.r:.2f}, ρ = {f.rho:+.2f}, n = {f.n} targets\n"
+            f"without Mouse 1's no-FUS control: r = {fn.r:.2f}, n = {fn.n}",
+            transform=ax.transAxes, ha="right", va="bottom", fontsize=9, color=INK_2)
+    ax.legend(loc="upper left", bbox_to_anchor=(0, 1.17), ncol=3, frameon=False, fontsize=8.5,
+              handletextpad=0.4, columnspacing=1.4)
+    _header(fig, "Delivery vs acoustic dose: fraction of neurons GFP+, all mice")
+    _footer(fig, "Number = target. Every kept slice of each mouse is summed (low-signal slices included); "
+            "no per-mouse rescale. Pipeline B, 1.74 mm ROIs. Mouse 1 T3 = no-FUS control; Mouse 1 T1 = three "
+            "sonications summed. p-values would treat targets as independent; they are not.")
+    return fig
+
+
 def pixels_vs_cells(d: pd.DataFrame):
     """Pipeline B against pipeline A for every slice x target."""
     use = d[(d.dropped == "") & d.cell_fraction.notna()]
@@ -710,6 +750,9 @@ def main():
     plt.close(fig)
     fig = pooled_figure(c, pf)
     fig.savefig(OUT / "cumulative_pooled.png", dpi=170)
+    plt.close(fig)
+    fig = fraction_figure(c, pf)
+    fig.savefig(OUT / "pooled_gfp_fraction.png", dpi=170)
     plt.close(fig)
     print(pf.round(3).to_string(index=False))
     full.drop(columns=["coverage", "slice_mean", "z"]).round(4).to_csv(OUT / "slices_dose_delivery.csv", index=False)
