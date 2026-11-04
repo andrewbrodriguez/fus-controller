@@ -26,7 +26,8 @@ plotted.
 
 ## The result
 
-![Scatter of acoustic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line](../results/histology/mouse01_dose_delivery_scatter.png)
+Mouse 1 is plotted with the other animals in `results/histology/slices/cumulative.png` and
+`cumulative_pooled.png`; the per-target numbers are in `results/histology/mouse01_dose_vs_coverage.csv`.
 
 | | Value |
 |---|---|
@@ -159,8 +160,6 @@ radius of 1.0 mm — half the ~2 mm lateral focal spot — scaled by the fitted 
 
 Coverage is the fraction of tissue pixels inside the circle that are GFP+.
 
-![Section s4 with the six target circles and the GFP+ masks for each channel](../results/histology/figures/section_s4_slots.png)
-
 ### 2e. All five sections
 
 ![Five sections side by side, each with its fitted target circles](figures/histology-sections-overview.png)
@@ -263,13 +262,12 @@ the sequence on 2026-09-18, and the acquisition timestamps stored in each record
 
 ## Step 4 — the plots
 
-Both plots come from
-[`scripts/mouse01_dose_vs_coverage.py`](../scripts/mouse01_dose_vs_coverage.py), which
-also writes the joined table to `results/histology/mouse01_dose_vs_coverage.csv`.
+[`scripts/mouse01_dose_vs_coverage.py`](../scripts/mouse01_dose_vs_coverage.py) writes the
+joined table to `results/histology/mouse01_dose_vs_coverage.csv`. The Mouse 1 figures that
+used to sit here (per-mouse panels and scatter) were retired on 2026-11-04 in favour of the
+all-mice figures in `results/histology/slices/`; the table carries the same numbers.
 
 ### All combinations
-
-![Four panels: two mappings × two dose measures, both GFP channels](../results/histology/mouse01_dose_vs_coverage.png)
 
 - **Columns** are measured and prescribed dose.
 - **Markers:** filled blue = TRITC (number = target), hollow orange = FITC for the same
@@ -355,14 +353,14 @@ PYTHONPATH=src python -m fus.histology export \
     data/histology/Mouse_01/Image.vsi data/processed/histology/Mouse_01/ds4
 PYTHONPATH=src python -m fus.histology measure \
     data/processed/histology/Mouse_01/ds4/section_s*.ome.tif \
-    --csv results/histology/mouse01_slots.csv --figures results/histology/figures
+    --csv results/histology/mouse01_slots.csv
 
-# join and plot (assumptions live at the top of this script)
+# join (assumptions live at the top of this script)
 PYTHONPATH=src python scripts/mouse01_dose_vs_coverage.py
 
 # README example: target 1 vs the no-FUS control on section s4
 PYTHONPATH=src python scripts/mouse01_example_figure.py
 ```
 
-Outputs go to `results/histology/`. The figures in this document are copies saved in
-`docs/figures/`, because PNGs under `results/` are git-ignored.
+Outputs go to `results/histology/`. The method figures in this document live in
+`docs/figures/`.

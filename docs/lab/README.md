@@ -9,7 +9,6 @@ Files from the Todd lab, kept as received. Agents can't read the images in them;
 | `Mouse_02_Summary.pdf` | **Current** Mouse 2 summary, from N. Todd's 2026-09-29 4:33 pm email ("left side was notched … updated pdf attached"). PDF created 2026-09-29 14:49. One page: the six targets with bursts, harmonic goal and cumulative harmonic dose (T1 0.62, T2 1.02, T3 0.76, T4 1.07, T5 0.37, T6 1.60, matching our recordings), NeuN/GFP images, and the label **"FUS + AAV9-GFP @ 7.6e12 vg/kg"** |
 | `gABI_template_100um.nii` | From N. Todd's 2026-09-18 2:25 pm email ("Mouse brain template and mask for 6 target locations, assuming 2x2x2mm diameter. One voxel = 0.1 x 0.1 x 0.1 mm."). The Allen (ABI) average template at 100 µm, converted from MINC; 114 × 132 × 80 voxels ordered (ML, AP, DV), RAS (+x right, +y anterior, +z dorsal). The header says 1.0 per voxel, but voxels are really 0.1 mm. It matches our Allen CCF annotation (`fus.reconstruct.load_atlas`) at brain-mask IoU 0.83 after flipping AP and DV |
 | `Mask_AAVTargets.nii` | Same email and grid. Binary mask of the six targets as 2 mm-diameter sphere **surfaces** (hollow; 5,548 voxels, and the pole voxels come loose as separate pieces). Centres, at template voxel (ML, AP, DV): (72, 86, 38), (92, 66, 38), (72, 61, 38), (42, 86, 38), (22, 66, 38), (42, 61, 38). These are exactly the `posx.xyz` plan, ±1.5/±3.5 mm lateral with rows 2.5 mm and 0.5 mm apart, so they are T1–T6 in that order with +x = the animal's right. All six sit at one depth |
-| `Mouse_02_Summary_superseded_2026-09-29.pdf` | Earlier version, created 2026-09-29 11:57 and attached to that morning's email, before the notch correction. Same targets and doses, without the virus and channel labels. Kept only for provenance |
 
 ## What the mask says about the targets (2026-10-20)
 
@@ -40,7 +39,7 @@ Transcribed from a screenshot on 2026-10-19; the screenshot was then deleted.
   sections on them for 12 total images." He thought the notch was cut at the bottom
   **right** of the brain, pending confirmation with the student; summary attached on that
   assumption.
-- **2026-09-29 11:59 am.** Summary attached (the superseded PDF above).
+- **2026-09-29 11:59 am.** Summary attached: an earlier version, before the notch correction, with the same targets and doses (removed from the repo 2026-11-04).
 - **2026-09-29 4:33 pm.** "Update - left side was notched, which actually makes more sense
   with the delivery and harmonic doses for the different targets. Updated pdf attached. Also
   looks like there was some rotation in this mouse, with the right side targets being

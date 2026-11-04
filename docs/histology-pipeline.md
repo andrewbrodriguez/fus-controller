@@ -27,10 +27,10 @@ the same whichever endpoint is chosen.
 PYTHONPATH=src python -m fus.histology export \
     data/histology/Mouse_01/Image.vsi data/processed/histology/Mouse_01/ds4
 
-# 2. Coverage per slot, plus an overlay figure per section. ~11 s per section.
+# 2. Coverage per slot. ~11 s per section. (--figures DIR adds a local overlay per section.)
 PYTHONPATH=src python -m fus.histology measure \
     data/processed/histology/Mouse_01/ds4/section_s*.ome.tif \
-    --csv results/histology/mouse01_slots.csv --figures results/histology/figures
+    --csv results/histology/mouse01_slots.csv
 
 # Mouse_02 onwards: one .vsi per slide, whose series numbers repeat, so prefix them
 for i in 1 2 3 4; do
@@ -42,7 +42,7 @@ done
     data/processed/histology/Mouse_01/ds4/section_s*.ome.tif
 .venv/bin/python -m fus.histology measure data/processed/histology/Mouse_02/ds4/*.ome.tif \
     --orientation data/section_orientation.csv \
-    --csv results/histology/mouse02_template_slots.csv --figures results/histology/figures/mouse02_template
+    --csv results/histology/mouse02_template_slots.csv
 ```
 
 Geometry tests: `PYTHONPATH=src python -m pytest tests/`
@@ -103,10 +103,8 @@ untreated animal or a second negative region.
 
 ## Mouse_01 results
 
-![Section s4: GFP+ masks and the six ROIs](../results/histology/figures/section_s4_slots.png)
-
-Section s4. Left: NeuN (log) with the GFP+ union. Middle and right: GFP+ masks per
-channel. Slot 3 reads 0.0 % (FITC) and 1.9 % (TRITC). Slot 6 is 76 % in FITC and 6.7 %
+On section s4 (per-section overlays are no longer committed; rerun `measure --figures DIR`
+to see one), slot 3 reads 0.0 % (FITC) and 1.9 % (TRITC). Slot 6 is 76 % in FITC and 6.7 %
 in TRITC — see known problem 1.
 
 ### Per section

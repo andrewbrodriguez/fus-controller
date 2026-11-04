@@ -29,19 +29,23 @@ This matters most for translation. Brute force is not an option in a patient: sp
 
 One mouse, one AAV injection, six planned targets. At **target 1** the controller drove the transducer while microbubbles circulated. The blue trace is the second-harmonic emission it regulates, about 40 dB above baseline once the bubbles arrive. **Target 3**, 2.5 mm behind it in the same brain, was left unsonicated as a control. In this section, 72% of the target 1 circle expresses GFP from the delivered virus; the control reads 2% (66% vs 2% averaged over four sections).
 
-That is the whole premise: where the acoustic signal says the BBB opened, the virus got in. The open question — and the reason this project exists — is ***how much***. Plotting all six Mouse 1 targets, acoustic dose against delivery:
+That is the whole premise: where the acoustic signal says the BBB opened, the virus got in. The open question, and the reason this project exists, is ***how much***.
+
+## Five animals, pooled
+
+Five brains are imaged so far (Mice 1–5, 27 sections). Each target's delivery is summed over every section of its animal, then plotted against acoustic dose (cumulative second harmonic) for all 30 targets on one axis:
 
 <p align="center">
-  <img src="results/histology/mouse01_dose_delivery_scatter.png" alt="Scatter of cumulative second-harmonic dose against GFP coverage for the six Mouse 1 targets, with a least-squares line; r = 0.85" width="560">
+  <img src="results/histology/slices/cumulative_pooled.png" alt="Acoustic dose against cumulative GFP delivery for 30 targets from five mice, three delivery measures side by side" width="100%">
 </p>
 
-The r = 0.85 comes almost entirely from the two ends: the unsonicated control, and target 1, which was sonicated three times. Among the four targets sonicated once (2, 4, 5 and 6), doses between 0.95 and 1.35 produced anywhere from 18% to 48% coverage, with no clear trend. That scatter is what a delivery-aware controller has to learn, and it takes more animals than one to learn it.
+| Delivery measure (30 targets, 5 mice) | Pearson r with dose |
+|---|---|
+| GFP+ fraction of neurons, ΣGFP+ ÷ ΣNeuN | **+0.66** |
+| GFP+ area ÷ the animal's mean target | +0.61 |
+| GFP+ cells ÷ the animal's mean target | +0.56 |
 
-This is one animal. The recording-to-target mapping and the choice of GFP channel have since been confirmed with the lab; the full method, the remaining assumptions, and how each figure was made are in [`docs/mouse01-dose-delivery.md`](docs/mouse01-dose-delivery.md).
-
-## Two animals, slice by slice
-
-Mouse 2 is the first clean animal: each target was sonicated once, at six different doses. Its 12 sections are oriented by hand (front, notch side, and hand-finetuned target circles in napari) and measured the same way as Mouse 1's. Within each slice, the higher-dose targets tend to carry more GFP. Across the 11 slices with clear signal, the rank correlation of GFP+ pixel coverage with dose is positive in all 11 (median ρ = +0.54). Counting cells instead of pixels gives the same picture: the fraction of NeuN cells tagged GFP+ correlates with dose in 10 of 11 (median ρ = +0.61), and the two measures agree closely across all 96 target ROIs (r = 0.98). Five Mouse 2 slices carry little GFP anywhere, probably cut outside the focal column, and they're reported separately. This is still two animals, so it's a consistent within-animal pattern, not a population result; the figures and caveats are in [`results/histology/slices/README.md`](results/histology/slices/README.md).
+Within single sections the pattern holds too: the higher-dose targets carry more GFP in 17 of 17 sections with clear signal under the pixel measure (median ρ +0.60), and 16 of 17 under the cell count (+0.61). Which cross-animal measure to use is not settled yet, and the p-values treat targets as independent even though they come from five animals. Full tables and caveats: [`results/histology/slices/README.md`](results/histology/slices/README.md).
 
 ## From pixels to cells
 
@@ -55,7 +59,7 @@ Coverage counts GFP+ *pixels*, most of which are processes rather than cell bodi
 
 In a 3 × 3 mm square around that target, 16,723 neurons are segmented. 97–100% are tagged within 0.5 mm of the target centre, falling to under 1% beyond 1.25 mm. Normalising to each slice's own background keeps Mouse 1's unsonicated control at about 1% GFP+.
 
-This runs as **pipeline B** (`python -m fus.cells`) on every target ROI of both mice, about 1–1.5 min per slice, alongside the pixel pipeline (A). The two agree closely (r = 0.98 across 96 ROIs). It hasn't been checked against a hand count yet. Method, numbers and caveats: [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
+This runs as **pipeline B** (`python -m fus.cells`) on every target ROI, about 1–1.5 min per slice, alongside the pixel pipeline (A). The two agree closely (r = 0.97 across 162 ROIs). It hasn't been checked against a hand count yet. Method, numbers and caveats: [`docs/gfp-cell-tagging.md`](docs/gfp-cell-tagging.md).
 
 ## Approach
 
@@ -83,11 +87,10 @@ The acoustic recordings were made with an **837 kHz** carrier (second harmonic a
 Current state, blockers and next steps: [`notes/current.md`](notes/current.md). Working
 conventions for anyone (or any agent) picking this up: [`AGENTS.md`](AGENTS.md).
 
-As of 2026-09-30, week ~5 of 13:
-- **Acoustics:** the feature extraction is built and reproduces the lab's numbers.
-- **Tissue:** 2 of 24 brains are imaged. Both (16 sections) are oriented by hand, measured, and joined to dose. Within slices, dose and delivery rise together in both animals.
-- **Two delivery measures:** pixel coverage (pipeline A) and the fraction of neurons tagged GFP+ (pipeline B) run on every target ROI and agree closely. Pipeline B still needs a hand count to validate it.
-- **Still open:** the section order and starting depth (thickness 30 µm and spacing ~360 µm per N. Todd, 2026-10-23, pending confirmation), how to normalise delivery across animals, and review verdicts for each slice (in place of a post hoc low-signal cutoff). All four acoustic sessions (24 mice) are processed.
+As of 2026-11-04, week ~10 of 13:
+- **Acoustics:** feature extraction reproduces the lab's numbers; all 24 mice (4 sessions) are processed.
+- **Tissue:** 5 of 24 brains are imaged, oriented by hand, measured with both pipelines and joined to dose. Mouse 6's files were empty.
+- **Still open:** which cross-animal delivery measure to use, a hand count to validate pipeline B, and the section order and depth.
 
 The limiting factor is still tissue.
 
@@ -102,7 +105,7 @@ scripts/        Helper scripts, incl. QuPath Groovy
 tests/          pytest suite
 notebooks/      Per-animal ingest (orient, finetune, measure, review), full-resolution slice viewer
 segmentation_alpha/  Cell segmentation pilot and its environments (StarDist CPU/GPU, Cellpose)
-results/        Generated figures and model outputs
+results/        Generated CSVs and aggregate (all-mice) figures
 docs/           Proposal and lab presentations
 notes/          Meeting notes and working log (`current.md` = state of play)
 assets/         Images used in documentation
@@ -141,7 +144,7 @@ python -m fus --mouse 1 2 3 4 5 6 --csv results/day1.csv --quiet
 
 ```bash
 python -m fus.histology export data/histology/Mouse_01/Image.vsi data/processed/histology/Mouse_01/ds4
-python -m fus.histology measure data/processed/histology/Mouse_01/ds4/*.ome.tif --csv results/histology/mouse01_slots.csv --figures results/histology/figures
+python -m fus.histology measure data/processed/histology/Mouse_01/ds4/*.ome.tif --csv results/histology/mouse01_slots.csv
 ```
 
 It is a first pass with provisional parameters; see [`docs/histology-pipeline.md`](docs/histology-pipeline.md) for the method, the Mouse_01 results, and the open questions.

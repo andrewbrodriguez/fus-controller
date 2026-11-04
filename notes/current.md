@@ -1,4 +1,4 @@
-# Where the project is — updated 2026-11-01
+# Where the project is — updated 2026-11-04
 
 Week ~9 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
@@ -20,6 +20,15 @@ against a hand count, and the review verdicts still need re-tagging. Tissue rema
 limit: 2 of 24 brains imaged. **Four more are sectioned and stained and are being imaged Mon
 10/26.** Call with N. Todd **Wed 10/28, 4:30** (proposed) on normalising delivery across
 animals; prep is in [`meeting_10-28.md`](meeting_10-28.md).
+
+## Since 11/01
+
+- **Repo simplified (11/04): aggregate figures only.** Removed ~60 per-mouse, per-section and
+  per-session images (`results/histology/figures/`, `aligned/`, the Mouse 1 and Mouse 2
+  plots, per-slice heatmaps and panels, per-session controller traces) and
+  `scripts/aligned_sections.py`. The scripts no longer draw them; the numbers stay in the
+  CSVs. The README headline is now the five-mouse pooled figure
+  (`results/histology/slices/cumulative_pooled.png`). Old images are in git history.
 
 ## Since 10/28 (updated 2026-11-01)
 
@@ -93,7 +102,7 @@ animals; prep is in [`meeting_10-28.md`](meeting_10-28.md).
   95 of 96 ROIs kept the default size; finetuning moved centres, not radii.
 - **3D reconstruction of Mouse 2 (10/15)** (`src/fus/reconstruct.py`; GIF:
   `scripts/mouse02_reconstruction_3d.py`; interactive: `scripts/view_reconstruction_3d.py`;
-  output in `results/histology/reconstruction/`). The 12 pipeline-A maps are aligned by
+  spacing CSVs in `results/histology/reconstruction/`; the GIF and PNGs are no longer committed). The 12 pipeline-A maps are aligned by
   the clicks, stacked, and Gaussian-blended in depth. Alignment checks out: per-ROI coverage from
   the resampled maps matches the table (r = 1.00, max diff 0.01), and each target's ROI centre
   varies by 0.06–0.21 mm SD across sections. **Spacing is inferred, ~93 µm** (73–139 µm over
@@ -112,7 +121,7 @@ animals; prep is in [`meeting_10-28.md`](meeting_10-28.md).
   The GIF is now a dashboard. Beside the rotating 3D view are a top-down panel of the
   *measured* GFP (max over sections, no depth inference) with dose circles, and bars of
   cumulative delivery against dose share per target (Mouse 2: r = +0.79 A, +0.64 B,
-  n = 6). These panels are also saved as `mouse02_topdown.png`. **The order is still assumed** (filename order), and in that order
+  n = 6). **The order is still assumed** (filename order), and in that order
   coverage jumps between slices (T6: .01 .87 .37 .02 .94 …). Don't choose the order from the GFP.
 
 ## What exists and is trusted
@@ -220,8 +229,7 @@ T5 0.37, T6 1.60 (interlock fired).
   thalamus (VPM)**. Focal centres are 2.9–3.7 mm below the dorsal surface, while our area
   matching puts Mouse 2's sections at 1.7–2.7 mm, i.e. above most focal centres. Our assumed
   pattern offset from the brain centre (1.6 plan mm) agrees with the mask within ~0.3 mm.
-- **Aligned section images (10/15)** (`scripts/aligned_sections.py` →
-  `results/histology/aligned/`). Every clicked section is re-rendered from its ds4 export as
+- **Aligned section images (10/15; script and images removed 2026-11-04, in git history).** Every clicked section is re-rendered from its ds4 export as
   a dorsal view: front up, animal's left on the left (Mouse 1 flipped, since its notch is on
   the right), with ROIs labelled by target and coverage. There is one PNG per section and a
   grid per mouse. Checks: T1–T3 land right and T1/T4 front in both mice, at matching positions;

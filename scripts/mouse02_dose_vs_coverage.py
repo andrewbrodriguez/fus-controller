@@ -14,7 +14,7 @@ with those directions:
 
     .venv/bin/python -m fus.histology measure data/processed/histology/Mouse_02/ds4/*.ome.tif \
         --orientation data/section_orientation.csv \
-        --csv results/histology/mouse02_template_slots.csv --figures results/histology/figures/mouse02_template
+        --csv results/histology/mouse02_template_slots.csv
 
 Assumptions (see docs/mouse01-dose-delivery.md for A1-A7):
 

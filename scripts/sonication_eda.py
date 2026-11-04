@@ -375,53 +375,6 @@ def steady_state(b: pd.DataFrame, cm: pd.DataFrame) -> dict:
             "skew": float(np.median(skew)), "mean_in_band": float(np.mean(np.abs(rel_mean - 1) <= half))}
 
 
-def trace_figure(b: pd.DataFrame, rec: pd.DataFrame, col: str, ylabel: str, path: Path, band: bool,
-                 sess: int):
-    ymax = b.loc[~b["baseline"], col].quantile(0.995) * 1.08   # all sessions, so they compare
-    rec = rec[rec["session"] == sess]
-    b = b[b["mouse"].isin(rec["mouse"])]
-    mice = sorted(rec["mouse"].unique())
-    ncol = int(rec.groupby("mouse").size().max())
-    fig, axes = plt.subplots(len(mice), ncol, figsize=(2.0 * ncol, 1.45 * len(mice)),
-                             facecolor=SURFACE, sharey=True, squeeze=False)
-    for i, m in enumerate(mice):
-        rr = rec[rec["mouse"] == m].sort_values("order")
-        for j in range(ncol):
-            a = axes[i, j]
-            if j >= len(rr):
-                a.axis("off")
-                continue
-            r = rr.iloc[j]
-            s = b[(b["mouse"] == m) & (b["recording"] == r["recording"])]
-            style(a)
-            a.grid(False)
-            if band:
-                a.axhspan(r["goal_lo"], r["goal_hi"], color=BLUES[0], lw=0)
-                if r["interlock"]:
-                    a.axhspan(r["goal_end_lo"], r["goal_end_hi"], color=ORANGE, alpha=0.18, lw=0)
-            else:
-                a.axhline(r["max_v_allowed"], color=AXIS, lw=0.8, ls="--")
-            a.plot(s["burst"], s[col], color=BLUE, lw=0.9)
-            a.axvline(r["n_baseline"] - 0.5, color=AXIS, lw=0.6)
-            a.set_ylim(0, ymax)
-            lbl = f"P{r['position']} · {r['recording'].replace('Target', 'T')}"
-            lbl += f" · {r['goal_lo']:.2f}–{r['goal_hi']:.2f}" if band else ""
-            lbl += " · interlock" if r["interlock"] else ""
-            lbl += " · at V cap" if (not band and r["at_v_cap"]) else ""
-            a.set_title(lbl, fontsize=6.5, color=INK_2, loc="left", pad=2)
-            a.tick_params(labelsize=6)
-            if j == 0:
-                a.set_ylabel(f"M{m}", fontsize=8, color=INK, rotation=0, ha="right", va="center")
-    title(fig, f"{ylabel} per burst, session {sess} ({SESSIONS[sess]}): mice {mice[0]}–{mice[-1]} "
-          "(rows), recordings in firing order (columns)",
-          ("Blue band = goal deadband; orange = band after the interlock lowered it. "
-           "Vertical line = end of zero-volt baseline bursts.") if band else
-          "Dashed = the controller's voltage ceiling (MaxV1). Vertical line = end of baseline bursts.")
-    fig.tight_layout(rect=(0, 0, 1, 0.94), h_pad=0.6, w_pad=0.4)
-    fig.savefig(path, dpi=120, facecolor=SURFACE)
-    plt.close(fig)
-
-
 def controller_summary_figure(cm: pd.DataFrame, path: Path):
     fig, axes = plt.subplots(1, 4, figsize=(13, 3.6), facecolor=SURFACE)
     rng = np.random.default_rng(1)
@@ -681,8 +634,6 @@ controller's own reading, on the goal's scale. `recordings.csv` has every number
 - **Irregular recordings:** {irregular(cm)}
 - **Dose vs exposure** (`dose_vs_exposure.png`, the simplest figure for the lab): log 2nd-harmonic\n  dose against peak pressure summed over bursts gives r = {f['exp_r']:.2f} (slope {f['exp_slope']:.2f}); at a\n  given exposure the middle 80% of sonications span {f['exp_lo']:.2f}–{f['exp_hi']:.2f}× the trend (~{f['exp_spread']:.1f}×).\n- **Headline** (`controller_headline.png`, for the lab): settled level vs goal for every sonication, and
   ceiling/interlock rates per session.
-- **Traces**, one figure per session: `controller_harmonic_s1.png` … `_s4.png` (online harmonic
-  with the goal band) and `controller_voltage_s1.png` … (drive voltage with the ceiling).
 
 {session_table(cm)}
 
@@ -730,11 +681,6 @@ def main() -> int:
     cm = controller_metrics(b, rec)
     facts.update(steady_state(b, cm))   # also adds hh_rel per recording
     cm.to_csv(OUT / "recordings.csv", index=False)
-    for sess in sorted(cm["session"].unique()):
-        trace_figure(b, cm, "hh", "Online 2nd harmonic", OUT / f"controller_harmonic_s{sess}.png",
-                     band=True, sess=sess)
-        trace_figure(b, cm, "volt", "Drive voltage (V)", OUT / f"controller_voltage_s{sess}.png",
-                     band=False, sess=sess)
     dc = dose_check(rec, d)
     dc.to_csv(OUT / "dose_check.csv", index=False)
     facts["dose_check"] = dc

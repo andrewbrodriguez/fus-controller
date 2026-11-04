@@ -55,20 +55,11 @@ Per animal, on raw totals (`cumulative.png`, n = 6 each):
 
 Mouse 1 without its no-FUS control (T3), 5 targets: A r = +0.44; B r = +0.51.
 
-## Per-slice figures (secondary)
+## Within-slice view (secondary)
 
-Each pipeline has the same three figures; B's carry a `_cells` suffix.
+Per-slice numbers are in `slices_dose_delivery.csv`; there are no per-slice figures.
 
-**`heatmap.png`: the raw numbers.** One row per slice, one column per target,
-with targets ordered by dose left to right. If delivery followed dose, rows
-would get darker toward the right. Grey row labels are low-signal slices.
-
-**`per_slice.png`: delivery vs dose inside each slice.** One panel per slice,
-grouped by animal and slide. Each dot is a target, and the line is a
-least-squares fit within that slice. ρ is the Spearman rank correlation with
-dose in that slice (6 targets).
-
-**`aggregate_standardized.png`: all slices pooled.** Each slice's six values
+**`aggregate_standardized.png`** (pipeline A; `_cells` for B)**: all slices pooled.** Each slice's six values
 are z-scored against that slice's own mean and SD. This removes what the whole
 slice shares (depth relative to the focal column, staining, exposure) and keeps
 how its targets rank against each other. Small dots are slice × target; big dots
