@@ -42,8 +42,8 @@ Writes to ``results/histology/slices/``:
   pooled_gfp_fraction.png       the GFP+ fraction of neurons alone (sum GFP+ / sum NeuN), all mice
   cumulative.png                raw totals, one panel per mouse and pipeline
   slices_dose_delivery.csv      long table: one row per slice x target, both measures
-  heatmap.png, per_slice.png, aggregate_standardized.png          pipeline A (pixels)
-  heatmap_cells.png, per_slice_cells.png, aggregate_standardized_cells.png   pipeline B
+  aggregate_standardized.png    within-slice z-scores pooled over all slices, pipeline A (pixels)
+  aggregate_standardized_cells.png                                   same, pipeline B (cells)
   pixels_vs_cells.png           B against A for every slice x target
   README.md                     what each figure shows, with the headline numbers
 """
@@ -89,7 +89,6 @@ RECORDINGS = {
 SURFACE, INK, INK_2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 GRID, AXIS = "#e1e0d9", "#c3c2b7"
 MOUSE_COLOR = {1: "#2a78d6", 2: "#eb6834", 3: "#1baf7a", 4: "#eda100", 5: "#e87ba4"}
-BLUES = ["#fcfcfb", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
 
 
 # ---------------------------------------------------------------------------
@@ -259,130 +258,6 @@ def _header(fig, title, subtitle=""):
 
 def _footer(fig, text):
     fig.text(0.012, 0.008, text, ha="left", va="bottom", fontsize=8, color=MUTED)
-
-
-def _dose_label(mouse, target, dose):
-    extra = " (×3)" if mouse == 1 and target == 1 else " (no FUS)" if mouse == 1 and target == 3 else ""
-    return f"T{target}\n{dose:.2f}{extra}"
-
-
-def heatmap(d: pd.DataFrame):
-    from matplotlib.colors import LinearSegmentedColormap
-
-    cmap = LinearSegmentedColormap.from_list("blues", BLUES)
-    n_rows = {m: d[d.mouse == m].section.nunique() for m in MICE}
-    fig = plt.figure(figsize=(8.2, 2.2 + 0.34 * sum(n_rows.values()) + 0.9))
-    gs = fig.add_gridspec(len(MICE), 2, height_ratios=[n_rows[m] for m in MICE],
-                          width_ratios=[40, 1], hspace=0.75, wspace=0.04,
-                          left=0.24, right=0.92, top=0.84, bottom=0.07)
-    for row, mouse in enumerate(MICE):
-        ax = fig.add_subplot(gs[row, 0])
-        m = d[d.mouse == mouse]
-        dose = m.groupby("target").dose.first().sort_values()
-        order = dose.index.tolist()
-        sections = sorted(m.section.unique())
-        grid = m.pivot(index="section", columns="target", values="coverage").loc[sections, order]
-        flags = m.groupby("section").agg(low=("low_signal", "first"), drop=("dropped", "first"))
-        im = ax.imshow(grid.to_numpy(), cmap=cmap, vmin=0, vmax=1, aspect="auto")
-        for (i, j), v in np.ndenumerate(grid.to_numpy()):
-            ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=8.5,
-                    color="#ffffff" if v > 0.5 else INK)
-        ax.set_xticks(np.arange(-0.5, len(order)), minor=True)
-        ax.set_yticks(np.arange(-0.5, len(sections)), minor=True)
-        ax.grid(which="minor", color=SURFACE, linewidth=2)
-        # a wider gap between slides
-        slides = [s.split("_")[0] for s in sections]
-        for i in range(1, len(slides)):
-            if slides[i] != slides[i - 1]:
-                ax.axhline(i - 0.5, color=SURFACE, linewidth=6)
-        ax.tick_params(which="both", length=0)
-        ax.xaxis.tick_top()
-        ax.set_xticks(range(len(order)), [_dose_label(mouse, t, dose[t]) for t in order],
-                      fontsize=8.5, color=INK_2)
-        labels = []
-        for sec in sections:
-            note = "  dropped" if flags.loc[sec, "drop"] else "  low signal" if flags.loc[sec, "low"] else ""
-            labels.append(slice_name(mouse, sec) + note)
-        ax.set_yticks(range(len(sections)), labels)
-        for sec, tick in zip(sections, ax.get_yticklabels()):
-            tick.set_color(MUTED if flags.loc[sec, "low"] or flags.loc[sec, "drop"] else INK)
-        for side in ax.spines.values():
-            side.set_visible(False)
-        ax.set_title(f"Mouse {mouse}", loc="left", fontsize=11, weight="bold", color=INK, pad=34,
-                     x=-0.27)
-        if row == 0:
-            cax = fig.add_subplot(gs[:, 1])
-            cb = fig.colorbar(im, cax=cax)
-            cb.outline.set_visible(False)
-            cb.ax.tick_params(length=0, labelsize=8, colors=MUTED)
-            cb.ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
-            cb.set_label(M["name"], color=INK_2)
-    _header(fig, f"{M['name']} per slice and target (pipeline {M['pipeline']})",
-            f"{M['what'][0].upper() + M['what'][1:]}, 1.74 mm-diameter ROIs.\nColumns: targets ordered by "
-            "acoustic dose (cumulative 2nd harmonic), low → high.")
-    _footer(fig, f"Low signal: slice mean pixel coverage < {LOW_SIGNAL_MEAN} (post hoc). "
-            "Mouse 1 T1 got three sonications (doses summed).")
-    return fig
-
-
-def per_slice(d: pd.DataFrame, rho: pd.DataFrame):
-    rho = rho.set_index(["mouse", "section"])
-    rows = []
-    for mouse in MICE:
-        secs = sorted(d[d.mouse == mouse].section.unique())
-        chunks = [secs[i:i + 6] for i in range(0, len(secs), 6)]
-        for k, chunk in enumerate(chunks):
-            rows.append((f"Mouse {mouse}" + (f" · {k + 1}/{len(chunks)}" if len(chunks) > 1 else ""),
-                         [(mouse, s) for s in chunk]))
-    ncol = max(len(r[1]) for r in rows)
-    fig, axes = plt.subplots(len(rows), ncol, figsize=(2.75 * ncol + 1.2, 2.3 * len(rows) + 1.3),
-                             sharex=True, sharey=True, squeeze=False)
-    fig.subplots_adjust(left=0.11, right=0.985, top=0.88, bottom=0.08, hspace=0.42, wspace=0.12)
-    xmax = d.dose.max() * 1.1
-    for r, (row_name, sections) in enumerate(rows):
-        axes[r, 0].annotate(row_name.replace(" · ", "\n"), xy=(-0.3, 0.5),
-                            xycoords="axes fraction", ha="center", va="center", rotation=90,
-                            fontsize=9.5, weight="bold", color=INK, linespacing=1.3)
-        for c in range(ncol):
-            ax = axes[r, c]
-            if c >= len(sections):
-                ax.set_visible(False)
-                continue
-            mouse, sec = sections[c]
-            g = d[(d.mouse == mouse) & (d.section == sec)].sort_values("dose")
-            mouse = int(g.mouse.iloc[0])
-            faded = bool(g.low_signal.iloc[0]) or bool(g.dropped.iloc[0])
-            col = MOUSE_COLOR[mouse]
-            _clean(ax)
-            fit = stats.linregress(g.dose, g.coverage)
-            gx = np.array([0, g.dose.max()])
-            ax.plot(gx, fit.intercept + fit.slope * gx, color=col, linewidth=1.5,
-                    alpha=0.25 if faded else 0.5, zorder=2)
-            ax.scatter(g.dose, g.coverage, s=120, zorder=3, linewidths=1.6,
-                       facecolors=SURFACE if faded else col, edgecolors=col if faded else SURFACE)
-            for p in g.itertuples():
-                ax.annotate(str(p.target), (p.dose, p.coverage), ha="center",
-                            va="center_baseline", fontsize=7.5, weight="bold", zorder=4,
-                            color=col if faded else "#ffffff")
-            ax.set_title(slice_name(mouse, sec).replace("well ", "w").replace("slide ", "sl"),
-                         loc="left", fontsize=9.5, color=MUTED if faded else INK, pad=4)
-            ax.text(1.0, 1.02, f"ρ {rho.loc[(mouse, sec), 'rho']:+.2f}" + ("  · low signal" if faded else ""),
-                    transform=ax.transAxes, ha="right", va="bottom", fontsize=8, color=MUTED)
-            ax.set_xlim(-0.1, xmax)
-            ax.set_xticks(np.arange(0, xmax, 1.0))
-            ax.set_ylim(-0.06, 1.04)
-            ax.set_yticks([0, 0.5, 1])
-            ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
-    for c in range(ncol):
-        bottom = next(axes[r, c] for r in range(len(rows) - 1, -1, -1) if axes[r, c].get_visible())
-        bottom.set_xlabel("dose (cum. 2nd harmonic)")
-        bottom.xaxis.set_tick_params(labelbottom=True)
-    _header(fig, f"{M['name']} vs dose, one panel per slice (pipeline {M['pipeline']})",
-            "Number = target. Line: least squares within the slice. ρ: Spearman with dose. "
-            "Hollow = low-signal slice.")
-    _footer(fig, f"Y: {M['what']}. Mouse 1 T3 is the no-FUS control at dose 0; "
-            "T1 = three sonications summed.")
-    return fig
 
 
 def aggregate(d: pd.DataFrame, rho: pd.DataFrame):
@@ -663,20 +538,11 @@ Per animal, on raw totals (`cumulative.png`, n = 6 each):
 
 Mouse 1 without its no-FUS control (T3), 5 targets: {no_ctrl}.
 
-## Per-slice figures (secondary)
+## Within-slice view (secondary)
 
-Each pipeline has the same three figures; B's carry a `_cells` suffix.
+Per-slice numbers are in `slices_dose_delivery.csv`; there are no per-slice figures.
 
-**`heatmap.png`: the raw numbers.** One row per slice, one column per target,
-with targets ordered by dose left to right. If delivery followed dose, rows
-would get darker toward the right. Grey row labels are low-signal slices.
-
-**`per_slice.png`: delivery vs dose inside each slice.** One panel per slice,
-grouped by animal and slide. Each dot is a target, and the line is a
-least-squares fit within that slice. ρ is the Spearman rank correlation with
-dose in that slice (6 targets).
-
-**`aggregate_standardized.png`: all slices pooled.** Each slice's six values
+**`aggregate_standardized.png`** (pipeline A; `_cells` for B)**: all slices pooled.** Each slice's six values
 are z-scored against that slice's own mean and SD. This removes what the whole
 slice shares (depth relative to the focal column, staining, exposure) and keeps
 how its targets rank against each other. Small dots are slice × target; big dots
@@ -736,10 +602,9 @@ def main():
             continue
         rho = per_slice_rho(d[d.dropped == ""])
         results[measure] = (d, rho)
-        for name, fig in (("heatmap", heatmap(d)), ("per_slice", per_slice(d, rho)),
-                          ("aggregate_standardized", aggregate(d, rho))):
-            fig.savefig(OUT / f"{name}{info['suffix']}.png", dpi=170)
-            plt.close(fig)
+        fig = aggregate(d, rho)
+        fig.savefig(OUT / f"aggregate_standardized{info['suffix']}.png", dpi=170)
+        plt.close(fig)
     full = table("pixels")
     c = cumulative(full)
     fits = cumulative_fits(c)

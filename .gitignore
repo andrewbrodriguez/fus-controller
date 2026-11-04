@@ -42,6 +42,13 @@ data/processed/
 *.hdf5
 *.npz
 
+# Per-mouse / per-section figures: local inspection only, not committed
+# (aggregate figures in results/histology/slices/ and results/acoustic_eda/ are)
+results/histology/figures/
+results/histology/aligned/
+results/histology/reconstruction/*.png
+results/histology/reconstruction/*.gif
+
 # ── OS / editor ─────────────────────────────────────────────────────────
 .DS_Store
 ._*

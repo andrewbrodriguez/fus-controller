@@ -40,8 +40,6 @@ controller's own reading, on the goal's scale. `recordings.csv` has every number
   given exposure the middle 80% of sonications span 0.61–1.62× the trend (~2.7×).
 - **Headline** (`controller_headline.png`, for the lab): settled level vs goal for every sonication, and
   ceiling/interlock rates per session.
-- **Traces**, one figure per session: `controller_harmonic_s1.png` … `_s4.png` (online harmonic
-  with the goal band) and `controller_voltage_s1.png` … (drive voltage with the ceiling).
 
 | Session | Mice | Recordings | Online harmonic ÷ goal (median) | Recordings averaging in band | Interlock | At V ceiling | Ceiling (V) | Noise-floor CV |
 |---|---|---|---|---|---|---|---|---|
