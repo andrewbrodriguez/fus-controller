@@ -45,7 +45,7 @@ COLUMNS = ["mouse", "section", "centre_row", "centre_col", "front_row", "front_c
 #: Pyramid level shown in napari: 5.2 um/px, enough to see a notch.
 VIEW_LEVEL = 2
 
-#: Hemisphere the lab notched: right on Mouse 1 (N. Todd, 2026-09-18), left from
+#: Hemisphere the lab notched: right on Mouse 1 (lab, 2026-09-18), left from
 #: Mouse 2 on (2026-09-29).
 NOTCH_SIDE_MOUSE01 = "right"
 NOTCH_SIDE_DEFAULT = "left"

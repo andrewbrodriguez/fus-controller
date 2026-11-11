@@ -1,6 +1,6 @@
 """Per-burst acoustic emission feature extraction for FUS-BBB recordings.
 
-This is a Python port of ``reference/nt_ExtractHarmonicData.m`` (N. Todd).
+This is a Python port of ``reference/nt_ExtractHarmonicData.m`` (Dr. Todd).
 It reads one ``Mouse_Cntr_XX_TargetYY.mat`` recording and reduces every burst
 to four scalar cavitation metrics.
 

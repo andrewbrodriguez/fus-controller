@@ -1,6 +1,6 @@
 """Loose 3D reconstruction of anti-GFP delivery from one animal's horizontal sections.
 
-N. Todd (2026-10-02): delivery is loosely a sphere around each focal spot, which is the
+Lab (2026-10-02): delivery is loosely a sphere around each focal spot, which is the
 reason for summing delivery over slices. This module stacks the slices so the shape can
 be looked at. It is a picture, not a measurement: nothing here feeds a number in ``docs/``.
 
@@ -46,7 +46,7 @@ be looked at. It is a picture, not a measurement: nothing here feeds a number in
    clicked ROI centre) at the middle depth of the stack. Its radius is scaled by the
    cumulative 2nd-harmonic AUC (``results/histology/slices/doses.csv``):
    ``r = r_max * (dose / max dose) ** exponent``. The default exponent 1/3 makes **volume
-   proportional to dose**, and r_max = 1.0 mm is half the ~2 mm focal spot (N. Todd,
+   proportional to dose**, and r_max = 1.0 mm is half the ~2 mm focal spot (lab,
    2026-09-18). This is the dose hypothesis drawn in the same space as the GFP, not a
    measurement.
 """

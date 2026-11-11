@@ -87,7 +87,7 @@ PLAN_MM: dict[int, tuple[float, float]] = {
 }
 
 #: ROI radius, in plan mm (scaled by the fitted shrinkage). Half the ~2 mm
-#: lateral focal spot at 837 kHz (N. Todd, 2026-09-18; precise dimensions to
+#: lateral focal spot at 837 kHz (lab, 2026-09-18; precise dimensions to
 #: follow). The closest pair of targets (2 and 3) is 2.06 mm apart, so
 #: neighbouring ROIs still do not overlap. Was 0.75 mm before 2026-09-30.
 ROI_RADIUS_MM = 1.0
@@ -217,8 +217,8 @@ def export_sections(
     return written
 
 
-#: Scan names from Mouse 3 on: ``Image_Cntr_<mouse>.<well>.<slide>_<scan>.vsi`` (N. Todd,
-#: 2026-10-28: "mouse.well.slide_section"); some have a space for the first underscore.
+#: Scan names from Mouse 3 on: ``Image_Cntr_<mouse>.<well>.<slide>_<scan>.vsi`` (lab,
+#: 2026-10-28: mouse.well.slide_section); some have a space for the first underscore.
 _CNTR_SCAN = re.compile(r"Image_Cntr[_ ](\d+)\.(\d+)\.(\d+)_(\d+)$")
 
 

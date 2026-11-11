@@ -2,7 +2,7 @@
 
     .venv/bin/python scripts/mouse02_reconstruction_3d.py
     .venv/bin/python scripts/mouse02_reconstruction_3d.py --spacing-mm 0.2 \
-        --order slide01_s2,slide02_s2,...   # once Nick gives the real order
+        --order slide01_s2,slide02_s2,...   # once the lab gives the real order
 
 Interactive version: ``scripts/view_reconstruction_3d.py``.
 

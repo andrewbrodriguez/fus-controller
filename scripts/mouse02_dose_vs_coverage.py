@@ -18,14 +18,14 @@ with those directions:
 
 Assumptions (see docs/mouse01-dose-delivery.md for A1-A7):
 
-B1  The notch is on the animal's left for Mouse 2 (N. Todd, 2026-09-29, correcting
-    his earlier "bottom right"), and on the right for Mouse 1 (2026-09-18).
+B1  The notch is on the animal's left for Mouse 2 (lab, 2026-09-29, correcting
+    an earlier report of right), and on the right for Mouse 1 (2026-09-18).
 B2  Which side of the animal plan +x (targets 1-3) is on is *derived*, not assumed:
     the Mouse 1 notch corners plus the empty target 3 fix it. The script stops if
     the Mouse 1 sections disagree.
-B3  TargetN was fired at position N (N. Todd, 2026-09-18: true for every mouse but 1).
+B3  TargetN was fired at position N (lab, 2026-09-18: true for every mouse but 1).
 B4  Coverage per target is the mean over the usable sections. Section depth is
-    unknown, and N. Todd reports the head was rolled -- right-side targets higher,
+    unknown, and the lab reports the head was rolled -- right-side targets higher,
     left-side lower -- so one section cuts the two sides at different depths.
 
 Writes ``results/histology/mouse02_dose_vs_coverage.csv`` and

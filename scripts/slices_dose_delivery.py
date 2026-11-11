@@ -18,7 +18,7 @@ Slices are dropped if excluded or marked wrong in review. Of the rest, a slice i
 cutoff was chosen *after* looking at the per-slice table (2026-09-30), so every
 aggregate is reported with and without low-signal slices.
 
-**Cumulative across slices (the headline, per N. Todd, 2026-10-02).** Each target's
+**Cumulative across slices (the headline, per the lab, 2026-10-02).** Each target's
 delivery is summed over every slice of its animal, giving one number per target that
 approximates the transduced volume: total GFP+ cells (B) and total GFP+ area in mm²
 (A: pixel coverage × ROI tissue area). Low-signal slices stay in, since a slice that
@@ -330,7 +330,7 @@ def cumulative_figure(c: pd.DataFrame, fits: pd.DataFrame):
     _header(fig, "Cumulative delivery across slices vs acoustic dose",
             "Each dot is a target (number), delivery summed over every slice of that animal. "
             "Line: least squares, n = 6 per panel.")
-    _footer(fig, "Mouse 1 T3 is the no-FUS control at dose 0; Mouse 1 T1 = its three sonications at position 1 summed (Target1-3 recordings, per N. Todd 9/18; not the sheet). "
+    _footer(fig, "Mouse 1 T3 is the no-FUS control at dose 0; Mouse 1 T1 = its three sonications at position 1 summed (Target1-3 recordings, per the lab 9/18; not the sheet). "
             "Low-signal slices are included. Animals have different slice counts, so compare slopes "
             "within a panel, not heights across.")
     return fig
@@ -507,14 +507,14 @@ measured two ways in the same hand-finetuned ROIs, 1.74 mm across on the tissue
 
 ## Headline: cumulative delivery across slices
 
-Following N. Todd (2026-10-02), each target's delivery is **summed over every slice** of its
+Following the lab (2026-10-02), each target's delivery is **summed over every slice** of its
 animal instead of treating each slice as its own measurement: total GFP+ cells (pipeline B)
 and total GFP+ area (pipeline A, coverage × ROI tissue area). All slices that aren't excluded
 or marked wrong are summed, including the low-signal ones, so no post hoc cutoff enters.
 
 Raw totals aren't comparable between animals (kept slices: {slice_counts}; staining and
 section depth differ too). Two ways round that are shown side by side; which one to use across
-animals is **not settled** (call with N. Todd, 2026-10-28):
+animals is **not settled** (discussed with the lab, 2026-10-28):
 
 - divide each total by **its animal's mean target total** (1.0 = that animal's average
   target; `*_rel` columns), which cancels anything that scales a whole animal, or
@@ -572,7 +572,7 @@ Across the six target means (z), ρ with dose: {"; ".join(means_line)}.
 - **Mouse 1's correlation leans on the no-FUS control** (T3, dose 0) and on T1, whose
   dose is three sonications summed.
 - **Mouse 1 T1's dose (2.44) is the actual dose at position 1**: the `Target1`, `Target2` and
-  `Target3` recordings (0.9462 + 0.5658 + 0.9293), all fired there per N. Todd (2026-09-18).
+  `Target3` recordings (0.9462 + 0.5658 + 0.9293), all fired there per the lab (2026-09-18).
   It comes from the recordings, not the summary sheet, whose Mouse 1 rows 3–6 are rotated
   by one run (the sheet would give 2.83). Mouse 1 T2 is `Target2_Repeat`; T4–T6 are
   `Target4`–`Target6`.

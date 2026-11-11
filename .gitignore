@@ -64,3 +64,9 @@ Thumbs.db
 
 # Segmentation pilot environments (PyTorch / TensorFlow)
 segmentation_alpha/.venv*/
+
+# Correspondence and meetings with Dr. Todd: kept locally, never pushed
+notes/meeting_*
+notes/next-email-todd.md
+notes/notes-for-next-time.txt
+docs/lab/correspondence.md

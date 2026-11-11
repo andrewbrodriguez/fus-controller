@@ -14,9 +14,9 @@ confirmed with the lab:
 A1  Section orientation: s2 and s4 as scanned, s5 and s6 mirrored. Confirmed
     9/18: sections carry a notch (bottom right on Mouse 1) and target 3 was
     never sonicated, so a flipped section is identifiable.
-A2  The empty site is target 3 -- confirmed by N. Todd.
+A2  The empty site is target 3 -- confirmed by the lab.
 A3  Coverage per target is the mean over s2, s4, s5, s6; bars span min-max.
-A4  Recording -> position, **confirmed** by N. Todd (9/18) and by the
+A4  Recording -> position, **confirmed** by the lab (9/18) and by the
     acquisition timestamps in each file: the first three sonications all went
     to position 1 (Target1, Target2, Target3), then positions 4, 5, 6 in turn,
     then a 7th back at position 2 (Target2_Repeat). Position 3 was never

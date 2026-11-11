@@ -8,7 +8,7 @@ GFP+, summed over the mouse's kept slices (sum GFP+ / sum NeuN) -- against its a
 with each slice's own value behind it.
 
 Mouse 1 is drawn hollow: its reference shot went into position 1 together with two other
-sonications (N. Todd, 2026-09-18), so that site's dose is all three summed.
+sonications (lab, 2026-09-18), so that site's dose is all three summed.
 
 Inputs: ``results/histology/slices/slices_dose_delivery.csv`` (run
 ``scripts/slices_dose_delivery.py`` first) and ``results/acoustic_eda/recordings.csv``.
