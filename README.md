@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Fluorescence micrograph of mouse brain tissue from the study, densely labelled in yellow and red with scattered patches of blue." width="100%">
+  <img src="docs/figures/banner.png" alt="Fluorescence micrograph of mouse brain tissue from the study, densely labelled in yellow and red with scattered patches of blue." width="100%">
 </p>
 
 <h1 align="center">FUS Controller</h1>
@@ -78,9 +78,9 @@ This runs as **pipeline B** (`python -m fus.cells`) on every target ROI, about 1
 | Harmonic goal (setpoint) | 0.55, 0.65, 0.75, 0.85, 0.95, 1.05 |
 | Number of bursts | 57 – 255 |
 | Brain region | 6 targets per animal |
-| Virus | AAV9-GFP, 7.6e12 vg/kg (Mouse 2 summary); assumed the same for every animal |
+| Virus | AAV9-GFP, 7.6e12 vg/kg, mice 1–12; AAV.CPP16, mice 13–24 |
 
-The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The virus is delivered by tail vein immediately after sonication. The lab's controller-study slides (`docs/lab/ControllerStudy_Plots.pptx`) list an AAV9 and an AAV.CPP16 cohort of 12 each, but no per-mouse assignment exists. We assume AAV9 throughout (decided 2026-10-19), which doesn't affect the within-animal dose–delivery comparisons.
+The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The virus is delivered by tail vein immediately after sonication. Mice 1–12 got AAV9 and 13–24 AAV.CPP16 (lab, 2026-11-09). The capsid is not modelled as a factor: the comparisons are within-animal dose vs delivery.
 
 ## Project status
 
@@ -98,17 +98,14 @@ The limiting factor is still tissue.
 
 ```
 data/           Experiment summary sheet (tracked); raw acoustic + histology (git-ignored)
-literature/     Reference papers — index tracked, PDFs git-ignored
-reference/      Lab-provided material, incl. the MATLAB extraction script
 src/fus/        Analysis package — feature extraction, quantification, models
 scripts/        Helper scripts, incl. QuPath Groovy
 tests/          pytest suite
 notebooks/      Per-animal ingest (orient, finetune, measure, review), full-resolution slice viewer
 segmentation_alpha/  Cell segmentation pilot and its environments (StarDist CPU/GPU, Cellpose)
 results/        Generated CSVs and aggregate (all-mice) figures
-docs/           Proposal and lab presentations
+docs/           Method write-ups, decisions, lab materials (docs/lab/), papers (docs/literature/)
 notes/          Meeting notes and working log (`current.md` = state of play)
-assets/         Images used in documentation
 ARCH.md         Project charter: scope, weekly plan, status
 AGENTS.md       Conventions, commands and gotchas for contributors
 ```
@@ -119,7 +116,7 @@ Raw data is not in version control — a single `.mat` acoustic recording is rou
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate   # Python ≥ 3.10 required
-pip install -r requirements.txt -e .
+pip install -e ".[dev]"
 pip install "napari[all]"                               # optional: interactive viewer used in the notebook
 
 # register the venv as a Jupyter kernel for notebooks/
@@ -174,7 +171,7 @@ See [`ARCH.md`](ARCH.md) for the full charter and week-by-week plan.
 
 ## Key references
 
-Full index in [`literature/README.md`](literature/README.md).
+Full index in [`docs/literature/README.md`](docs/literature/README.md).
 
 - Owusu-Yaw et al., *Pharmaceutics* 2024 — FUS-mediated AAV9 delivery in a HD mouse model; the predecessor study and the source of the GFP quantification method.
 - Todd et al., *Molecular Therapy* (in preparation) — FUS-mediated AAV gene therapy in the CNS delivery landscape.

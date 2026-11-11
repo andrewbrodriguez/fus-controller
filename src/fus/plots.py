@@ -1,6 +1,6 @@
 """Figures for acoustic emission recordings.
 
-Ports sections 7 and 8 of ``reference/nt_ExtractHarmonicData.m``:
+Ports sections 7 and 8 of ``docs/lab/nt_ExtractHarmonicData.m``:
 
 * `plot_cavitation_metrics` -- 2x2 grid of the four raw metrics in dB.
 * `plot_cumulative_dose` -- 1x2 grid of the cumulative normalised metrics.

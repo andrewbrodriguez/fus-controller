@@ -20,8 +20,8 @@ data/histology/
 
 # ── Literature ──────────────────────────────────────────────────────────
 # Published PDFs and in-preparation manuscripts are not redistributed here.
-# literature/README.md lists what belongs in this folder.
-literature/*.pdf
+# docs/literature/README.md lists what belongs in this folder.
+docs/literature/*.pdf
 
 # ── Python ──────────────────────────────────────────────────────────────
 __pycache__/

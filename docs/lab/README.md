@@ -6,6 +6,7 @@ Files from the Todd lab, kept as received. Agents can't read the images in them;
 
 | File | What |
 |---|---|
+| `nt_ExtractHarmonicData.m` | Dr. Todd's MATLAB script: loads a `.mat` recording and extracts 2nd-harmonic and wideband metrics per burst. `src/fus/extract.py` is its port and reproduces its numbers |
 | `ControllerStudy_Plots.pptx` | Controller-study slides (git-ignored, like every `.pptx`) |
 | `AAV_By_TreatmentLocation.pptx` | From the lab, last modified 2026-11-06, received 2026-11-11 (git-ignored). One slide per target, Mice 1–6: bursts, mean MPa and cumulative harmonic dose (CHD), then sorted CHDs. Mouse 1 T1 is the three sonications summed (465 bursts, CHD 2.82); Mouse 1 T3 is 0 (never sonicated). Mouse 6 CHDs: T1 1.04, T2 0.47, T3 2.02, T4 0.92, T5 0.43, T6 3.33, matching our recordings (`results/acoustic_eda/recordings.csv`, 2026-11-11) |
 | `IF_Images_Table.xlsx` | From the lab, last modified 2026-11-09, received 2026-11-11. Imaging QC, one row per section for Mice 2–6: mouse, well, slide, section, imaged, QC note (e.g. "Not ok - section too torn"). Mouse 5 well 11 slide 1 is "Not Stained?"; Mouse 6 is one file per slide |

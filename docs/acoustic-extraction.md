@@ -4,7 +4,7 @@ How to turn a raw `Mouse_Cntr_XX_TargetYY.mat` recording into per-burst cavitati
 metrics, using the `fus` package in [`src/fus/`](../src/fus).
 
 This is a Python port of the lab's `nt_ExtractHarmonicData.m`
-([`reference/`](../reference/nt_ExtractHarmonicData.m)). It reproduces that script's
+([`docs/lab/`](lab/nt_ExtractHarmonicData.m)). It reproduces that script's
 numbers exactly — see [Validation](#validation) — and adds a few things the original
 doesn't surface.
 
@@ -62,7 +62,7 @@ against delivered AAV. Everything else exists to make that number trustworthy.
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e ".[dev]"
 pip install -e .          # puts `fus` on the path
 ```
 

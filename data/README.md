@@ -147,7 +147,7 @@ That last row matters: offline feature extraction can be validated against what 
 controller itself recorded in real time.
 
 `Reduced_*.mat` files (~12 KB) are the lab's already-reduced output from
-[`reference/nt_ExtractHarmonicData.m`](../reference/nt_ExtractHarmonicData.m), useful as a
+[`docs/lab/nt_ExtractHarmonicData.m`](../docs/lab/nt_ExtractHarmonicData.m), useful as a
 regression target when porting that script to Python.
 
 > **Note on frequency:** this controller study runs at 837 kHz. Owusu-Yaw et al. (2024)
