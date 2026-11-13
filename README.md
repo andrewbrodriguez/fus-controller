@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/figures/banner.png" alt="Fluorescence micrograph of mouse brain tissue from the study, densely labelled in yellow and red with scattered patches of blue." width="100%">
+  <img src="docs/figures/banner.png" alt="FUS Controller" width="100%">
 </p>
 
 <h1 align="center">FUS Controller</h1>
