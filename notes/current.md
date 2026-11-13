@@ -38,6 +38,18 @@ animals was held 10/28. Meeting notes and email drafts are kept locally (git-ign
       reading low in Mice 3–5;
     - same cumulative dose reached by different parameters: few bursts at high intensity
       vs many bursts at low intensity.
+- **Region analysis, first pass (11/13)** (`scripts/region_delivery.py` →
+  `results/histology/region/README.md`, Mice 1–5, 28 single-sonication targets). Delivery is
+  compared after taking out dose (logit delivery vs log dose, one offset per mouse);
+  p-values come from shuffling targets within each mouse.
+  - **Thalamus is strongest raw, but not at matched dose.** T3/T6 got the most dose in these
+    four mice by chance (position 3: 1.44 in mice 2–5 vs 1.29 over mice 2–24; dose doesn't
+    differ by position overall, p 0.76). Dose-adjusted, thalamus vs the rest is +0.21, p 0.62.
+  - **T1 < T4 holds at matched dose**: lower in 4/4 mice on both measures (cells p 0.018,
+    pixels p 0.034), with equal mean doses (0.80 vs 0.81). The other right–left pairs go both
+    ways, so it isn't the whole right side.
+  - **Not independent:** the lab suggested both after viewing these animals. Mouse 6 is the
+    first clean test. T1 is also always fired first, so side and firing order are confounded.
 - **Mouse 6 scans arrived (11/11).** `Mouse_Cntr_06.zip` was extracted to
   `data/histology/Mouse_06/` (all 32 files CRC-match the zip; the zip was then deleted). **New format again: one `.vsi`
   per slide with several sections in it** (10.1 and 11.1: 4 each; 10.2 and 11.2: 2 each; 12
@@ -343,8 +355,8 @@ written into `docs/`**. Re-derive before citing:
   `notebooks/ingest_new_histology.ipynb`.
 - Match `IF_Images_Table.xlsx` rows to our scans: why the counts differ, and the QC reason for
   each exclusion.
-- Rough cuts of the lab's three suggested comparisons: region, T1 vs T4, and same dose by
-  different parameters.
+- Rough cuts of the lab's three suggested comparisons: ~~region~~ and ~~T1 vs T4~~ done 11/13
+  (`results/histology/region/`); same dose by different parameters still to do.
 
 Older list:
 

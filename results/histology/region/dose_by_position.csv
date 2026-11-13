@@ -1,0 +1,7 @@
+position,region,side,mean_dose_all,n_all,mean_dose_imaged
+1,anterior striatum,right,1.058,23,0.8
+2,lateral striatum / cortex,right,1.128,23,0.86
+3,thalamus,right,1.286,23,1.437
+4,anterior striatum,left,1.006,23,0.809
+5,lateral striatum / cortex,left,0.923,23,0.879
+6,thalamus,left,1.423,23,1.014

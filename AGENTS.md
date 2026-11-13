@@ -46,6 +46,7 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/benchmark_mouse01.py          # hand placement vs Mouse 1 answer key
 .venv/bin/python scripts/slices_dose_delivery.py       # per-slice + pooled dose vs coverage
 .venv/bin/python scripts/reference_target.py           # the constant 120-burst/0.75 treatment, all mice (run after the line above)
+.venv/bin/python scripts/region_delivery.py           # delivery by brain region, dose-adjusted (run after slices_dose_delivery.py; ~1 min)
 .venv/bin/python scripts/mouse02_reconstruction_3d.py  # 3D GIF (git-ignored); order assumed, spacing from atlas
 .venv/bin/python scripts/view_reconstruction_3d.py    # same, interactive (napari; GUI, run it yourself)
 .venv/bin/python scripts/sonication_eda.py           # design, controller, noise; all 24 mice from the zip (~6 min first run, then ~40 s)

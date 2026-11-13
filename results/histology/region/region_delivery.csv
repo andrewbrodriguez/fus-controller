@@ -1,0 +1,31 @@
+mouse,target,region,side,dose,n_sonications,in_fit,gfp_fraction,pixel_coverage,residual_cells,residual_pixels
+1,1,anterior striatum,right,2.4413,3,False,0.657,0.6176,,
+1,2,lateral striatum / cortex,right,1.1015,1,True,0.4387,0.4962,0.1913,0.4514
+1,3,thalamus,right,0.0,0,False,0.0102,0.0147,,
+1,4,anterior striatum,left,1.3457,1,True,0.7434,0.6123,1.1921,0.7047
+1,5,lateral striatum / cortex,left,0.9466,1,True,0.3378,0.3367,-0.0013,-0.0461
+1,6,thalamus,left,1.3164,1,True,0.1759,0.2007,-1.382,-1.11
+2,1,anterior striatum,right,0.6247,1,True,0.1668,0.1828,-0.3139,-0.3442
+2,2,lateral striatum / cortex,right,1.0215,1,True,0.2466,0.2311,-0.582,-0.5857
+2,3,thalamus,right,0.7665,1,True,0.4336,0.418,0.7114,0.5993
+2,4,anterior striatum,left,1.0703,1,True,0.4638,0.4398,0.3177,0.3236
+2,5,lateral striatum / cortex,left,0.3688,1,True,0.0998,0.1331,-0.0907,-0.1445
+2,6,thalamus,left,1.5973,1,True,0.5283,0.5058,-0.0425,0.1516
+3,1,anterior striatum,right,0.8752,1,True,0.0158,0.0415,-1.244,-1.2129
+3,2,lateral striatum / cortex,right,0.4201,1,True,0.0105,0.0457,-0.5241,-0.3104
+3,3,thalamus,right,1.7159,1,True,0.3811,0.4614,1.3629,1.0379
+3,4,anterior striatum,left,1.1035,1,True,0.2545,0.3184,1.455,0.9134
+3,5,lateral striatum / cortex,left,0.4233,1,True,0.0136,0.0862,-0.274,0.3603
+3,6,thalamus,left,1.0912,1,True,0.0348,0.0776,-0.7757,-0.7883
+4,1,anterior striatum,right,0.8726,1,True,0.0301,0.0478,-1.6513,-1.5198
+4,2,lateral striatum / cortex,right,0.6884,1,True,0.4722,0.5307,2.0764,1.8539
+4,3,thalamus,right,2.5889,1,True,0.5358,0.5122,0.2847,0.3335
+4,4,anterior striatum,left,0.4215,1,True,0.0391,0.0613,-0.2562,-0.4626
+4,5,lateral striatum / cortex,left,0.9591,1,True,0.2068,0.2229,0.331,0.1199
+4,6,thalamus,left,1.0243,1,True,0.0864,0.1649,-0.7846,-0.3248
+5,1,anterior striatum,right,0.8286,1,True,0.0309,0.0578,-1.5077,-1.4622
+5,2,lateral striatum / cortex,right,1.3097,1,True,0.1579,0.2866,-0.4433,-0.0831
+5,3,thalamus,right,0.6767,1,True,0.1773,0.2741,0.716,0.5761
+5,4,anterior striatum,left,0.6395,1,True,0.1083,0.1517,0.2298,-0.1094
+5,5,lateral striatum / cortex,left,1.7665,1,True,0.2773,0.3743,-0.1895,-0.0116
+5,6,thalamus,left,0.3422,1,True,0.1082,0.2307,1.1948,1.0901
