@@ -261,7 +261,7 @@ the baseline level dashed. Reading it:
 > `20*log10(peak)` — the absolute value, with a baseline line drawn on top. The
 > values are not baseline-referenced. That behaviour is reproduced faithfully here
 > and the axis relabelled **"dB (absolute)"** so the plot isn't misread. Worth
-> confirming with Bernie that the original label was just a slip.
+> confirming with the lab that the original label was just a slip.
 
 ### 3. Cumulative dose
 

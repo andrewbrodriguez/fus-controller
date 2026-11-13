@@ -1,7 +1,6 @@
 # ES91r — Independent Study / Research
 
 **PI:** Dr. Nicholas Todd
-**Primary Mentor (day-to-day):** Dr. Bernie Owusu-Yaw
 **Semester:** Fall 2026 (13-week independent study)
 **Schedule:** Tue 1:00–5:00 PM, Wed 10:00 AM–12:00 PM, Thu 10:00 AM–2:00 PM
 **Location:** Brigham and Women's Hospital / HMS (lab safety training required)

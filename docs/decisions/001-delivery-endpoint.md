@@ -168,7 +168,7 @@ Rather than argue from estimates, measure it. Roughly an afternoon:
 
 1. Run StarDist (QuPath extension) on the DAPI channel of the crop above, plus two more:
    one plume edge, one background region.
-2. Bernie or Andrew manually counts GFP+ cells in three 200 µm boxes — **plume core,
+2. Andrew manually counts GFP+ cells in three 200 µm boxes — **plume core,
    plume edge, background** — blinded to the automated result.
 3. Compute precision, recall, and F1 for GFP+ calling in each box.
 

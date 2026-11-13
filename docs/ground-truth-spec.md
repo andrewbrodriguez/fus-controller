@@ -219,7 +219,7 @@ whole point of the `N Bursts` × `Harmonic Goal` design, record both.
 
 ## 7. ROI definition
 
-This is the step where a defensible choice matters most, and I'd want Bernie's input.
+This is the step where a defensible choice matters most, and I'd want the lab's input.
 
 **Option A — fixed geometric ROI at the target coordinate.** Register each section to a
 mouse brain atlas, project the target's `xyz` coordinate in, place a fixed-radius disc.

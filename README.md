@@ -167,7 +167,6 @@ See [`ARCH.md`](ARCH.md) for the full charter and week-by-week plan.
 
 **Andrew Rodriguez** — student investigator
 **Dr. Nicholas Todd** — principal investigator
-**Dr. Bernie Owusu-Yaw** — primary mentor
 
 ## Key references
 

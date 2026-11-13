@@ -3,7 +3,7 @@
 _extracted by pdftext_
 
 --- page 1 of 3 ---
-Student  Name:  Andrew  Rodriguez  PI  Name:  Dr.  Nicholas  Todd  Primary  Mentor  Name:  Dr.  Nicholas  Todd  (day  to  day  contact  Dr.  Bernie  Owusu-Yaw)   Title  of  Project:  Machine  Learning  Based  Acoustic  Feedback  Controller  for  FUS-BBB  Mediated  
+Student  Name:  Andrew  Rodriguez  PI  Name:  Dr.  Nicholas  Todd  Primary  Mentor  Name:  Dr.  Nicholas  Todd   Title  of  Project:  Machine  Learning  Based  Acoustic  Feedback  Controller  for  FUS-BBB  Mediated  
 AAV
  
 Delivery
