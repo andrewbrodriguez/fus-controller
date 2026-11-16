@@ -19,10 +19,10 @@ are left out of the fit and the tests, and drawn hollow where shown.
 
 Caveats (also in the README this writes):
 - The lab's suggestions came from viewing these same animals, so agreement here is not an
-  independent replication. Only Mice 6+ can test them cleanly.
+  independent replication. Mouse 6 (measured 2026-11-16) is the only clean test.
 - "Region" is the planned target, not the tissue in the section: sections sit ~1.7-2.7 mm
   deep (``fus.reconstruct``), above most focal centres (2.9-3.7 mm).
-- n is 4-5 mice per contrast.
+- n is 5-6 mice per contrast.
 
 Inputs: ``results/histology/slices/{cumulative_dose_delivery,slices_dose_delivery}.csv`` and
 ``results/acoustic_eda/recordings.csv``. Writes ``results/histology/region/``:
@@ -295,7 +295,7 @@ def write_readme(d, tt, slopes, pos, kw_p):
         f"Over mice 2-24 dose doesn't differ by position (Kruskal-Wallis p = {kw_p:.2f}), but in the "
         "imaged mice it does, by chance:",
         "",
-        "| Position | Region | Side | Mean dose, mice 2-24 | Mean dose, imaged mice 2-5 |",
+        f"| Position | Region | Side | Mean dose, mice 2-24 | Mean dose, imaged mice 2-{sdd.MICE[-1]} |",
         "|---|---|---|---|---|",
         *[f"| T{x.position} | {x.region} | {x.side} | {x.mean_dose_all:.2f} (n {x.n_all}) | "
           f"{x.mean_dose_imaged:.2f} |" for x in pos.itertuples()],
@@ -310,12 +310,15 @@ def write_readme(d, tt, slopes, pos, kw_p):
         f"{row('cells', 'T1').mice_negative}/{row('cells', 'T1').n_mice} mice on cells "
         f"(p {row('cells', 'T1').perm_p:.3f}) and {row('pixels', 'T1').mice_negative}/"
         f"{row('pixels', 'T1').n_mice} on pixels (p {row('pixels', 'T1').perm_p:.3f}). It is not a "
-        "whole-right-side effect: the other two right-left pairs go both ways.",
+        "whole-right-side effect: T2-T5 goes both ways, and T3 (right thalamus) reads *higher* "
+        f"than T6 in {row('cells', 'T3').n_mice - row('cells', 'T3').mice_negative}/"
+        f"{row('cells', 'T3').n_mice} mice on cells (p {row('cells', 'T3').perm_p:.3f}).",
         "",
         "## Caveats",
         "",
         "- The lab raised both questions after looking at these same animals' images, so agreement "
-        "here is not independent. Mice 6+ are the clean test.",
+        "here is not independent. Mouse 6 was measured after the suggestion (2026-11-16) and is "
+        "the only animal that tests them cleanly.",
         "- \"Region\" is the planned target. Sections sit ~1.7-2.7 mm deep (`fus.reconstruct`), "
         "above most focal centres (2.9-3.7 mm; thalamic ones deepest), so the tissue in a T3/T6 ROI "
         "may not be thalamus.",
@@ -323,7 +326,7 @@ def write_readme(d, tt, slopes, pos, kw_p):
         "T1-T4 gap could be firing order rather than side. Their doses in the imaged mice are "
         f"about equal ({pos.set_index('position').mean_dose_imaged[1]:.2f} vs "
         f"{pos.set_index('position').mean_dose_imaged[4]:.2f} mean).",
-        "- 4-5 mice per contrast; three region contrasts and three pairs were tested per measure, "
+        f"- {len(sdd.MICE) - 1}-{len(sdd.MICE)} mice per contrast; three region contrasts and three pairs were tested per measure, "
         "uncorrected.",
         "",
     ]

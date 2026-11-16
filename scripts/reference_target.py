@@ -13,7 +13,7 @@ sonications (lab, 2026-09-18), so that site's dose is all three summed.
 Inputs: ``results/histology/slices/slices_dose_delivery.csv`` (run
 ``scripts/slices_dose_delivery.py`` first) and ``results/acoustic_eda/recordings.csv``.
 Writes ``results/histology/slices/reference_target.{png,csv}`` (the reference alone) and
-``reference_normalised.{png,csv}`` (every target of Mice 2-5 divided by its mouse's reference).
+``reference_normalised.{png,csv}`` (every target of Mice 2-6 divided by its mouse's reference).
 """
 
 from __future__ import annotations
@@ -161,7 +161,7 @@ def normalised_figure(n: pd.DataFrame):
                frameon=False, fontsize=8.5)
     sdd._header(fig, "All targets, normalised by each mouse's constant treatment (120 bursts, goal 0.75)")
     sdd._footer(fig, "Number = target; hollow diamond = that mouse's reference target (1× by construction). "
-                "Mice 2-5; Mouse 1 is left out because its reference site also got two other sonications. "
+                f"Mice 2-{sdd.MICE[-1]}; Mouse 1 is left out because its reference site also got two other sonications. "
                 "Pipeline B, 1.74 mm ROIs.")
     return fig
 

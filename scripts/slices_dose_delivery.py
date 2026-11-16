@@ -61,12 +61,12 @@ import pandas as pd
 from scipy import stats
 
 from fus import archive
-from fus import extract, orientation
+from fus import extract, histology, orientation
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results/histology/slices"
 DOSES = OUT / "doses.csv"
-MICE = (1, 2, 3, 4, 5)  # Mouse 6's histology has not arrived (2026-11-01)
+MICE = (1, 2, 3, 4, 5, 6)  # all imaged mice (Mouse 6 added 2026-11-16)
 
 LOW_SIGNAL_MEAN = 0.2  # post hoc -- see module docstring
 
@@ -85,10 +85,10 @@ RECORDINGS = {
     **{m: {t: [f"Target{t}"] for t in range(1, 7)} for m in range(2, 25)},
 }
 
-# Reference palette (dataviz skill), light mode: categorical slots 1-5 in fixed order, blue ramp.
+# Reference palette (dataviz skill), light mode: categorical slots 1-6 in fixed order, blue ramp.
 SURFACE, INK, INK_2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 GRID, AXIS = "#e1e0d9", "#c3c2b7"
-MOUSE_COLOR = {1: "#2a78d6", 2: "#eb6834", 3: "#1baf7a", 4: "#eda100", 5: "#e87ba4"}
+MOUSE_COLOR = {1: "#2a78d6", 2: "#eb6834", 3: "#1baf7a", 4: "#eda100", 5: "#e87ba4", 6: "#008300"}
 
 
 # ---------------------------------------------------------------------------
@@ -119,10 +119,18 @@ def doses() -> pd.DataFrame:
 def table(measure: str = "pixels") -> pd.DataFrame:
     """One row per slice x target; ``coverage`` holds the chosen measure."""
     sheet = orientation.read_sheet()
+    plus_x = orientation.plus_x_side(sheet)
     parts = []
     for mouse in MICE:
         d = pd.read_csv(ROOT / f"results/histology/mouse{mouse:02d}_template_slots.csv")
-        d = d[d.channel == "TRITC"][["section", "target", "coverage", "placement"]].copy()
+        d = d[d.channel == "TRITC"][["section", "slot", "target", "coverage", "placement"]].copy()
+        # Template-placed (not finetuned) sections leave `target` blank; map slot -> target
+        # from the notch click, as the ingest notebook does.
+        if (blank := d.target.isna()).any():
+            d.loc[blank, "target"] = [
+                histology.slot_to_target(int(s), orientation.is_mirrored(sheet[(mouse, n)], plus_x))
+                for s, n in zip(d.slot[blank], d.section[blank])]
+        d = d.drop(columns="slot").astype({"target": int})
         d["mouse"] = mouse
         cells = ROOT / f"results/histology/cells/mouse{mouse:02d}_cell_rois.csv"
         if cells.exists():
