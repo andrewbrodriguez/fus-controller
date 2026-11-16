@@ -97,7 +97,7 @@ During this 13-week independent study, the project focuses on the first two phas
 
 ## Key Concepts
 - Blood-brain barrier (BBB) and permeability
-- Adeno-Associated Viruses (AAVs) for gene therapy delivery
+- AAVs (adeno-associated vectors) for gene therapy delivery
 - Focused Ultrasound BBB (FUS-BBB) mediated opening
 - Acoustic cavitation and microbubble dynamics
 - Acoustic emission monitoring (piezoelectric detection)

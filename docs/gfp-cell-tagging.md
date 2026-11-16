@@ -9,7 +9,7 @@ production on every target ROI of both mice ([pipeline B](#in-production-pipelin
 alongside it, and the endpoint decision is still open.
 
 The question: instead of the fraction of an ROI's *pixels* that are GFP+, how many
-*neurons* took up the virus?
+*neurons* took up the AAV?
 
 <p align="center">
   <img src="figures/gfp-tagging-example.png" alt="Three panels of a 400 micrometre square at the edge of the T3 target: stains; segmented neurons outlined yellow (GFP-positive) or magenta (negative) over the stains; the outlines alone." width="100%">

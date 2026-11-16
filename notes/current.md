@@ -88,7 +88,7 @@ pre-registration — say so if it goes in the write-up.
 ## Since 11/11
 
 - **Lab update 11/09** (correspondence kept locally in `docs/lab/correspondence.md`). **Meeting
-  Wed 11/18, 11:15.** All imaging done except Mouse 5 well 11 slide 1. Virus: mice 1–12 AAV9,
+  Wed 11/18, 11:15.** All imaging done except Mouse 5 well 11 slide 1. AAV: mice 1–12 AAV9,
   13–24 AAV.CPP16, so **every imaged mouse is AAV9** and capsid is not a factor. Three analyses
   suggested: by region (done), T1 vs T4 (done), and **same dose from different parameters —
   still to do**.

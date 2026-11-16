@@ -13,7 +13,7 @@
 
 ## Overview
 
-The blood-brain barrier (BBB) blocks most gene therapies — including adeno-associated viruses (AAVs) — from reaching the central nervous system. Focused ultrasound (FUS) with circulating microbubbles opens it non-invasively and transiently, but the therapeutic window is narrow: too little acoustic energy and nothing is delivered, too much and tissue is damaged.
+The blood-brain barrier (BBB) blocks most gene therapies — including AAVs (adeno-associated vectors) — from reaching the central nervous system. Focused ultrasound (FUS) with circulating microbubbles opens it non-invasively and transiently, but the therapeutic window is narrow: too little acoustic energy and nothing is delivered, too much and tissue is damaged.
 
 The focused ultrasound lab already runs a closed-loop controller during sonication. It ramps drive voltage until the second-harmonic emission from cavitating microbubbles reaches a setpoint — the **harmonic goal** — an approach that traces back to Aryal et al. (2014). What that controller regulates, though, is an *acoustic* quantity. Nobody has yet shown how tightly it maps onto the quantity that actually matters: **how much AAV ends up in the brain**.
 
@@ -27,9 +27,9 @@ This matters most for translation. Brute force is not an option in a patient: sp
   <img src="docs/figures/mouse01-example.png" alt="Mouse 1 brain section with two circled targets. Target 1 was sonicated: its acoustic trace jumps about 40 dB when microbubbles arrive, and 72% of its circle is GFP-positive. Target 3 was a no-FUS control: nothing was recorded, and 2% of its circle is GFP-positive." width="100%">
 </p>
 
-One mouse, one AAV injection, six planned targets. At **target 1** the controller drove the transducer while microbubbles circulated. The blue trace is the second-harmonic emission it regulates, about 40 dB above baseline once the bubbles arrive. **Target 3**, 2.5 mm behind it in the same brain, was left unsonicated as a control. In this section, 72% of the target 1 circle expresses GFP from the delivered virus; the control reads 2% (66% vs 2% averaged over four sections).
+One mouse, one AAV injection, six planned targets. At **target 1** the controller drove the transducer while microbubbles circulated. The blue trace is the second-harmonic emission it regulates, about 40 dB above baseline once the bubbles arrive. **Target 3**, 2.5 mm behind it in the same brain, was left unsonicated as a control. In this section, 72% of the target 1 circle expresses GFP from the delivered AAV; the control reads 2% (66% vs 2% averaged over four sections).
 
-That is the whole premise: where the acoustic signal says the BBB opened, the virus got in. The open question, and the reason this project exists, is ***how much***.
+That is the whole premise: where the acoustic signal says the BBB opened, the AAV got in. The open question, and the reason this project exists, is ***how much***.
 
 ## Six animals, pooled
 
@@ -80,9 +80,9 @@ This runs as **pipeline B** (`python -m fus.cells`) on every target ROI, about 1
 | Harmonic goal (setpoint) | 0.55, 0.65, 0.75, 0.85, 0.95, 1.05 |
 | Number of bursts | 57 – 255 |
 | Brain region | 6 targets per animal |
-| Virus | AAV9-GFP, 7.6e12 vg/kg, mice 1–12; AAV.CPP16, mice 13–24 |
+| AAV | AAV9-GFP, 7.6e12 vg/kg, mice 1–12; AAV.CPP16, mice 13–24 |
 
-The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The virus is delivered by tail vein immediately after sonication. Mice 1–12 got AAV9 and 13–24 AAV.CPP16 (lab, 2026-11-09). The capsid is not modelled as a factor: the comparisons are within-animal dose vs delivery.
+The acoustic recordings were made with an **837 kHz** carrier (second harmonic at 1.674 MHz), sampled at 5 MHz and stored as per-burst magnitude spectra. The AAV is delivered by tail vein immediately after sonication. Mice 1–12 got AAV9 and 13–24 AAV.CPP16 (lab, 2026-11-09). The capsid is not modelled as a factor: the comparisons are within-animal dose vs delivery.
 
 ## Project status
 
