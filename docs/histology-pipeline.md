@@ -45,6 +45,8 @@ done
     --csv results/histology/mouse02_template_slots.csv
 ```
 
+**Scan formats by animal.** Each format is handled by `histology.slide_prefix`; the
+ingest notebook (`notebooks/ingest_new_histology.ipynb`) picks the right one
 Geometry tests: `PYTHONPATH=src python -m pytest tests/`
 
 ---
@@ -257,6 +259,14 @@ turned 180°.
 ---
 
 ## Known problems
+
+0. **Template-placed sections leave `target` blank.** `measure` fills the `target` column
+   only for finetuned ROIs; with plain template circles it writes the slot and leaves
+   `target` empty. Anything reading `mouseNN_template_slots.csv` must map slot → target
+   itself, from the notch click (`histology.slot_to_target` with
+   `orientation.is_mirrored`), as the ingest notebook and
+   `scripts/slices_dose_delivery.py` do. Until 2026-11-16 the slice script silently
+   dropped such sections, which cost Mouse 5 one of its three slices.
 
 1. **FITC and TRITC disagree at target 6** (and at target 5 in s5). TRITC is the agreed
    delivery measure, so this affects the placement map rather than the numbers. The site

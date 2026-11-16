@@ -31,21 +31,23 @@ One mouse, one AAV injection, six planned targets. At **target 1** the controlle
 
 That is the whole premise: where the acoustic signal says the BBB opened, the virus got in. The open question, and the reason this project exists, is ***how much***.
 
-## Five animals, pooled
+## Six animals, pooled
 
-Five brains are imaged so far (Mice 1–5, 27 sections). Each target's delivery is summed over every section of its animal, then plotted against acoustic dose (cumulative second harmonic) for all 30 targets on one axis:
+Six brains are imaged and measured (Mice 1–6, 35 sections across the six animals). Each target's delivery is summed over every section of its animal, then plotted against acoustic dose (cumulative second harmonic) for all 36 targets on one axis:
 
 <p align="center">
-  <img src="results/histology/slices/cumulative_pooled.png" alt="Acoustic dose against cumulative GFP delivery for 30 targets from five mice, three delivery measures side by side" width="100%">
+  <img src="results/histology/slices/cumulative_pooled.png" alt="Acoustic dose against cumulative GFP delivery for 36 targets from six mice, three delivery measures side by side" width="100%">
 </p>
 
-| Delivery measure (30 targets, 5 mice) | Pearson r with dose |
-|---|---|
-| GFP+ fraction of neurons, ΣGFP+ ÷ ΣNeuN | **+0.66** |
-| GFP+ area ÷ the animal's mean target | +0.61 |
-| GFP+ cells ÷ the animal's mean target | +0.56 |
+| Delivery measure (36 targets, 6 mice) | Pearson r with dose | Spearman ρ |
+|---|---|---|
+| GFP+ fraction of neurons, ΣGFP+ ÷ ΣNeuN | **+0.52** | +0.63 |
+| GFP+ area ÷ the animal's mean target | +0.56 | +0.67 |
+| GFP+ cells ÷ the animal's mean target | +0.47 | +0.63 |
 
-Within single sections the pattern holds too: the higher-dose targets carry more GFP in 17 of 17 sections with clear signal under the pixel measure (median ρ +0.60), and 16 of 17 under the cell count (+0.61). Which cross-animal measure to use is not settled yet, and the p-values treat targets as independent even though they come from five animals. Full tables and caveats: [`results/histology/slices/README.md`](results/histology/slices/README.md).
+Within each animal the relationship is steadier than the pooled number suggests: GFP+ fraction of neurons against dose gives r = +0.63 to +0.85 in every one of the six mice. Pooling is weaker because animals differ in overall level and because delivery flattens at the highest doses (Mouse 6's T6, dose 3.33, reads 17%). Adding Mouse 6 moved the pooled fraction r from +0.66 (five mice) to +0.52.
+
+Within single sections the pattern holds too: the higher-dose targets carry more GFP in 21 of 21 sections with clear signal under the pixel measure (median ρ +0.60), and 20 of 21 under the cell count (+0.71). Which cross-animal measure to use is not settled yet, and the p-values treat targets as independent even though they come from six animals. Full tables and caveats: [`results/histology/slices/README.md`](results/histology/slices/README.md).
 
 ## From pixels to cells
 
@@ -87,9 +89,11 @@ The acoustic recordings were made with an **837 kHz** carrier (second harmonic a
 Current state, blockers and next steps: [`notes/current.md`](notes/current.md). Working
 conventions for anyone (or any agent) picking this up: [`AGENTS.md`](AGENTS.md).
 
-As of 2026-11-04, week ~10 of 13:
+As of 2026-11-16:
 - **Acoustics:** feature extraction reproduces the lab's numbers; all 24 mice (4 sessions) are processed.
-- **Tissue:** 5 of 24 brains are imaged, oriented by hand, measured with both pipelines and joined to dose. Mouse 6's scans arrived 2026-11-11 (12 sections, not yet ingested).
+- **Tissue:** 6 brains (Mice 1–6, all AAV9) are imaged, oriented by hand, measured with both pipelines and joined to dose. The lab reports imaging complete; whether any of Mice 7–24 will be stained is open.
+- **Region:** no brain-region effect once dose is accounted for; right anterior striatum (T1) reads below left (T4) at matched dose in 5/5 mice ([`results/histology/region/`](results/histology/region/README.md)).
+- **Plan:** analysis wraps up by 2026-11-30; from 2026-12-01 the work is the journal-style write-up.
 - **Still open:** which cross-animal delivery measure to use, a hand count to validate pipeline B, and the section order and depth.
 
 The limiting factor is still tissue.
