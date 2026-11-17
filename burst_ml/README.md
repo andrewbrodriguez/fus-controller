@@ -124,3 +124,4 @@ correctly. From then on agents ran **one at a time**, not the 2–4 the goal all
 |---|---|---|
 | env | create `burst_ml/.venv` (jax 0.12, numpyro 0.22, `fus` editable) | **kept**; imports checked by hand |
 | cache, data, models, invert | first attempt, four at once | **rejected**: degenerate output under concurrent load (above) |
+| cache2 | `bml/cache.py`: per-burst bands for every recording | **kept** after review; removed an unused variable and a stray temp-file line, added progress output. `tests/test_cache.py` (orchestrator's) passes: Σh2/10⁴ + baseline = dose exactly, and h2 matches the earlier per-burst table burst for burst |
