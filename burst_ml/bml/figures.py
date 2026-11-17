@@ -1,7 +1,9 @@
 """Aggregate figures from ``burst_ml/results/*.csv`` and ``cache/samples_*.npz``.
 
-From ``burst_ml/``: ``.venv/bin/python -m bml.figures``. Writes PNGs (dpi 150) to
-``burst_ml/results/``. Every figure pools all six mice. Use matplotlib's Agg backend,
+From ``burst_ml/``: ``.venv/bin/python -m bml.figures [--results DIR] [--samples DIR] [--out DIR]``
+(defaults ``results/``, ``cache/``, ``results/``; for development use
+``--results cache/quick --samples cache/quick --out cache/quick``). Writes PNGs (dpi 150).
+CSV paths below are relative to ``--results`` and ``samples_*.npz`` to ``--samples``. Every figure pools all six mice. Use matplotlib's Agg backend,
 colour mice with ``tab10`` in mouse order (1-6), label axes with units, and put the source
 CSV's name in each figure's lower-right corner in small grey text.
 
@@ -24,7 +26,7 @@ CSV's name in each figure's lower-right corner in small grey text.
 from __future__ import annotations
 
 
-def main() -> None:
+def main(argv=None) -> None:
     raise NotImplementedError
 
 
