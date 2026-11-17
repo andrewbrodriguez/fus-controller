@@ -62,14 +62,15 @@ def loao(spec: Spec, d: dict, seed: int = 0, **fit_kw) -> tuple[pd.DataFrame, pd
 
 
 def compare(folds: pd.DataFrame, base: str = "m3a") -> pd.DataFrame:
-    """Per model: elpd (sum over folds), delta vs ``base`` (sum of per-mouse differences),
+    """Columns model, elpd, delta, se, z, beats. Per model: elpd (sum over folds), delta vs ``base`` (sum of per-mouse differences),
     se = sqrt(n_folds)·std(per-mouse differences, ddof=1), z = delta/se (NaN for the base),
     beats = delta > 0 and z > 2 (the README's decision rule). Sorted by elpd, descending."""
     raise NotImplementedError
 
 
 def calibration(targets: pd.DataFrame) -> pd.DataFrame:
-    """Per model: share of observed fractions inside the 50% (q25-q75) and 90% (q05-q95)
-    intervals, mean pit, mean lpd, and the mean over mice of the within-mouse Spearman ρ
-    between pred_median and frac."""
+    """One row per model with columns model, cover50, cover90, mean_pit, mean_lpd, spearman:
+    the share of observed fractions inside the 50% (q25-q75) and 90% (q05-q95) intervals
+    (inclusive), the mean pit, the mean lpd, and the mean over mice of the within-mouse
+    Spearman ρ between pred_median and frac."""
     raise NotImplementedError
