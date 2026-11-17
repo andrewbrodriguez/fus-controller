@@ -32,7 +32,7 @@ def test_predict_pooled_matches_scipy():
                    for i in range(3)])                                    # (S, N)
     assert np.isclose(out["joint"], logsumexp(ll.sum(1)) - np.log(3), atol=1e-6)
     assert np.allclose(out["pointwise"], logsumexp(ll, axis=0) - np.log(3), atol=1e-6)
-    assert out["frac"].shape[1] == 3
+    assert out["frac"].shape == (3, 3)          # (S·n_a, N); non-hierarchical → n_a = 1
     assert ((out["frac"] >= 0) & (out["frac"] <= 1)).all()
 
 
@@ -43,6 +43,7 @@ def test_predict_hier_with_zero_sigma_matches_fixed_effect():
          "log_phi": np.log(np.array([10.0, 15.0])), "sigma_a": np.array([0.0, 0.0]),
          "z": np.zeros((2, 6))}
     out = predict(MODELS["m3a"], s, d, n_a=7, seed=1)
+    assert out["frac"].shape == (2 * 7, 2)
     ll = np.array([[_ll(expit(s["beta0"][i] + s["beta1"][i] * np.log(d["dose"][j])),
                         np.exp(s["log_phi"][i]), d["k"][j], d["n"][j]) for j in range(2)]
                    for i in range(2)])
