@@ -17,7 +17,8 @@ Steps, each skipped for a model already in its output (``--force`` redoes it):
 4. **Dose inversion** from the full-data m3a and m3b samples → ``dose_for_delivery.csv``:
    the dose for 20% GFP+ (both) and for 90% of the plateau (m3b), in a new animal.
 
-``--quick`` (2 chains, 300 + 300 draws, n_a 50) is for smoke tests: it writes to
+``--exclude 1:1 --out DIR`` drops those mouse:target rows (exploratory runs only; samples go
+to ``DIR`` too). ``--quick`` (2 chains, 300 + 300 draws, n_a 50) is for smoke tests: it writes to
 ``cache/quick/`` unless ``--out`` is given, so quick numbers never land in ``results/``.
 Defaults are the README's: 4 chains, 1000 + 1000, n_a 200, seed 0.
 """
@@ -36,7 +37,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from . import CACHE, RESULTS, invert  # noqa: E402
-from .data import load_design  # noqa: E402
+from .data import load_design, subset  # noqa: E402
 from .loao import calibration, compare, fit, loao  # noqa: E402
 from .models import MODELS  # noqa: E402
 
@@ -125,25 +126,45 @@ def step_invert(out, cache, n_a):
     pd.DataFrame(rows).to_csv(out / "dose_for_delivery.csv", index=False)
 
 
+def _exclude_pairs(pairs: list[str]) -> list[tuple[int, int]]:
+    """Parse ``['1:1', '2:3']`` → ``[(1, 1), (2, 3)]``."""
+    out: list[tuple[int, int]] = []
+    for p in pairs:
+        m_str, t_str = p.split(":")
+        out.append((int(m_str), int(t_str)))
+    return out
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--models", nargs="*", default=ORDER)
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--out", default=None, help="results directory (default burst_ml/results)")
+    ap.add_argument("--exclude", nargs="*", default=[],
+                      help="Mouse:Target pairs to drop from the design (e.g. 1:1 2:3)")
     a = ap.parse_args(argv)
     bad = [m for m in a.models if m not in MODELS]
     if bad:
         ap.error(f"unknown models: {bad}")
+    if a.exclude and not a.out:
+        ap.error("--exclude needs --out, so the pre-registered results and samples aren't touched")
 
     out = Path(a.out) if a.out else (CACHE / "quick" if a.quick else RESULTS)
-    cache = out if a.quick else CACHE
+    cache = out if (a.quick or a.exclude) else CACHE
     out.mkdir(parents=True, exist_ok=True)
     fit_kw = dict(chains=2, warmup=300, draws=300) if a.quick else dict(chains=4, warmup=1000,
                                                                         draws=1000)
     n_a = 50 if a.quick else 200
 
     d = load_design()
+    if a.exclude:
+        pairs = _exclude_pairs(a.exclude)
+        keep = np.ones(len(d["k"]), dtype=bool)
+        for m, t in pairs:
+            keep = keep & ~((d["mouse"] == m) & (d["target"] == t))
+        d = subset(d, np.flatnonzero(keep))
+        log(f"excluded {len(pairs)} target(s): {pairs}")
     log(f"{len(d['k'])} targets, {d['n_animals']} animals; {fit_kw}, n_a {n_a}; out {out}")
     log("1. LOAO")
     step_loao(a.models, d, out, fit_kw, n_a, a.force)
