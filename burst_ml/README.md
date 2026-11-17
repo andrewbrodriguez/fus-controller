@@ -171,6 +171,16 @@ reference target's dose) explains the animal effect.
 - Delivery is pipeline B (ΣGFP+ ÷ ΣNeuN), which no hand count has validated yet.
 - The firing-order confound, capsid and section depth are untouched (see *Not tested here*).
 
+### Exploratory: without Mouse 1 T1 (not pre-registered)
+
+Mouse 1 T1 is the one target built from three sonications (dose 2.44), and it has leverage in
+every burst model. Rerunning everything without it
+([`results/exploratory_no_m1t1/`](results/exploratory_no_m1t1/README.md), 34 targets) leaves
+the verdict unchanged. M4 +0.20 (SE 1.10), M5a +0.10 (0.82), M5b −0.09 (1.10) against M3a; no
+burst model gets past |Δ/SE| = 0.2. ρ = 1.39 (0.83–2.29) and γ = −0.76 (−1.76 to +0.15) both
+still cover their no-effect values. Dose still beats no-dose (+5.77, SE 1.78), and the dose for
+20% GFP+ in a new animal is unchanged: 0.86 (0.22–3.37).
+
 ## Deviations
 
 None from the analysis plan. Process and implementation details the plan didn't fix:
