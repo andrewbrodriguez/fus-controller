@@ -30,9 +30,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable
 
-import jax.numpy as jnp
-import numpyro.distributions as dist
-from jax.scipy.special import expit
+import numpyro
+
+# float64 everywhere: BetaBinomial log-probabilities with n ~ 75,000 involve log-gamma terms
+# near 1e5, where float32 rounding (~0.01-0.05 per target) would add noise to every score.
+numpyro.enable_x64()
+
+import jax.numpy as jnp  # noqa: E402
+import numpyro.distributions as dist  # noqa: E402
+from jax.scipy.special import expit  # noqa: E402
 
 SCALE = 1e4   # the lab's dose = Σ h2 / 1e4
 

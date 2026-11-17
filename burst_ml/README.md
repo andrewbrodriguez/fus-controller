@@ -110,5 +110,17 @@ plateau are shared. M3a is the special case `p0 = 0`, `pmax = 1`.
 
 What each sparky agent was asked to do, what came back, and what was kept or rejected.
 
+Sparky is the local Qwen3.6-35B-A3B box. Every agent gets a one- or two-sentence brief that
+points at a skeleton whose docstrings are the spec; the orchestrator (Claude) wrote the
+skeletons, the plan and the cache tests, and checks every result.
+
+**Concurrency broke the model.** Four agents started together all failed: turns ended after 2
+output tokens (`finish_reason: length`), one agent produced repeated "the the …" text, and one
+wrote a corrupt edit to `bml/cache.py` (restored from git). A direct one-line request during
+that load also came back as repeated text; with no load the same request was answered
+correctly. From then on agents ran **one at a time**, not the 2–4 the goal allowed.
+
 | Agent | Task | Outcome |
 |---|---|---|
+| env | create `burst_ml/.venv` (jax 0.12, numpyro 0.22, `fus` editable) | **kept**; imports checked by hand |
+| cache, data, models, invert | first attempt, four at once | **rejected**: degenerate output under concurrent load (above) |
