@@ -13,7 +13,8 @@ Steps, each skipped if its output already holds that model (``--force`` redoes i
    with column ``base``); ``loao.calibration`` → ``calibration.csv``.
 3. **Full-data fits** of every model on all 35 targets → ``posterior_summary.csv``: model,
    param, index (for vector params, else 0), mean, sd, q05, q50, q95; plus rows
-   ``diag/max_rhat`` and ``diag/divergences`` per model. Skip ``z``.
+   ``diag/max_rhat`` and ``diag/divergences`` per model. Skip ``z``. Also save each model's
+   samples with ``np.savez(CACHE / f"samples_{model}.npz", **samples)`` for the figures.
 4. **Dose inversion** from the full-data m3a and m3b samples → ``dose_for_delivery.csv``:
    ``invert.dose_for_level`` at level 0.2 for both, and ``invert.dose_at_plateau_fraction``
    at 0.9 for m3b.
