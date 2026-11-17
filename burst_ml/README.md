@@ -100,11 +100,86 @@ plateau are shared. M3a is the special case `p0 = 0`, `pmax = 1`.
 
 ## Results
 
-*Not yet run.*
+Run 2026-11-16 with the settings above (`bml.run`, ~20 min on CPU). Every table is generated:
+[`results/README.md`](results/README.md) (by `bml/report.py`); CSVs beside it. All 49 fits
+converged (max R̂ 1.008); the LOAO fits had no divergent transitions, and M5b's full-data fit
+had 1 of 4,000.
+
+### Verdict
+
+**No. The per-burst record does not predict delivery better than the cumulative 2nd-harmonic
+AUC.** None of the three burst models meets the pre-registered rule, and none comes close:
+
+| vs M3a (the AUC in a hierarchical model) | Δelpd | SE | Δ/SE |
+|---|---|---|---|
+| M4, learned time weighting | +0.27 | 1.25 | +0.22 |
+| M5a, per-burst power | −0.27 | 0.59 | −0.45 |
+| M5b, power + broadband/sub/ultraharmonic | −0.54 | 0.91 | −0.60 |
+
+The fitted burst parameters say the same thing. Each one's posterior covers the value that
+turns the model back into the plain dose (`burst_params.png`):
+
+- **γ (time weighting) = −0.78, 90% interval −1.74 to +0.09.** It leans towards early bursts
+  counting for more, but 0 (flat) is inside the interval, and M4's small gain comes from one
+  held-out mouse (Mouse 1, +0.95; the other five sum to −0.68).
+- **ρ (per-burst power) = 1.28, 0.80 to 2.04.** This is the lab's question: does the same dose
+  delivered as few intense bursts beat many weak ones? ρ = 1 (only the total matters) is well
+  inside the interval. The data can't rule out a moderate advantage for intense bursts either,
+  so the honest answer is "no detectable difference at n = 35", not "no difference".
+- **Broadband, sub- and ultraharmonic weights ≈ 0** (all three intervals straddle 0 within
+  ±0.5). Most bursts carry almost no energy in those bands: broadband sits at 1.09× the noise
+  floor (median, max 1.20×), sub- and ultraharmonics at ~1.05×.
+
+### What the dose model itself shows
+
+- **Dose predicts delivery in an animal the model has never seen.** M3a beats the no-dose
+  model by Δelpd +7.11 (SE 1.38, Δ/SE 5.2). Within a held-out mouse the predicted order of its
+  targets matches the observed order with mean Spearman ρ +0.71.
+- **The animal effect is real but not decisive here.** Dropping it (M2) costs 3.12 (SE 2.55),
+  worse in 5 of 6 held-out mice. The animal SD is 0.61 on the logit scale (0.27–1.21).
+- **No evidence that a plateau helps prediction.** Emax (M3b) vs logit–log (M3a): −0.25
+  (SE 0.42). M3b puts the plateau at 61% GFP+ (41–86%) and EC50 at dose 1.41 (0.63–3.08), but
+  the logit–log curve predicts held-out mice just as well. The flattening at Mouse 6's high doses
+  that motivated assumption A15 doesn't need a plateau in the model; a log-dose slope covers it.
+- **Calibration is good.** M3a's held-out 50% and 90% intervals contain 49% and 94% of the 35
+  targets; mean PIT 0.49.
+
+### Dose for a delivery level
+
+For **20% GFP+ neurons in a new animal**, the required cumulative 2nd harmonic is **0.86 (90%
+interval 0.22–3.24)** under M3a and **0.77 (0.19–2.80)** under M3b. The interval spans about
+15-fold, and most of that is animal-to-animal spread. The dose reaching **90% of the Emax
+plateau** is 7.2 (1.4–53), more than twice the largest dose any target received (3.33), so it
+is extrapolation and shouldn't be used.
+
+**What this means for the controller.** Retargeting the controller from an acoustic setpoint
+to a delivery setpoint needs more than a better feature of the burst record. On these data the
+burst record adds nothing to the cumulative 2nd harmonic. The limit is the animal: the same
+dose gives very different delivery in different mice, and nothing in this analysis predicts
+which mouse will respond strongly. The useful next question is whether an **animal-level**
+acoustic quantity (skull transmission at f0, the drive voltage the controller needed, the
+reference target's dose) explains the animal effect.
+
+### Caveats
+
+- n = 35 targets in 6 mice. With six folds, SEs are themselves rough; a Δ/SE of 2 is a
+  minimum bar, not proof.
+- Monte Carlo error is negligible next to these differences: re-drawing the animal effects
+  moves one fold's score by ~0.004, and refitting with a new seed by ~0.03.
+- Mouse 1 T1 combines three sonications (dose 2.44) and has leverage in every burst model.
+  It is in all fits, as planned.
+- Delivery is pipeline B (ΣGFP+ ÷ ΣNeuN), which no hand count has validated yet.
+- The firing-order confound, capsid and section depth are untouched (see *Not tested here*).
 
 ## Deviations
 
-*None yet.*
+None from the analysis plan. Process and implementation details the plan didn't fix:
+
+- **Sparky agents ran one at a time**, not 2–4 (see *Log*).
+- **float64** throughout: BetaBinomial log-probabilities with n up to 74,550 lose ~0.01–0.05 per
+  target in float32.
+- **Held-out predictions use 1,000 of the 4,000 posterior draws** (evenly thinned) × 200 animal
+  effects each. The plan fixed the 200, not the thinning.
 
 ## Log
 
