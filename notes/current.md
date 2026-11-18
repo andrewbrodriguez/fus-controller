@@ -1,4 +1,4 @@
-# Where the project is — updated 2026-11-17
+# Where the project is — updated 2026-11-17 (evening)
 
 Week ~10 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
@@ -12,19 +12,92 @@ side reproduces the lab's own numbers on all 138 targets of mice 2–24. The tis
 whole-slide scan into delivery per target, two ways in the same hand-placed ROIs: **pixel
 coverage (pipeline A)** and the **fraction of NeuN cells tagged GFP+ (pipeline B**, StarDist,
 GFP+ above 4.05× that slice's background). The two agree at r = 0.97 over 204 ROIs. Mice 1–6
-are oriented by hand, finetuned, measured and joined to dose: **35 sections, 36 targets**.
-Within every animal, higher-dose targets carry more delivery (ΣGFP+÷ΣNeuN vs dose r = +0.63 to
-+0.85 in all six). Pooled across animals that falls to r = +0.52, down from +0.66 at five mice,
-because Mouse 6's two highest doses do not deliver proportionally more. A pre-registered,
+are oriented by hand, finetuned, measured and joined to dose: **34 sections, 36 targets**
+(Mouse 3's `w10sl1_02_s0` was dropped as a bad slice on 11/17). Within every animal,
+higher-dose targets carry more delivery (ΣGFP+÷ΣNeuN vs dose r = +0.63 to +0.86 in all six).
+Pooled across animals that falls to r = +0.52 (ρ +0.65), down from +0.66 at five mice, because
+Mouse 6's two highest doses do not deliver proportionally more. **No single mouse drives the
+pooled result.** The one influential point is Mouse 6 T6, the highest dose in the study, and
+only under a straight-line fit (leave-one-out, Since 11/17 evening). A pre-registered,
 leave-one-mouse-out model comparison (`burst_ml/`) found that **per-burst acoustic detail adds
 nothing to the cumulative 2nd harmonic**: dose predicts delivery in an unseen mouse, but the
-mouse sets the level. Imaging is complete at
-the lab, so **six animals is probably the final n** unless mice 7–24 get stained. The
-remaining gaps are validation, not throughput: no hand count has scored pipeline B, Mice 1–2
-have no review ✓ on record, and the cross-animal measure is still unsettled.
+mouse sets the level. Imaging is complete at the lab, so **six animals is probably the final
+n** unless mice 7–24 get stained. The remaining gaps are validation, not throughput: **the
+11/17 re-finetune of the zones isn't measured yet**, no hand count has scored pipeline B, Mice
+1–2 have no review ✓ on record, and the cross-animal measure is still unsettled.
 
 **Deliverable plan: analysis finishes 2026-11-30; from 2026-12-01 the work is the journal-style
 write-up.**
+
+## Since 11/17 (evening)
+
+- **Mouse 3 `w10sl1_02_s0` excluded** as a bad slice (Andrew's call; `exclude = yes` with a
+  note in `data/section_orientation.csv`). It was low-signal and mostly added NeuN cells. Mouse
+  3 now has 4 kept sections, 34 in all. Re-ran `slices_dose_delivery.py`, `reference_target.py`,
+  `region_delivery.py` and `dose_delivery_by_region.py`. What moved:
+  - pooled ΣGFP+÷ΣNeuN r +0.52 (unchanged), ρ +0.63 → +0.65; GFP+ area r +0.56, ρ +0.67 → +0.66;
+  - Mouse 3 within-mouse r +0.85 → +0.86 (cells), +0.82 → +0.84 (pixels);
+  - T1 < T4 still 5/5 mice, but cells p 0.047 → **0.052**, pixels 0.083 → 0.071. T3 > T6 p 0.067
+    → 0.074. Thalamus at matched dose +0.07 (p 0.85).
+  - **`burst_ml/` was not re-run.** It reads `cumulative_dose_delivery.csv`, so its committed
+    results are for the 35-section data. Expect small shifts.
+- **Finetuning moved out of the ingest notebook** into `scripts/finetune_rois.py`: every kept
+  section of every mouse in one napari window (`--mouse N` for one). It prints what moved.
+- **Zones re-finetuned (11/17) but not yet measured.** Zones moved in 25 of 34 kept sections, by
+  up to 0.5 mm, most in Mice 1 and 2; sizes are unchanged. Mouse 5's `w11sl2_01_s2` was
+  finetuned for the first time. **Every number in this file still uses the old zones** (Open 0).
+- **Sections ranked for quality, all six mice** (`scripts/rank_sections.py` →
+  `data/section_quality.csv`, rank 1 = best, no notes yet). The window shows each section
+  straightened with its zones, so it needs orientation clicks: Mouse 6's five excluded sections
+  have none and couldn't be ranked. **The ranking wasn't blind**: the thumbnails show the GFP.
+- **Top-k sections** (`scripts/top_k_sections.py` → `results/histology/slices/top_k_sections.*`):
+  dose vs delivery using only each mouse's k best-ranked sections. Pooled r over 36 targets:
+
+  | k | Sections | A (pixels) | B (ΣGFP+÷ΣNeuN) |
+  |---|---|---|---|
+  | 1 | 6 | +0.68 | +0.55 |
+  | 2 | 12 | +0.67 | +0.55 |
+  | 3 | 18 | +0.62 | +0.46 |
+  | 6 | 27 | +0.55 | +0.46 |
+  | 12 (all) | 34 | +0.56 | +0.52 |
+
+  - Fewer, better sections read a little higher on pixels, but the 90% interval on r is about
+    ±0.15–0.2, so it's within noise.
+  - Mice disagree. Mouse 2 improves with more sections (B +0.57 → +0.82). Mouse 6 gets worse
+    (A +0.84 → +0.60). Mouse 4's pixel r drops from +0.91 to +0.45 when its 3rd and 4th
+    sections go in.
+  - Before using top-k as a rule: the ranking saw the GFP (circular), and k would be picked
+    after seeing this trace.
+- **Leave-one-out** (`scripts/leave_one_out.py` → `results/histology/slices/leave_one_out.*`).
+  - **No mouse is a clear outlier.** Pixels: dropping any one mouse moves r by at most 0.05
+    (0.53–0.61 vs 0.56), inside what dropping 6 random targets does (−0.07 to +0.10).
+  - Cells: only Mouse 6 stands out, r 0.52 → 0.69 without it (5% of random 6-target drops move
+    r that far). Its slope is about 0.2× the others' and it reads 21 points below their fit,
+    but it still ranks its own targets (r 0.63).
+  - Mice differ in level on cells (M1 +17, M2 +13, M3 −9, M6 −21 points against the others'
+    fit). That's the mouse effect, not an outlier.
+  - **One dose dominates: Mouse 6 T6** (3.33, the highest in the study; 17% GFP+). Cook's
+    distance 1.2 (A) and 2.0 (B), against a flag of 0.11. Dropping it alone: A 0.56 → 0.64, B
+    0.52 → 0.67. No other target moves r by more than 0.07.
+  - **It's a straight-line effect.** ρ barely moves without it (A 0.66 → 0.67, B 0.65 → 0.67),
+    and on log dose B goes 0.57 → 0.65. That is A15 again, which the pre-registered log-dose
+    model already handles. Quote ρ or the log-dose fit rather than linear r.
+- **Missing scans traced (lab sheet `docs/lab/IF_Images_Table.xlsx` vs the files).** The sheet
+  lists 9 more imaged sections for Mice 3–5 than we have (10/9/7 vs 7/5/5), and all 9 are the
+  first scan (`_01`) on their slide; the slide overviews arrived without them. Mapping rule
+  (inferred, not confirmed): sheet "section n" = scan `_0n`, or the nth section inside a
+  multi-section file. Mouse 3's `3.10.2_01` image data is present but misfiled inside
+  `_Image_Cntr_3.11.2_03_/` with no `.vsi` (header read: 16-bit, ~34,800 × 29,200 px);
+  `3.11.2_01` has a `.vsi` but no data. Re-downloads of Mice 3 and 4 were byte-identical to what
+  we had (zips deleted after checksum checks). Up to 8 usable sections if the lab re-uploads.
+  Ask on 11/18.
+- **The sheet's "ignore" verdicts are all applied.** It marks 4 sections "Not ok / Not great /
+  Not very good": 3 are excluded here, the 4th (Mouse 4 `4.11.2_01`) never arrived. We also
+  exclude 8 the sheet doesn't flag (our calls): Mouse 3 `w10sl1_02_s0`, `w10sl1_03_s0`; Mouse 5
+  `w11sl2_01_s3`; Mouse 6's five. Mouse 4's two "Pretty good – thalamus lost" sections are kept;
+  they are its two lowest-ranked, the ones that drop its pixel r in the top-k trace.
+- **Not yet looked at by a person:** `top_k_sections.png`, `leave_one_out.png`, and the
+  regenerated slices and region figures.
 
 ## Since 11/16
 
@@ -87,18 +160,18 @@ write-up.**
   against %GFP+ neurons, coloured by region. Human-checked 11/16. It shows the regions mixed
   throughout: thalamus sits further right (more dose), not higher at matched dose.
 
-### Results at six mice
+### Results at six mice (34 sections since 11/17 evening)
 
 | Pooled over 36 targets | r | ρ |
 |---|---|---|
-| ΣGFP+ ÷ ΣNeuN | **+0.52** (was +0.66 at five mice) | +0.63 |
-| GFP+ area ÷ animal mean | +0.56 | +0.67 |
+| ΣGFP+ ÷ ΣNeuN | **+0.52** (was +0.66 at five mice) | +0.65 |
+| GFP+ area ÷ animal mean | +0.56 | +0.66 |
 | GFP+ cells ÷ animal mean | +0.47 | +0.63 |
 
-Per animal, ΣGFP+÷ΣNeuN vs dose: M1 +0.75, M2 +0.82, M3 +0.85, M4 +0.64, M5 +0.75, M6 +0.63.
+Per animal, ΣGFP+÷ΣNeuN vs dose: M1 +0.75, M2 +0.82, M3 +0.86, M4 +0.64, M5 +0.75, M6 +0.63.
 Within-slice ρ is positive in 21/21 clear slices (A, median +0.60) and 20/21 (B, +0.71).
 
-**Why pooling got weaker:** without Mouse 6 the pooled r is +0.68. Mouse 6 ranks its own
+**Why pooling got weaker:** without Mouse 6 the pooled r is +0.69, and most of that is its T6 alone (leave-one-out). Mouse 6 ranks its own
 targets fine, but its two big doses (T3 2.02, T6 3.33) read 24.6% and 17.1% — below a straight
 line. That is **assumption A15**: delivery is being fitted as linear in dose, and it looks like
 it saturates. **Done since (Since 11/16):** a log-dose fit scored leave-one-mouse-out handles
@@ -114,11 +187,12 @@ pre-registration — say so if it goes in the write-up.
 - ✓ T1 < T4 on cells (9.6% vs 15.6%) despite T1 getting *more* dose (1.04 vs 0.92); a tie on pixels
 
 **Region, at six mice** (`results/histology/region/README.md`):
-- **No region effect at matched dose.** Thalamus +0.05, p 0.89 (it has the most raw delivery
+- **No region effect at matched dose.** Thalamus +0.07, p 0.85 (it has the most raw delivery
   and the most dose).
-- **T1 < T4 holds in 5/5 mice**, both measures, but weaker than at five mice: cells p 0.047
-  (was 0.018), pixels p 0.083 (was 0.034). Mouse 5's new section narrowed its gap.
-- **New**: T3 (right thalamus) > T6 (left) in 5/5 mice, p 0.067. So it is not "the right side
+- **T1 < T4 holds in 5/5 mice**, both measures, but weaker than at five mice: cells p 0.052
+  (0.047 before Mouse 3's bad slice was dropped; 0.018 at five mice), pixels p 0.071 (0.034 at
+  five mice). Mouse 5's new section narrowed its gap.
+- **New**: T3 (right thalamus) > T6 (left) in 5/5 mice, p 0.074. So it is not "the right side
   delivers less" — T1 vs T4 is specific.
 - Still confounded: T1 is always fired first, so side and firing order can't be separated.
 
@@ -180,18 +254,27 @@ pre-registration — say so if it goes in the write-up.
 | `src/fus/extract.py` | Python port of `nt_ExtractHarmonicData.m`. All 138 targets of mice 2–24 match the lab's sheet to 4 dp (`docs/acoustic-extraction.md`) |
 | `src/fus/histology.py` | `.vsi` → per-target GFP coverage. ROI r = 1.0 template mm (1.74 mm diameter on tissue). `export --prefix/--series` |
 | `src/fus/orientation.py` | napari: `annotate` (centre, front, notch side) and `review` (✓/✗). Each window writes only its own fields |
-| `src/fus/rois.py` + `data/roi_locations.csv` | Hand-finetuned T1–T6 shapes per section. **All kept sections of Mice 1–6 finetuned** |
+| `src/fus/rois.py` + `data/roi_locations.csv` | Hand-finetuned T1–T6 shapes per section. **All kept sections of Mice 1–6 finetuned**, re-finetuned 11/17 (not yet measured) |
 | `data/section_orientation.csv` | Clicks for all 36 sections of Mice 1–6. Review ✓ on every kept section of Mice 3–6; **none on record for Mice 1–2** (see Open 1) |
 | `src/fus/cells.py` | **Pipeline B**: per-ROI cell count and GFP+ fraction. Run on every kept section of Mice 1–6; ~1–1.5 min per section on `segmentation_alpha/.venv-stardist-gpu` |
 | `src/fus/archive.py` | Reads recordings straight out of `data/acoustic/US_Data.zip` (48.6 GB, all 24 mice). **The only copy — don't unpack it** |
 | `src/fus/reconstruct.py` | Loose 3D stack of one animal: clicks for alignment, atlas spacing, Gaussian depth blending |
 | `notebooks/ingest_new_histology.ipynb` | Per-animal workflow: export → orient → measure → review |
 | `scripts/finetune_rois.py` | napari: move and resize T1–T6 on every kept section of every mouse in one window (`--mouse N` for one); writes `data/roi_locations.csv` |
+| `scripts/rank_sections.py` + `data/section_quality.csv` | Qt window: rank one mouse's sections by quality from straightened thumbnails with zones. All six mice ranked 11/17. Only `top_k_sections.py` reads it |
+| `scripts/top_k_sections.py`, `scripts/leave_one_out.py` | Sensitivity of the pooled result: each mouse's top-k ranked sections; drop each mouse, then each target |
 | `tests/` | 37 tests, passing |
 | `burst_ml/` | Pre-registered burst-level models. Own environment `burst_ml/.venv` (jax, numpyro). Per-burst cache in `burst_ml/cache/` (git-ignored; rebuild with `.venv/bin/python -m bml.cache` from `burst_ml/`, reads the zip). Full run `.venv/bin/python -m bml.run` (~20 min); 55 tests |
 
 ## Open — blocking or slowing
 
+0. **Re-measure with the 11/17 zones** (25 of 34 sections changed).
+   - Pipeline A: the notebook's Measure cell, once per mouse. `fus.histology measure` ignores
+     finetuned shapes (see Traps).
+   - Pipeline B: `fus.cells --mouse N --section …` on the changed sections, ~25–40 min.
+   - Then `slices_dose_delivery` → `reference_target` → `region_delivery` →
+     `dose_delivery_by_region` → `top_k_sections` → `leave_one_out` → `burst_ml` (`bml.run`,
+     ~20 min), and update every quoted number.
 1. **Review verdicts.** Every kept section of Mice 3–6 is reviewed ✓ (Mice 5–6 recorded
    11/17; all placements correct). Mice 1 and 2 have no verdict on record (4 and 12 kept
    sections). The analysis only drops sections marked *wrong*, so they are included either way.
@@ -200,7 +283,10 @@ pre-registration — say so if it goes in the write-up.
    would find. **Nothing else validates the delivery measure.**
 3. **Cross-animal normalisation is still unsettled.** ΣGFP+÷ΣNeuN is the candidate (needs no
    rescale), but it has not been chosen formally. Decide it before the write-up, not during.
-4. **Why Mouse 6's five sections were excluded** isn't recorded anywhere.
+   Leave-one-out adds a second choice: linear r swings on one point (Mouse 6 T6); ρ and the
+   log-dose fit don't.
+4. **Why Mouse 6's five sections were excluded** isn't recorded anywhere. They have no clicks,
+   so the ranking window can't show them, and `section_quality.csv` has no notes yet.
 5. **Section order, spacing and starting depth** are still assumed (filename order, 250 µm).
    Asked 10/20 and 11/01; ask Josh directly.
 6. **FITC-only signal at Mouse 1 T6.** Unexplained.
@@ -227,9 +313,17 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
   - 37 pairs of targets within 15% of each other's dose but at least 1.5× apart in burst count.
 
   So the ρ null isn't from a lack of variation.
+- **Within-mouse (repeated-measures) correlation, 35 sonicated targets** (11/17 evening): log
+  dose vs logit ΣGFP+÷ΣNeuN r +0.67 (df 28, p 6e-5); vs log GFP+ area r +0.60 (p 4e-4). Pooled
+  without removing mouse levels: +0.61 and +0.47. Mouse level is 34% (cells) and 45% (pixels)
+  of the variance.
 
 ## Traps for whoever picks this up
 
+- **`python -m fus.histology measure` ignores finetuned shapes.** It measures plain template
+  circles, and the `AGENTS.md` command writes to `mouseNN_template_slots.csv`, the file that
+  holds the finetuned results. Measure through the notebook's Measure cell until the CLI reads
+  `data/roi_locations.csv`.
 - **Template-placed sections leave `target` blank** in `mouseNN_template_slots.csv`. Map slot →
   target from the notch click. This silently cost a slice once (fixed 11/16).
 - **The spreadsheet's Mouse 1 rows 3–6 are rotated by one run.** Read doses from the recordings.
@@ -251,7 +345,8 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
 ## Next steps, in the order I would do them
 
 **Before the 11/18 meeting:**
-- Look at the four `burst_ml/results/*.png` figures before showing them.
+- Look at the figures before showing them: the four `burst_ml/results/*.png`, and
+  `results/histology/slices/top_k_sections.png` and `leave_one_out.png`.
 - Meeting questions:
   - the missing Mouse 5 well 10 sections, and why the QC sheet lists more sections than we have;
   - section order, spacing and depth from Josh;
@@ -260,14 +355,22 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
   - per-animal records that might explain the mouse effect (weight, microbubble lot, injection
     timing);
   - whether intensity in the third suggestion meant drive pressure or emitted harmonic;
-  - which cross-animal measure to use;
+  - which cross-animal measure to use, and whether to quote ρ / the log-dose fit rather than
+    linear r;
+  - whether choosing sections by a quality ranking is acceptable (if so: ranked blind to the
+    GFP, with k fixed in advance);
+  - Andrew's idea: total delivery over each slice, not only inside the ROIs;
   - co-authorship and target journal.
 
 **Analysis to finish by 11/30:**
-1. **Hand count** (open 2) — the only validation of pipeline B.
-2. Decide the cross-animal measure and write it into the scripts as the default.
-3. Freeze the dataset with a git tag and re-run every script from scratch, `burst_ml` included.
-4. Optional: re-run the 15-feature screen at 35 targets. `burst_ml` already covers bands,
+1. **Re-measure with the 11/17 zones** (open 0) and re-run everything downstream.
+2. **Hand count** (open 2) — the only validation of pipeline B.
+3. Decide the cross-animal measure, and whether the headline is ρ / the log-dose fit rather than
+   linear r. Write it into the scripts as the default.
+4. Decide the section rule: every kept section, or top-k by a quality ranking done blind to the
+   GFP with k fixed first.
+5. Freeze the dataset with a git tag and re-run every script from scratch, `burst_ml` included.
+6. Optional: re-run the 15-feature screen at 35 targets. `burst_ml` already covers bands,
    timing and per-burst power, so expect nothing new.
 
 **From 12/01: write-up.** Draft journal manuscript by end of reading period. On current data
