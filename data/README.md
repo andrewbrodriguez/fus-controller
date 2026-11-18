@@ -12,7 +12,10 @@ data/
 ├── section_orientation.csv       tracked — per-section centre, front and notch-side clicks,
 │                                 exclusions and review verdicts (notebooks/ingest_new_histology.ipynb)
 ├── roi_locations.csv             tracked — hand-finetuned T1–T6 shapes per section (export px),
-│                                 from the finetune step of notebooks/ingest_new_histology.ipynb
+│                                 from scripts/finetune_rois.py
+├── section_quality.csv           tracked — hand ranking of each mouse's sections by quality
+│                                 (rank 1 = best) with notes, from scripts/rank_sections.py.
+│                                 A record only: exclusions live in section_orientation.csv
 ├── acoustic/                     git-ignored
 │   └── US_Data.zip               all 4 sessions as received from Dropbox (48.6 GB, stored, not
 │                                 compressed). The ONLY copy: never unpack it; read it with

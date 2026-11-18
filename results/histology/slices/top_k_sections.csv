@@ -1,0 +1,169 @@
+k,scope,mouse,pipeline,measure,n_targets,n_sections,r,r_lo90,r_hi90,rho
+1,pooled,,A,gfp_area_mm2_rel,36,6,0.6831,0.4994,0.808,0.67
+1,pooled,,B,gfp_fraction,36,6,0.5542,0.3258,0.7215,0.6232
+1,within mouse,1,A,gfp_area_mm2,6,1,0.7344,,,0.4286
+1,within mouse,1,B,gfp_fraction,6,1,0.5882,,,0.2571
+1,within mouse,2,A,gfp_area_mm2,6,1,0.575,,,0.5429
+1,within mouse,2,B,gfp_fraction,6,1,0.5684,,,0.6
+1,within mouse,3,A,gfp_area_mm2,6,1,0.8215,,,0.7714
+1,within mouse,3,B,gfp_fraction,6,1,0.7998,,,0.7714
+1,within mouse,4,A,gfp_area_mm2,6,1,0.8728,,,0.6
+1,within mouse,4,B,gfp_fraction,6,1,0.8648,,,0.3714
+1,within mouse,5,A,gfp_area_mm2,6,1,0.5974,,,0.6
+1,within mouse,5,B,gfp_fraction,6,1,0.7338,,,0.7714
+1,within mouse,6,A,gfp_area_mm2,6,1,0.8378,,,0.7714
+1,within mouse,6,B,gfp_fraction,6,1,0.741,,,0.7714
+2,pooled,,A,gfp_area_mm2_rel,36,12,0.672,0.4839,0.8008,0.7297
+2,pooled,,B,gfp_fraction,36,12,0.5534,0.3248,0.7209,0.6435
+2,within mouse,1,A,gfp_area_mm2,6,2,0.7,,,0.6
+2,within mouse,1,B,gfp_fraction,6,2,0.7687,,,0.7714
+2,within mouse,2,A,gfp_area_mm2,6,2,0.5938,,,0.5429
+2,within mouse,2,B,gfp_fraction,6,2,0.6075,,,0.7714
+2,within mouse,3,A,gfp_area_mm2,6,2,0.8179,,,0.7714
+2,within mouse,3,B,gfp_fraction,6,2,0.7618,,,0.7143
+2,within mouse,4,A,gfp_area_mm2,6,2,0.9068,,,0.4857
+2,within mouse,4,B,gfp_fraction,6,2,0.8848,,,0.6
+2,within mouse,5,A,gfp_area_mm2,6,2,0.5999,,,0.5429
+2,within mouse,5,B,gfp_fraction,6,2,0.744,,,0.7143
+2,within mouse,6,A,gfp_area_mm2,6,2,0.8355,,,0.9429
+2,within mouse,6,B,gfp_fraction,6,2,0.7586,,,0.8286
+3,pooled,,A,gfp_area_mm2_rel,36,18,0.616,0.4072,0.7637,0.6929
+3,pooled,,B,gfp_fraction,36,18,0.457,0.2043,0.6526,0.5918
+3,within mouse,1,A,gfp_area_mm2,6,3,0.7158,,,0.6
+3,within mouse,1,B,gfp_fraction,6,3,0.7411,,,0.7143
+3,within mouse,2,A,gfp_area_mm2,6,3,0.5923,,,0.5429
+3,within mouse,2,B,gfp_fraction,6,3,0.602,,,0.6
+3,within mouse,3,A,gfp_area_mm2,6,3,0.8474,,,0.9429
+3,within mouse,3,B,gfp_fraction,6,3,0.8191,,,0.9429
+3,within mouse,4,A,gfp_area_mm2,6,3,0.6937,,,0.4857
+3,within mouse,4,B,gfp_fraction,6,3,0.7396,,,0.4857
+3,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+3,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+3,within mouse,6,A,gfp_area_mm2,6,3,0.7581,,,0.8857
+3,within mouse,6,B,gfp_fraction,6,3,0.6495,,,0.6
+4,pooled,,A,gfp_area_mm2_rel,36,23,0.577,0.3554,0.7372,0.67
+4,pooled,,B,gfp_fraction,36,23,0.4595,0.2073,0.6544,0.6347
+4,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+4,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+4,within mouse,2,A,gfp_area_mm2,6,4,0.6143,,,0.5429
+4,within mouse,2,B,gfp_fraction,6,4,0.626,,,0.8286
+4,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+4,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+4,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+4,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+4,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+4,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+4,within mouse,6,A,gfp_area_mm2,6,4,0.7164,,,0.8857
+4,within mouse,6,B,gfp_fraction,6,4,0.7348,,,0.8857
+5,pooled,,A,gfp_area_mm2_rel,36,25,0.5606,0.334,0.7259,0.653
+5,pooled,,B,gfp_fraction,36,25,0.4577,0.2051,0.6531,0.5985
+5,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+5,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+5,within mouse,2,A,gfp_area_mm2,6,5,0.6166,,,0.5429
+5,within mouse,2,B,gfp_fraction,6,5,0.6032,,,0.4857
+5,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+5,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+5,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+5,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+5,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+5,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+5,within mouse,6,A,gfp_area_mm2,6,5,0.6748,,,0.8857
+5,within mouse,6,B,gfp_fraction,6,5,0.6967,,,0.7714
+6,pooled,,A,gfp_area_mm2_rel,36,27,0.5493,0.3195,0.7181,0.6695
+6,pooled,,B,gfp_fraction,36,27,0.4615,0.2097,0.6559,0.61
+6,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+6,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+6,within mouse,2,A,gfp_area_mm2,6,6,0.6654,,,0.7143
+6,within mouse,2,B,gfp_fraction,6,6,0.6744,,,0.8286
+6,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+6,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+6,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+6,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+6,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+6,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+6,within mouse,6,A,gfp_area_mm2,6,6,0.6217,,,0.9429
+6,within mouse,6,B,gfp_fraction,6,6,0.6917,,,0.7714
+7,pooled,,A,gfp_area_mm2_rel,36,29,0.55,0.3203,0.7186,0.6564
+7,pooled,,B,gfp_fraction,36,29,0.4622,0.2105,0.6564,0.6095
+7,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+7,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+7,within mouse,2,A,gfp_area_mm2,6,7,0.6676,,,0.6571
+7,within mouse,2,B,gfp_fraction,6,7,0.6747,,,0.8286
+7,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+7,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+7,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+7,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+7,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+7,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+7,within mouse,6,A,gfp_area_mm2,6,7,0.6049,,,0.9429
+7,within mouse,6,B,gfp_fraction,6,7,0.6328,,,0.7714
+8,pooled,,A,gfp_area_mm2_rel,36,30,0.5528,0.3239,0.7205,0.6587
+8,pooled,,B,gfp_fraction,36,30,0.4812,0.2338,0.6701,0.6183
+8,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+8,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+8,within mouse,2,A,gfp_area_mm2,6,8,0.7007,,,0.7143
+8,within mouse,2,B,gfp_fraction,6,8,0.7248,,,0.8286
+8,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+8,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+8,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+8,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+8,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+8,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+8,within mouse,6,A,gfp_area_mm2,6,7,0.6049,,,0.9429
+8,within mouse,6,B,gfp_fraction,6,7,0.6328,,,0.7714
+9,pooled,,A,gfp_area_mm2_rel,36,31,0.5541,0.3257,0.7214,0.6607
+9,pooled,,B,gfp_fraction,36,31,0.4963,0.2525,0.6808,0.6263
+9,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+9,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+9,within mouse,2,A,gfp_area_mm2,6,9,0.7207,,,0.8286
+9,within mouse,2,B,gfp_fraction,6,9,0.7398,,,0.8286
+9,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+9,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+9,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+9,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+9,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+9,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+9,within mouse,6,A,gfp_area_mm2,6,7,0.6049,,,0.9429
+9,within mouse,6,B,gfp_fraction,6,7,0.6328,,,0.7714
+10,pooled,,A,gfp_area_mm2_rel,36,32,0.5568,0.3291,0.7233,0.6672
+10,pooled,,B,gfp_fraction,36,32,0.5034,0.2613,0.6859,0.634
+10,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+10,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+10,within mouse,2,A,gfp_area_mm2,6,10,0.7597,,,0.9429
+10,within mouse,2,B,gfp_fraction,6,10,0.7685,,,0.9429
+10,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+10,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+10,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+10,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+10,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+10,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+10,within mouse,6,A,gfp_area_mm2,6,7,0.6049,,,0.9429
+10,within mouse,6,B,gfp_fraction,6,7,0.6328,,,0.7714
+11,pooled,,A,gfp_area_mm2_rel,36,33,0.5581,0.3308,0.7242,0.6636
+11,pooled,,B,gfp_fraction,36,33,0.5126,0.2728,0.6924,0.6329
+11,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+11,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+11,within mouse,2,A,gfp_area_mm2,6,11,0.7864,,,0.9429
+11,within mouse,2,B,gfp_fraction,6,11,0.8122,,,0.9429
+11,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+11,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+11,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+11,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+11,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+11,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+11,within mouse,6,A,gfp_area_mm2,6,7,0.6049,,,0.9429
+11,within mouse,6,B,gfp_fraction,6,7,0.6328,,,0.7714
+12,pooled,,A,gfp_area_mm2_rel,36,34,0.5583,0.331,0.7243,0.6636
+12,pooled,,B,gfp_fraction,36,34,0.5215,0.284,0.6987,0.6481
+12,within mouse,1,A,gfp_area_mm2,6,4,0.755,,,0.7714
+12,within mouse,1,B,gfp_fraction,6,4,0.7481,,,0.7714
+12,within mouse,2,A,gfp_area_mm2,6,12,0.7929,,,0.9429
+12,within mouse,2,B,gfp_fraction,6,12,0.8152,,,0.9429
+12,within mouse,3,A,gfp_area_mm2,6,4,0.8408,,,0.7714
+12,within mouse,3,B,gfp_fraction,6,4,0.8567,,,0.9429
+12,within mouse,4,A,gfp_area_mm2,6,4,0.4529,,,0.2571
+12,within mouse,4,B,gfp_fraction,6,4,0.6375,,,0.4857
+12,within mouse,5,A,gfp_area_mm2,6,3,0.6331,,,0.4857
+12,within mouse,5,B,gfp_fraction,6,3,0.754,,,0.4857
+12,within mouse,6,A,gfp_area_mm2,6,7,0.6049,,,0.9429
+12,within mouse,6,B,gfp_fraction,6,7,0.6328,,,0.7714

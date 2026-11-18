@@ -105,7 +105,7 @@ data/           Experiment summary sheet (tracked); raw acoustic + histology (gi
 src/fus/        Analysis package — feature extraction, quantification, models
 scripts/        Helper scripts, incl. QuPath Groovy
 tests/          pytest suite
-notebooks/      Per-animal ingest (orient, finetune, measure, review), full-resolution slice viewer
+notebooks/      Per-animal ingest (orient, measure, review), full-resolution slice viewer
 segmentation_alpha/  Cell segmentation pilot and its environments (StarDist CPU/GPU, Cellpose)
 results/        Generated CSVs and aggregate (all-mice) figures
 docs/           Method write-ups, decisions, lab materials (docs/lab/), papers (docs/literature/)
@@ -150,7 +150,7 @@ python -m fus.histology measure data/processed/histology/Mouse_01/ds4/*.ome.tif 
 
 It is a first pass with provisional parameters; see [`docs/histology-pipeline.md`](docs/histology-pipeline.md) for the method, the Mouse_01 results, and the open questions.
 
-For each new animal, run [`notebooks/ingest_new_histology.ipynb`](notebooks/ingest_new_histology.ipynb). It exports the sections, opens napari for the orientation clicks and optional finetuning, measures, and opens a review window. To inspect any section at full resolution, use [`notebooks/view_slice.ipynb`](notebooks/view_slice.ipynb). Pipeline B, the cell count, runs per section or per mouse:
+For each new animal, run [`notebooks/ingest_new_histology.ipynb`](notebooks/ingest_new_histology.ipynb). It exports the sections, opens napari for the orientation clicks, measures, and opens a review window. To move or resize T1–T6 by hand, run `.venv/bin/python scripts/finetune_rois.py` (every kept section of every mouse in one window; `--mouse N` for one animal) before measuring. To inspect any section at full resolution, use [`notebooks/view_slice.ipynb`](notebooks/view_slice.ipynb). Pipeline B, the cell count, runs per section or per mouse:
 
 ```bash
 .venv/bin/python -m fus.cells --mouse 2 --all          # ~1-1.5 min per section

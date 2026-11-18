@@ -196,7 +196,8 @@ napari window shows the same template labelled T1–T6 with coverage, and record
 section. Only ✓ sections are used.
 
 **Finetuning (optional).** After orienting, each target can be moved, resized or rotated
-on its own in napari (`fus.rois.finetune`). The shapes are saved per target in
+on its own in napari (`scripts/finetune_rois.py`, which wraps `fus.rois.finetune`; it
+queues every kept section of every mouse, or `--mouse N`). The shapes are saved per target in
 [`data/roi_locations.csv`](../data/roi_locations.csv), and `analyse_section(..., rois=...)`
 measures inside exactly those ellipses (`placement = finetuned`). Resizing changes the
 measurement itself: coverage is a fraction *of the shape*. Placing shapes by eye on the GFP

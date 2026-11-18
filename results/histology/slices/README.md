@@ -15,7 +15,7 @@ animal instead of treating each slice as its own measurement: total GFP+ cells (
 and total GFP+ area (pipeline A, coverage × ROI tissue area). All slices that aren't excluded
 or marked wrong are summed, including the low-signal ones, so no post hoc cutoff enters.
 
-Raw totals aren't comparable between animals (kept slices: Mouse 1 4, Mouse 2 12, Mouse 3 5, Mouse 4 4, Mouse 5 3, Mouse 6 7; staining and
+Raw totals aren't comparable between animals (kept slices: Mouse 1 4, Mouse 2 12, Mouse 3 4, Mouse 4 4, Mouse 5 3, Mouse 6 7; staining and
 section depth differ too). Two ways round that are shown side by side; which one to use across
 animals is **not settled** (discussed with the lab, 2026-10-28):
 
@@ -28,12 +28,12 @@ Figure: **`cumulative_pooled.png`**; table: `cumulative_dose_delivery.csv`.
 
 | Pipeline | Measure | Targets | n | Slope (relative units per unit dose) | Pearson r | p | Spearman ρ |
 |---|---|---|---|---|---|---|---|
-| A | gfp_area_mm2_rel | all | 36 | 0.526 | +0.56 | 0.00033 | +0.67 |
-| A | gfp_area_mm2_rel | all, no control | 35 | 0.498 | +0.53 | 0.00097 | +0.64 |
-| B | gfp_cells_rel | all | 36 | 0.532 | +0.47 | 0.004 | +0.63 |
-| B | gfp_cells_rel | all, no control | 35 | 0.502 | +0.44 | 0.0089 | +0.60 |
-| B | gfp_fraction | all | 36 | 0.147 | +0.52 | 0.0013 | +0.63 |
-| B | gfp_fraction | all, no control | 35 | 0.142 | +0.49 | 0.0028 | +0.60 |
+| A | gfp_area_mm2_rel | all | 36 | 0.544 | +0.56 | 0.0004 | +0.66 |
+| A | gfp_area_mm2_rel | all, no control | 35 | 0.518 | +0.53 | 0.0011 | +0.63 |
+| B | gfp_cells_rel | all | 36 | 0.537 | +0.47 | 0.0041 | +0.63 |
+| B | gfp_cells_rel | all, no control | 35 | 0.507 | +0.44 | 0.0089 | +0.60 |
+| B | gfp_fraction | all | 36 | 0.151 | +0.52 | 0.0011 | +0.65 |
+| B | gfp_fraction | all, no control | 35 | 0.146 | +0.50 | 0.0024 | +0.62 |
 
 The 36 points come from 6 animals, and the relative scale forces each
 animal's mean to 1, so p-values are optimistic: they treat targets as independent.
@@ -44,13 +44,13 @@ Per animal, on raw totals (`cumulative.png`, n = 6 each):
 |---|---|---|---|---|---|---|
 | A | gfp_area_mm2 | Mouse 1 | 2.07 | +0.76 | 0.083 | +0.77 |
 | A | gfp_area_mm2 | Mouse 2 | 7.73 | +0.79 | 0.06 | +0.94 |
-| A | gfp_area_mm2 | Mouse 3 | 3.38 | +0.82 | 0.044 | +0.71 |
+| A | gfp_area_mm2 | Mouse 3 | 3.53 | +0.84 | 0.036 | +0.77 |
 | A | gfp_area_mm2 | Mouse 4 | 1.13 | +0.45 | 0.37 | +0.26 |
 | A | gfp_area_mm2 | Mouse 5 | 1.06 | +0.63 | 0.18 | +0.49 |
 | A | gfp_area_mm2 | Mouse 6 | 0.923 | +0.60 | 0.2 | +0.94 |
 | B | gfp_cells | Mouse 1 | 2.17e+03 | +0.72 | 0.11 | +0.83 |
 | B | gfp_cells | Mouse 2 | 1.43e+04 | +0.64 | 0.17 | +0.89 |
-| B | gfp_cells | Mouse 3 | 5.36e+03 | +0.79 | 0.062 | +1.00 |
+| B | gfp_cells | Mouse 3 | 5.43e+03 | +0.79 | 0.059 | +0.94 |
 | B | gfp_cells | Mouse 4 | 1.3e+03 | +0.29 | 0.58 | +0.26 |
 | B | gfp_cells | Mouse 5 | 2.26e+03 | +0.91 | 0.011 | +0.94 |
 | B | gfp_cells | Mouse 6 | 526 | +0.34 | 0.51 | +0.37 |
@@ -68,20 +68,20 @@ how its targets rank against each other. Small dots are slice × target; big dot
 are each target's mean ± SE across slices, placed at that target's dose.
 
 **`pixels_vs_cells.png`: the two pipelines against each other**, one dot per
-slice × target. Pearson r = 0.97 over 210 ROIs.
+slice × target. Pearson r = 0.97 over 204 ROIs.
 
 ## Headline numbers
 
 | Within-slice ρ with dose | Pipeline A: pixels | Pipeline B: cells |
 |---|---|---|
 | All mice, excluding low-signal slices | median ρ +0.60, positive in 21/21 | median ρ +0.71, positive in 20/21 |
-| All mice, all slices | median ρ +0.49, positive in 31/35 | median ρ +0.37, positive in 30/35 |
+| All mice, all slices | median ρ +0.49, positive in 30/34 | median ρ +0.43, positive in 29/34 |
 | Mouse 1, excluding low-signal slices | median ρ +0.69, positive in 4/4 | median ρ +0.69, positive in 4/4 |
 | Mouse 1, all slices | median ρ +0.69, positive in 4/4 | median ρ +0.69, positive in 4/4 |
 | Mouse 2, excluding low-signal slices | median ρ +0.54, positive in 7/7 | median ρ +0.60, positive in 6/7 |
 | Mouse 2, all slices | median ρ +0.37, positive in 10/12 | median ρ +0.43, positive in 9/12 |
 | Mouse 3, excluding low-signal slices | median ρ +0.89, positive in 3/3 | median ρ +0.89, positive in 3/3 |
-| Mouse 3, all slices | median ρ +0.77, positive in 5/5 | median ρ +0.77, positive in 5/5 |
+| Mouse 3, all slices | median ρ +0.83, positive in 4/4 | median ρ +0.83, positive in 4/4 |
 | Mouse 4, excluding low-signal slices | median ρ +0.57, positive in 2/2 | median ρ +0.43, positive in 2/2 |
 | Mouse 4, all slices | median ρ +0.40, positive in 4/4 | median ρ +0.26, positive in 4/4 |
 | Mouse 5, excluding low-signal slices | median ρ +0.37, positive in 2/2 | median ρ +0.46, positive in 2/2 |
@@ -96,7 +96,7 @@ Across the six target means (z), ρ with dose: A (pixels): Mouse 1 +0.83, Mouse 
 - **Low signal** means a slice mean *pixel* coverage below 0.2, a cutoff chosen
   after looking at the data. It flags 14 slice(s), probably cut outside most targets'
   focal column, and the same slices are set aside for both pipelines.
-  No slice is excluded or marked wrong in `data/section_orientation.csv`.
+  Dropped (excluded or marked wrong): w10sl1_02_s0.
 - **Pipeline B's threshold** (4.05× the slice's background, its median anti-GFP over tissue) was
   set on one 3 mm crop of one section and is not yet checked against a hand count
   (`docs/gfp-cell-tagging.md`). Dividing by each slice's background is what keeps Mouse 1's

@@ -1,4 +1,4 @@
-# Where the project is — updated 2026-11-16
+# Where the project is — updated 2026-11-17
 
 Week ~10 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
@@ -15,13 +15,49 @@ GFP+ above 4.05× that slice's background). The two agree at r = 0.97 over 204 R
 are oriented by hand, finetuned, measured and joined to dose: **35 sections, 36 targets**.
 Within every animal, higher-dose targets carry more delivery (ΣGFP+÷ΣNeuN vs dose r = +0.63 to
 +0.85 in all six). Pooled across animals that falls to r = +0.52, down from +0.66 at five mice,
-because Mouse 6's two highest doses do not deliver proportionally more. Imaging is complete at
+because Mouse 6's two highest doses do not deliver proportionally more. A pre-registered,
+leave-one-mouse-out model comparison (`burst_ml/`) found that **per-burst acoustic detail adds
+nothing to the cumulative 2nd harmonic**: dose predicts delivery in an unseen mouse, but the
+mouse sets the level. Imaging is complete at
 the lab, so **six animals is probably the final n** unless mice 7–24 get stained. The
 remaining gaps are validation, not throughput: no hand count has scored pipeline B, Mice 1–2
 have no review ✓ on record, and the cross-animal measure is still unsettled.
 
 **Deliverable plan: analysis finishes 2026-11-30; from 2026-12-01 the work is the journal-style
 write-up.**
+
+## Since 11/16
+
+- **Burst-level models (`burst_ml/`, merged 11/17).** Question: does modelling each burst
+  predict delivery better than the cumulative 2nd harmonic, for a mouse the model hasn't seen?
+  35 sonicated targets in Mice 1–6, delivery ΣGFP+÷ΣNeuN. Seven beta-binomial models (numpyro),
+  each scored by fitting on five mice and predicting the sixth. The models, priors and the
+  rule for winning were committed (d90a650) before any model saw delivery data. Full write-up
+  in `burst_ml/README.md`; generated tables in `burst_ml/results/README.md`.
+  - **Verdict: no.** Against the AUC model (logit delivery linear in log dose, one offset per
+    mouse), Δelpd is M4 timing +0.27 (SE 1.25), M5a per-burst power −0.27 (0.59), M5b power
+    + bands −0.54 (0.91). The bar was Δ > 0 and Δ/SE > 2. M4's small gain comes from holding
+    out Mouse 1 alone.
+  - **The lab's third suggestion** (same dose as few intense bursts vs many weak): per-burst
+    power ρ = 1.28 (90%: 0.80–2.04). ρ = 1 means only the total counts, and it is well inside
+    the interval. Report it as "no detectable difference at n = 35", not "no difference".
+    "Intensity" here is each burst's emitted 2nd harmonic, not drive pressure.
+  - **Timing:** γ = −0.78 (−1.74 to +0.09), leaning toward early bursts counting more; 0 is
+    inside the interval. **Broadband, sub- and ultraharmonic weights are ≈ 0.**
+  - **Dose itself predicts delivery in an unseen mouse:** +7.11 over no dose (SE 1.38, 5.1
+    SE). The held-out predicted order within a mouse matches the observed order (mean Spearman
+    +0.71). The 50% and 90% held-out intervals cover 49% and 94% of targets.
+  - **A15 resolved:** a log-dose curve covers Mouse 6's flattening. A plateau (Emax) predicts no
+    better (−0.25, SE 0.42).
+  - **Dose for 20% GFP+ neurons in a new mouse: 0.86 (90%: 0.22–3.24).** That's a 15-fold
+    range, mostly mouse-to-mouse (SD 0.61 on the logit scale). The mouse, not the burst record,
+    is now the limit for a delivery-setpoint controller. An animal-level covariate (drive
+    voltage needed, reference-target dose) is the next question, but six mice give it six data
+    points.
+  - **Robustness (not in the plan):** without Mouse 1 T1 (three sonications), every verdict
+    holds.
+  - **Four figures in `burst_ml/results/` have not been looked at by a person.**
+- **Review ✓ recorded for every kept section of Mice 5 and 6** (11/17).
 
 ## Since 11/13
 
@@ -65,8 +101,9 @@ Within-slice ρ is positive in 21/21 clear slices (A, median +0.60) and 20/21 (B
 **Why pooling got weaker:** without Mouse 6 the pooled r is +0.68. Mouse 6 ranks its own
 targets fine, but its two big doses (T3 2.02, T6 3.33) read 24.6% and 17.1% — below a straight
 line. That is **assumption A15**: delivery is being fitted as linear in dose, and it looks like
-it saturates. A fit against log dose, scored by leaving out one mouse at a time, is the next
-model to try and is the "baseline predictive model" the proposal promised.
+it saturates. **Done since (Since 11/16):** a log-dose fit scored leave-one-mouse-out handles
+it, and a plateau adds nothing. That fit is the "baseline predictive model" the proposal
+promised.
 
 **Mouse 6 as an out-of-sample test** of what the lab suggested on 11/09. Predictions were
 written in chat before measuring but **were never committed**, so this is weaker than a real
@@ -90,8 +127,8 @@ pre-registration — say so if it goes in the write-up.
 - **Lab update 11/09** (correspondence kept locally in `docs/lab/correspondence.md`). **Meeting
   Wed 11/18, 11:15.** All imaging done except Mouse 5 well 11 slide 1. AAV: mice 1–12 AAV9,
   13–24 AAV.CPP16, so **every imaged mouse is AAV9** and capsid is not a factor. Three analyses
-  suggested: by region (done), T1 vs T4 (done), and **same dose from different parameters —
-  still to do**.
+  suggested: by region (done), T1 vs T4 (done), and same dose from different parameters (done
+  11/17 in `burst_ml/`; see Since 11/16).
 - **New lab files, in `docs/lab/`**: `AAV_By_TreatmentLocation.pptx` (bursts, MPa, dose per
   target, Mice 1–6; Mouse 6's doses match our recordings) and `IF_Images_Table.xlsx`
   (per-section imaging QC, Mice 2–6). **The sheet lists more sections than we have scans** for
@@ -132,8 +169,9 @@ pre-registration — say so if it goes in the write-up.
 - **Acoustic features vs delivery** (`src/fus/features.py`,
   `scripts/acoustic_features_vs_delivery.py`). 15 pre-registered features vs 2f AUC alone, on
   11 labelled targets. **No multi-feature model beats AUC convincingly** (best gain had
-  permutation p 0.23 and failed leave-one-mouse-out). Treat the screen as hypotheses. **Not yet
-  re-run at six mice** — worth doing now that there are 36 targets.
+  permutation p 0.23 and failed leave-one-mouse-out). Treat the screen as hypotheses. The
+  15-feature screen itself hasn't been re-run at six mice, but `burst_ml/` (Since 11/16) has
+  now tested bands, timing and per-burst power at 35 targets: none beat the AUC.
 
 ## What exists and is trusted
 
@@ -147,8 +185,10 @@ pre-registration — say so if it goes in the write-up.
 | `src/fus/cells.py` | **Pipeline B**: per-ROI cell count and GFP+ fraction. Run on every kept section of Mice 1–6; ~1–1.5 min per section on `segmentation_alpha/.venv-stardist-gpu` |
 | `src/fus/archive.py` | Reads recordings straight out of `data/acoustic/US_Data.zip` (48.6 GB, all 24 mice). **The only copy — don't unpack it** |
 | `src/fus/reconstruct.py` | Loose 3D stack of one animal: clicks for alignment, atlas spacing, Gaussian depth blending |
-| `notebooks/ingest_new_histology.ipynb` | Per-animal workflow: export → orient → finetune → measure → review |
+| `notebooks/ingest_new_histology.ipynb` | Per-animal workflow: export → orient → measure → review |
+| `scripts/finetune_rois.py` | napari: move and resize T1–T6 on every kept section of every mouse in one window (`--mouse N` for one); writes `data/roi_locations.csv` |
 | `tests/` | 37 tests, passing |
+| `burst_ml/` | Pre-registered burst-level models. Own environment `burst_ml/.venv` (jax, numpyro). Per-burst cache in `burst_ml/cache/` (git-ignored; rebuild with `.venv/bin/python -m bml.cache` from `burst_ml/`, reads the zip). Full run `.venv/bin/python -m bml.run` (~20 min); 55 tests |
 
 ## Open — blocking or slowing
 
@@ -180,6 +220,13 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
   account for 11/46 against 4/92 elsewhere (Fisher p 0.001). Per session: 1, 1, 3, 6.
 - **Candidate adjacent Mouse 2 pairs** (NeuN-count profile, r ≥ 0.98): slide01_s2↔slide04_s2,
   slide01_s3↔slide04_s3, slide02_s3↔slide02_s4. Weak; don't set the order from it.
+- **The design does contrast few-intense vs many-weak bursts** (11/17, from the `burst_ml`
+  cache; 35 targets):
+  - bursts per target 55–450, median 100 (450 is Mouse 1 T1's three sonications);
+  - mean 2nd harmonic per burst 42–289, median 76;
+  - 37 pairs of targets within 15% of each other's dose but at least 1.5× apart in burst count.
+
+  So the ρ null isn't from a lack of variation.
 
 ## Traps for whoever picks this up
 
@@ -204,22 +251,31 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
 ## Next steps, in the order I would do them
 
 **Before the 11/18 meeting:**
-- Rough cut of the lab's third suggestion: **same cumulative dose reached by different
-  parameters** (few bursts at high intensity vs many at low). Expect few matched pairs — likely
-  a descriptive table, not a test.
-- Meeting questions: the missing Mouse 5 well 10 sections; why the QC sheet lists more sections
-  than we have; section order/spacing/depth from Josh; whether any of mice 7–24 will be
-  stained; which cross-animal measure to use; co-authorship and target journal.
+- Look at the four `burst_ml/results/*.png` figures before showing them.
+- Meeting questions:
+  - the missing Mouse 5 well 10 sections, and why the QC sheet lists more sections than we have;
+  - section order, spacing and depth from Josh;
+  - whether any of Mice 7–12 (AAV9, like 1–6) will be stained, since the mouse effect is now
+    the limit;
+  - per-animal records that might explain the mouse effect (weight, microbubble lot, injection
+    timing);
+  - whether intensity in the third suggestion meant drive pressure or emitted harmonic;
+  - which cross-animal measure to use;
+  - co-authorship and target journal.
 
 **Analysis to finish by 11/30:**
-1. **Saturating fit** (delivery vs log dose), scored leave-one-mouse-out. This is the baseline
-   predictive model the proposal promised, and A15 says the linear fit is wrong.
-2. **Hand count** (open 2) — the only validation of pipeline B.
-3. Re-run the acoustic feature screen at six mice (36 targets, was 11).
-4. Freeze the dataset with a git tag and re-run every script from scratch.
-5. Decide the cross-animal measure and write it into the scripts as the default.
+1. **Hand count** (open 2) — the only validation of pipeline B.
+2. Decide the cross-animal measure and write it into the scripts as the default.
+3. Freeze the dataset with a git tag and re-run every script from scratch, `burst_ml` included.
+4. Optional: re-run the 15-feature screen at 35 targets. `burst_ml` already covers bands,
+   timing and per-burst power, so expect nothing new.
 
 **From 12/01: write-up.** Draft journal manuscript by end of reading period. On current data
-that is a validated pipeline plus a consistent within-animal dose–delivery relationship in six
-animals — not a trained predictive model. Say that in the design section rather than presenting
-it as a shortfall.
+that is:
+- a validated pipeline;
+- a consistent within-animal dose–delivery relationship in six animals;
+- a calibrated leave-one-mouse-out baseline (log dose with a per-mouse offset);
+- a pre-registered null for burst-level features.
+
+It is not a controller that hits a delivery target in a new mouse. Say that in the design
+section rather than presenting it as a shortfall.

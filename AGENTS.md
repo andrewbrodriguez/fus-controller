@@ -32,7 +32,11 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
     --csv results/histology/mouse01_slots.csv
 
 # Mouse 2+: use notebooks/ingest_new_histology.ipynb (export, napari clicks, measure,
-# napari review). The pieces, for reference:
+# napari review). Finetuning is separate (napari; GUI, run it yourself):
+.venv/bin/python scripts/finetune_rois.py             # every kept section, all mice
+.venv/bin/python scripts/finetune_rois.py --mouse 6   # one animal
+.venv/bin/python scripts/rank_sections.py --mouse 6   # rank one animal's sections by quality
+# The pieces, for reference:
 .venv/bin/python -m fus.histology export data/histology/Mouse_02/Control_02_Slide_01.vsi \
     data/processed/histology/Mouse_02/ds4 --prefix slide01
 .venv/bin/python -m fus.orientation data/processed/histology/Mouse_02/ds4/*.ome.tif \
@@ -48,6 +52,8 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/reference_target.py           # the constant 120-burst/0.75 treatment, all mice (run after the line above)
 .venv/bin/python scripts/region_delivery.py           # delivery by brain region, dose-adjusted (run after slices_dose_delivery.py; ~1 min)
 .venv/bin/python scripts/dose_delivery_by_region.py   # every target on one axis, dose vs delivery, coloured by region (run after the two above)
+.venv/bin/python scripts/top_k_sections.py          # dose vs delivery from each mouse's top-k ranked sections (needs data/section_quality.csv)
+.venv/bin/python scripts/leave_one_out.py           # pooled dose vs delivery without each mouse, then without each target
 .venv/bin/python scripts/mouse02_reconstruction_3d.py  # 3D GIF (git-ignored); order assumed, spacing from atlas
 .venv/bin/python scripts/view_reconstruction_3d.py    # same, interactive (napari; GUI, run it yourself)
 .venv/bin/python scripts/sonication_eda.py           # design, controller, noise; all 24 mice from the zip (~6 min first run, then ~40 s)
