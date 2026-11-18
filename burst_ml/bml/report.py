@@ -1,0 +1,157 @@
+"""Write ``burst_ml/results/README.md`` from the run's CSVs. Generated; do not edit by hand.
+
+From ``burst_ml/``: ``.venv/bin/python -m bml.report``.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from . import RESULTS
+
+NAMES = {"m1": "M1 animal only", "m2": "M2 pooled dose", "m3a": "M3a hierarchical logit–log dose",
+         "m3b": "M3b hierarchical Emax", "m4": "M4 time-weighted bursts",
+         "m5a": "M5a per-burst power", "m5b": "M5b power + bands"}
+ORDER = list(NAMES)
+
+
+def _f(x, nd=2):
+    return "" if pd.isna(x) else f"{x:+.{nd}f}" if nd and x != 0 else f"{x:.{nd}f}"
+
+
+def comparison_table(comp: pd.DataFrame, folds: pd.DataFrame, base: str) -> str:
+    c = comp[comp["base"] == base].set_index("model")
+    diag = folds.groupby("model").agg(rhat=("max_rhat", "max"), div=("divergences", "sum"))
+    lines = [f"| Model | elpd (LOAO) | Δ vs {base} | SE | Δ/SE | Beats {base}? | max R̂ | divergences |",
+             "|---|---|---|---|---|---|---|---|"]
+    for m in [m for m in ORDER if m in c.index]:
+        r = c.loc[m]
+        is_base = m == base
+        lines.append(f"| {NAMES[m]} | {r.elpd:.2f} | {'—' if is_base else _f(r.delta)} | "
+                     f"{'—' if is_base else f'{r.se:.2f}'} | {'—' if is_base else _f(r.z)} | "
+                     f"{'—' if is_base else ('**yes**' if r.beats else 'no')} | "
+                     f"{diag.loc[m, 'rhat']:.3f} | {int(diag.loc[m, 'div'])} |")
+    return "\n".join(lines)
+
+
+def per_mouse_table(folds: pd.DataFrame, base: str = "m3a") -> str:
+    w = folds.pivot(index="mouse", columns="model", values="elpd")
+    models = [m for m in ORDER if m in w.columns and m != base]
+    lines = ["| Held-out mouse | " + " | ".join(models) + " |",
+             "|---|" + "---|" * len(models)]
+    for mouse, r in w.iterrows():
+        lines.append(f"| {mouse} | " + " | ".join(_f(r[m] - r[base]) for m in models) + " |")
+    return "\n".join(lines)
+
+
+def calibration_table(cal: pd.DataFrame) -> str:
+    c = cal.set_index("model")
+    lines = ["| Model | 50% interval coverage | 90% interval coverage | mean PIT | "
+             "mean pointwise lpd | within-mouse Spearman ρ |", "|---|---|---|---|---|---|"]
+    for m in [m for m in ORDER if m in c.index]:
+        r = c.loc[m]
+        lines.append(f"| {NAMES[m]} | {r.cover50:.0%} | {r.cover90:.0%} | {r.mean_pit:.2f} | "
+                     f"{r.mean_lpd:.2f} | {r.spearman:+.2f} |")
+    return "\n".join(lines)
+
+
+def params_table(post: pd.DataFrame) -> str:
+    want = [("m3a", "beta1", 0, "dose slope (logit per log dose)", lambda x: x),
+            ("m3a", "sigma_a", 0, "animal SD (logit)", lambda x: x),
+            ("m3a", "log_phi", 0, "φ, beta-binomial concentration", np.exp),
+            ("m3b", "p0", 0, "floor p0", lambda x: x),
+            ("m3b", "pmax", 0, "plateau pmax", lambda x: x),
+            ("m3b", "log_ec50", 0, "EC50 (dose)", np.exp),
+            ("m3b", "log_h", 0, "Hill slope h", np.exp),
+            ("m4", "gamma", 0, "γ, time weighting (0 = flat)", lambda x: x),
+            ("m5a", "log_rho", 0, "ρ, per-burst power (1 = dose)", np.exp),
+            ("m5b", "log_rho", 0, "ρ in M5b", np.exp),
+            ("m5b", "beta_bands", 0, "β broadband", lambda x: x),
+            ("m5b", "beta_bands", 1, "β subharmonic", lambda x: x),
+            ("m5b", "beta_bands", 2, "β ultraharmonic", lambda x: x)]
+    p = post.set_index(["model", "param", "index"])
+    lines = ["| Model | Parameter | Median | 90% interval |", "|---|---|---|---|"]
+    for m, par, i, label, tf in want:
+        if (m, par, i) not in p.index:
+            continue
+        r = p.loc[(m, par, i)]
+        lines.append(f"| {m} | {label} | {tf(r.q50):.3g} | {tf(r.q05):.3g} – {tf(r.q95):.3g} |")
+    return "\n".join(lines)
+
+
+def dose_table(dose: pd.DataFrame) -> str:
+    lines = ["| Model | Target | Dose, median | 90% interval | P(unreachable) |",
+             "|---|---|---|---|---|"]
+    for _, r in dose.iterrows():
+        what = (f"{r.level:.0%} GFP+ neurons" if not pd.isna(r.get("level", np.nan))
+                else f"{r.plateau_frac:.0%} of the plateau")
+        pu = "" if pd.isna(r.get("p_unreachable", np.nan)) else f"{r.p_unreachable:.0%}"
+        lines.append(f"| {r.model} | {what} | {r["median"]:.2f} | {r["q05"]:.2f} – {r["q95"]:.2f} | {pu} |")
+    return "\n".join(lines)
+
+
+def main(results=RESULTS, title: str = "Burst-level models: results", note: str = "") -> None:
+    folds = pd.read_csv(results / "loao_folds.csv")
+    comp = pd.read_csv(results / "comparison.csv")
+    cal = pd.read_csv(results / "calibration.csv")
+    post = pd.read_csv(results / "posterior_summary.csv")
+    dose = pd.read_csv(results / "dose_for_delivery.csv")
+    tg = pd.read_csv(results / "loao_targets.csv")
+    n_t = len(tg[["mouse", "target"]].drop_duplicates())
+    n_m = tg["mouse"].nunique()
+    text = f"""# {title}
+
+{note}Generated by `bml/report.py` from the CSVs in this folder; do not edit by hand. Plan, method and
+reading: [`../README.md`](../README.md). {n_t} sonicated targets, {n_m} mice; every score is leave one
+animal out (fit on five mice, predict the sixth with a fresh animal effect).
+
+## Out-of-sample comparison against the AUC model (M3a)
+
+{comparison_table(comp, folds, "m3a")}
+
+Δ is summed over the six held-out mice; SE = √6 × SD of the six per-mouse differences. The
+pre-registered rule: a model beats M3a only if Δ > 0 and Δ/SE > 2.
+
+## Against the no-dose baseline (M1)
+
+{comparison_table(comp, folds, "m1")}
+
+## Per held-out mouse: elpd minus M3a's
+
+{per_mouse_table(folds)}
+
+## Calibration of held-out predictions
+
+{calibration_table(cal)}
+
+PIT is the share of predictive draws below the observed GFP+ fraction; a calibrated model
+averages 0.5, with 50% and 90% of targets inside its 50% and 90% intervals.
+
+## Parameters (full-data fits, all {n_t} targets)
+
+{params_table(post)}
+
+## Dose for a delivery level in a new animal (full-data fits)
+
+{dose_table(dose)}
+
+Dose is the lab's cumulative 2nd harmonic. The interval includes the spread between animals:
+a fresh animal effect is drawn for every posterior draw.
+
+Figures (`comparison.png`, `loao_predictions.png`, `dose_response.png`, `burst_params.png`)
+are generated by `bml/figures.py` and need a person to look at them.
+"""
+    (results / "README.md").write_text(text)
+    print(f"wrote {results / 'README.md'}")
+
+
+if __name__ == "__main__":
+    import argparse
+    from pathlib import Path
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--results", type=Path, default=RESULTS)
+    ap.add_argument("--title", default="Burst-level models: results")
+    ap.add_argument("--note", default="")
+    a = ap.parse_args()
+    main(a.results, a.title, a.note + "\n\n" if a.note else "")

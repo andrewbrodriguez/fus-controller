@@ -73,3 +73,8 @@ docs/lab/correspondence.md
 
 # Submitted proposal PDF (the .md beside it is the tracked text copy)
 docs/ES91r_Project_Proposal.pdf
+
+# Burst-level ML (burst_ml/): own environment and per-burst feature cache
+burst_ml/.venv/
+burst_ml/cache/
+burst_ml/results/**/*.npz
