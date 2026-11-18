@@ -17,8 +17,8 @@ Within every animal, higher-dose targets carry more delivery (ΣGFP+÷ΣNeuN vs 
 +0.85 in all six). Pooled across animals that falls to r = +0.52, down from +0.66 at five mice,
 because Mouse 6's two highest doses do not deliver proportionally more. Imaging is complete at
 the lab, so **six animals is probably the final n** unless mice 7–24 get stained. The
-remaining gaps are validation, not throughput: no hand count has scored pipeline B, the new
-sections have no review ✓, and the cross-animal measure is still unsettled.
+remaining gaps are validation, not throughput: no hand count has scored pipeline B, Mice 1–2
+have no review ✓ on record, and the cross-animal measure is still unsettled.
 
 **Deliverable plan: analysis finishes 2026-11-30; from 2026-12-01 the work is the journal-style
 write-up.**
@@ -143,7 +143,7 @@ pre-registration — say so if it goes in the write-up.
 | `src/fus/histology.py` | `.vsi` → per-target GFP coverage. ROI r = 1.0 template mm (1.74 mm diameter on tissue). `export --prefix/--series` |
 | `src/fus/orientation.py` | napari: `annotate` (centre, front, notch side) and `review` (✓/✗). Each window writes only its own fields |
 | `src/fus/rois.py` + `data/roi_locations.csv` | Hand-finetuned T1–T6 shapes per section. **All kept sections of Mice 1–6 finetuned** |
-| `data/section_orientation.csv` | Clicks for all 36 sections of Mice 1–6. **Review verdicts are patchy** (see Open 1) |
+| `data/section_orientation.csv` | Clicks for all 36 sections of Mice 1–6. Review ✓ on every kept section of Mice 3–6; **none on record for Mice 1–2** (see Open 1) |
 | `src/fus/cells.py` | **Pipeline B**: per-ROI cell count and GFP+ fraction. Run on every kept section of Mice 1–6; ~1–1.5 min per section on `segmentation_alpha/.venv-stardist-gpu` |
 | `src/fus/archive.py` | Reads recordings straight out of `data/acoustic/US_Data.zip` (48.6 GB, all 24 mice). **The only copy — don't unpack it** |
 | `src/fus/reconstruct.py` | Loose 3D stack of one animal: clicks for alignment, atlas spacing, Gaussian depth blending |
@@ -152,9 +152,9 @@ pre-registration — say so if it goes in the write-up.
 
 ## Open — blocking or slowing
 
-1. **Review verdicts.** Mice 5 and 6's new sections have no ✓/✗. The analysis only drops
-   sections marked *wrong*, so unreviewed ones are currently included. Re-tag in the ingest
-   notebook (step 6), then re-run `scripts/slices_dose_delivery.py`.
+1. **Review verdicts.** Every kept section of Mice 3–6 is reviewed ✓ (Mice 5–6 recorded
+   11/17; all placements correct). Mice 1 and 2 have no verdict on record (4 and 12 kept
+   sections). The analysis only drops sections marked *wrong*, so they are included either way.
 2. **Hand count for pipeline B.** A blinded neuron and GFP+ count in a plume core, a plume edge
    and background. This is decision 001's pre-registered test and the biggest hole a reviewer
    would find. **Nothing else validates the delivery measure.**
@@ -204,7 +204,6 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
 ## Next steps, in the order I would do them
 
 **Before the 11/18 meeting:**
-- Re-tag review verdicts for the new Mouse 5 and 6 sections (Andrew; napari).
 - Rough cut of the lab's third suggestion: **same cumulative dose reached by different
   parameters** (few bursts at high intensity vs many at low). Expect few matched pairs — likely
   a descriptive table, not a test.
