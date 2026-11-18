@@ -1,0 +1,7 @@
+mouse,recording,position,ref_mean_voltage,ref_dose,ref_at_voltage_cap,level_logit,pct_at_dose_1
+1,Target1,1,0.0758,0.9462,False,-0.5926,0.356
+2,Target4,4,0.1004,1.0703,False,-0.5827,0.3583
+3,Target1,1,0.0889,0.8752,False,-2.5744,0.0708
+4,Target5,5,0.1163,0.9591,False,-1.6161,0.1657
+5,Target1,1,0.0667,0.8286,False,-1.2723,0.2189
+6,Target4,4,0.0839,0.9159,False,-2.2479,0.0955

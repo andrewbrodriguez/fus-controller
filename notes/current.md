@@ -96,7 +96,18 @@ write-up.**
   exclude 8 the sheet doesn't flag (our calls): Mouse 3 `w10sl1_02_s0`, `w10sl1_03_s0`; Mouse 5
   `w11sl2_01_s3`; Mouse 6's five. Mouse 4's two "Pretty good – thalamus lost" sections are kept;
   they are its two lowest-ranked, the ones that drop its pixel r in the top-k trace.
-- **Not yet looked at by a person:** `top_k_sections.png`, `leave_one_out.png`, and the
+- **Within-mouse trends and the mouse effect** (`scripts/mouse_effect.py` →
+  `results/histology/mouse_effect/`; cells, logit vs log dose, 35 sonicated targets).
+  - Positive in all six mice. Repeated-measures r +0.67 on cells (p 6e-5) and +0.60 on pixels.
+    Separate slopes fit no better than one shared slope (p 0.40): doubling the dose multiplies
+    the odds of a neuron being GFP+ by 2.8 (90%: 1.9–4.0).
+  - Mice differ a lot in level: at dose 1, M1/M2 36%, M5 22%, M4 17%, M6 10%, M3 7% GFP+.
+    That's an odds ratio of 7 between highest and lowest, about 4× in dose. Mouse level is 34%
+    of the variance on cells.
+  - **Exploratory, six mice:** level doesn't track the drive voltage on the shared treatment (r
+    −0.08) and only loosely its dose (r +0.54, p 0.27).
+- **Not yet looked at by a person:** `top_k_sections.png`, `leave_one_out.png`,
+  `mouse_effect/within_mouse_trend.png`, `mouse_effect/mouse_level_vs_acoustics.png`, and the
   regenerated slices and region figures.
 
 ## Since 11/16
@@ -263,6 +274,7 @@ pre-registration — say so if it goes in the write-up.
 | `scripts/finetune_rois.py` | napari: move and resize T1–T6 on every kept section of every mouse in one window (`--mouse N` for one); writes `data/roi_locations.csv` |
 | `scripts/rank_sections.py` + `data/section_quality.csv` | Qt window: rank one mouse's sections by quality from straightened thumbnails with zones. All six mice ranked 11/17. Only `top_k_sections.py` reads it |
 | `scripts/top_k_sections.py`, `scripts/leave_one_out.py` | Sensitivity of the pooled result: each mouse's top-k ranked sections; drop each mouse, then each target |
+| `scripts/mouse_effect.py` | Within-mouse trends, each mouse's level (shared-slope fit), and levels vs the shared treatment's acoustics → `results/histology/mouse_effect/` |
 | `tests/` | 37 tests, passing |
 | `burst_ml/` | Pre-registered burst-level models. Own environment `burst_ml/.venv` (jax, numpyro). Per-burst cache in `burst_ml/cache/` (git-ignored; rebuild with `.venv/bin/python -m bml.cache` from `burst_ml/`, reads the zip). Full run `.venv/bin/python -m bml.run` (~20 min); 55 tests |
 
@@ -313,10 +325,6 @@ Computed but **not yet scripted or written into `docs/`**. Re-derive before citi
   - 37 pairs of targets within 15% of each other's dose but at least 1.5× apart in burst count.
 
   So the ρ null isn't from a lack of variation.
-- **Within-mouse (repeated-measures) correlation, 35 sonicated targets** (11/17 evening): log
-  dose vs logit ΣGFP+÷ΣNeuN r +0.67 (df 28, p 6e-5); vs log GFP+ area r +0.60 (p 4e-4). Pooled
-  without removing mouse levels: +0.61 and +0.47. Mouse level is 34% (cells) and 45% (pixels)
-  of the variance.
 
 ## Traps for whoever picks this up
 

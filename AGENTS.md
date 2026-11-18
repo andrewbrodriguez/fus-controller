@@ -54,6 +54,7 @@ Jupyter kernel: **Python 3.12 (fus-research .venv)**.
 .venv/bin/python scripts/dose_delivery_by_region.py   # every target on one axis, dose vs delivery, coloured by region (run after the two above)
 .venv/bin/python scripts/top_k_sections.py          # dose vs delivery from each mouse's top-k ranked sections (needs data/section_quality.csv)
 .venv/bin/python scripts/leave_one_out.py           # pooled dose vs delivery without each mouse, then without each target
+.venv/bin/python scripts/mouse_effect.py            # within-mouse trends, mouse-to-mouse levels, levels vs acoustics (reads the zip; ~10 s)
 .venv/bin/python scripts/mouse02_reconstruction_3d.py  # 3D GIF (git-ignored); order assumed, spacing from atlas
 .venv/bin/python scripts/view_reconstruction_3d.py    # same, interactive (napari; GUI, run it yourself)
 .venv/bin/python scripts/sonication_eda.py           # design, controller, noise; all 24 mice from the zip (~6 min first run, then ~40 s)
