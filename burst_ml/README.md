@@ -181,6 +181,69 @@ burst model gets past |Δ/SE| = 0.2. ρ = 1.39 (0.83–2.29) and γ = −0.76 (�
 still cover their no-effect values. Dose still beats no-dose (+5.77, SE 1.78), and the dose for
 20% GFP+ in a new animal is unchanged: 0.86 (0.22–3.37).
 
+### Exploratory: one encoder over every burst spectrum (not pre-registered)
+
+Andrew's idea, 2026-11-18: compress the whole sonication record into a small latent space and
+predict delivery from that. The design is in the docstring of `bml/encoder.py`, written before
+any model saw delivery, and run once as written
+([`results/exploratory_encoder/`](results/exploratory_encoder/README.md)). Each sonicating
+burst's spectrum (80 bands over 0.2–2.5 MHz, band sum and peak, plus drive voltage: 161
+inputs) goes through an autoencoder with a 3-number latent, and through PCA as the linear
+version. Both are fitted to all 18,031 bursts of the 24 mice with **no delivery data**. A
+target's features are its mean latent plus log(number of bursts). Delivery is then scored as
+above: same likelihood, same held-out mice, same bar, labels as of 11/18.
+
+**The latent doesn't beat dose, alone or added to it.**
+
+| vs M3a (dose alone, refitted on the same labels) | Δelpd | SE |
+|---|---|---|
+| M3a + autoencoder latent | −1.90 | 0.76 |
+| M3a + PCA latent | −2.41 | 1.08 |
+| Autoencoder latent alone, no dose | −4.39 | 1.49 |
+| PCA latent alone, no dose | −5.00 | 1.43 |
+
+- **Without the dose, the latent is barely better than no acoustics at all:** +2.71 (SE 1.85)
+  and +2.09 (1.68) over M1, against +7.10 (1.67) for the dose. It ranks a held-out mouse's
+  targets worse than dose alone does (Spearman +0.62 and +0.59, against +0.70).
+- **Added to the dose, it makes every held-out mouse worse** (autoencoder 6/6; PCA 5/6, Mouse 2
+  +0.01). Four extra weights with no signal behind them cost more than they bring.
+- **The latent did keep the dose.** Its target features recover log dose with R² 0.89
+  (autoencoder) and 0.92 (PCA) over all 145 recordings. So the encoder saw the 2nd harmonic;
+  nothing else it found carries delivery. Its 3 numbers capture only 16% (autoencoder) and 13%
+  (PCA) of the input variance, because most of the 80 bands sit at the noise floor.
+- One M3a fold (Mouse 6 held out) had R̂ 1.022 and 2 divergent draws. Refitting it with
+  seeds 1 and 2 gave R̂ ≤ 1.004, no divergences, and an elpd within 0.03.
+
+It's the same answer as the burst models: what the recordings say about delivery is in the
+cumulative 2nd harmonic, and the mouse sets the level.
+
+### Exploratory: standard supervised learners (not pre-registered)
+
+The next question, also 2026-11-18: skip the latent and train ordinary learners straight on
+delivery. `bml/learners.py` fixes eight scikit-learn learners and three feature sets before the
+first run and reports all of them
+([`results/exploratory_learners/`](results/exploratory_learners/README.md)). The learners are a
+dose line, ridge, lasso, random forest, gradient boosting, a neural net (MLP 32-16), a Gaussian
+process and k-nearest neighbours. The feature sets are log dose; 23 engineered features of each
+target's record (voltage, `h2` level and time course, the other bands, the encoder latents); and
+the target's mean spectrum (162 numbers). Outcome: logit GFP+ fraction, each mouse held out in
+turn, scored by RMSE against the straight line in log dose (1.32).
+
+- **None of the 14 learner × richer-feature runs beats the dose line**, and every one of them
+  does worse than the same learner given the dose alone (RMSE +0.06 to +0.76).
+- **The neural net is the worst:** RMSE 2.09 on the engineered features and 1.97 on the
+  spectrum, worse than predicting every held-out target at the training mean (1.55). With 30
+  training targets per fold it fits noise.
+- **On the dose alone, flexible learners do beat the straight line** (boosting 1.10, better in
+  6/6 held-out mice; forest 1.20). They bend the curve: steeper at low dose, flatter at the top
+  (Mouse 6 T6). That matches the saturation behind assumption A15, but the pre-registered Emax
+  model didn't beat M3a on the held-out likelihood (−0.25, SE 0.42), and this is the best of
+  seven flexible learners on a squared-logit score, so treat it as a hint about the dose
+  curve's shape, not a result.
+
+The answer is the same a third way: beyond the dose, the sonication record carries nothing these
+35 targets can detect.
+
 ## Deviations
 
 None from the analysis plan. Process and implementation details the plan didn't fix:

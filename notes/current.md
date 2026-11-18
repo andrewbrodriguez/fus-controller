@@ -1,4 +1,4 @@
-# Where the project is — updated 2026-11-17 (evening)
+# Where the project is — updated 2026-11-18 (morning)
 
 Week ~10 of 13. This file is the moment-in-time picture; the durable method write-ups are in
 `docs/`.
@@ -20,14 +20,31 @@ Mouse 6's two highest doses do not deliver proportionally more. **No single mous
 pooled result.** The one influential point is Mouse 6 T6, the highest dose in the study, and
 only under a straight-line fit (leave-one-out, Since 11/17 evening). A pre-registered,
 leave-one-mouse-out model comparison (`burst_ml/`) found that **per-burst acoustic detail adds
-nothing to the cumulative 2nd harmonic**: dose predicts delivery in an unseen mouse, but the
-mouse sets the level. Imaging is complete at the lab, so **six animals is probably the final
+nothing to the cumulative 2nd harmonic**, and neither an exploratory encoder over every burst
+spectrum nor standard learners (11/18) do: dose predicts delivery in an unseen mouse, but the mouse sets the level. Imaging is complete at the lab, so **six animals is probably the final
 n** unless mice 7–24 get stained. The remaining gaps are validation, not throughput: **the
 11/17 re-finetune of the zones isn't measured yet**, no hand count has scored pipeline B, Mice
 1–2 have no review ✓ on record, and the cross-animal measure is still unsettled.
 
 **Deliverable plan: analysis finishes 2026-11-30; from 2026-12-01 the work is the journal-style
 write-up.**
+
+## Since 11/18 (morning)
+
+- **One encoder over every burst spectrum doesn't beat dose** (`burst_ml/bml/encoder.py` →
+  `burst_ml/results/exploratory_encoder/`; Andrew's idea; exploratory, design fixed before any
+  delivery fit, run once). Autoencoder and PCA, 3-number latent, fitted label-free to all
+  18,031 bursts of 24 mice. Scored on held-out mice like burst_ml: latent + dose vs dose alone
+  −1.90 (SE 0.76, autoencoder) and −2.41 (1.08, PCA); latent alone −4.39 and −5.00. The latent
+  recovers log dose (R² 0.89–0.92), so it saw the 2nd harmonic; nothing else in it predicts
+  delivery. Same verdict as the burst models. Labels are the 11/17 evening ones (old zones).
+- **Standard learners don't either** (`burst_ml/bml/learners.py` →
+  `burst_ml/results/exploratory_learners/`; all 22 runs reported). Eight learners (incl. an MLP,
+  forest, boosting, GP) × three feature sets (dose; 23 engineered; mean spectrum). No learner
+  given more than the dose beats the dose line (held-out RMSE 1.32 on logit), and all 14 do
+  worse than on the dose alone. The MLP is worse than predicting the training mean. On dose alone,
+  boosting bends the curve and beats the line (1.10, 6/6 mice): a hint about saturation, not a
+  result (the pre-registered Emax didn't win).
 
 ## Since 11/17 (evening)
 
@@ -275,6 +292,8 @@ pre-registration — say so if it goes in the write-up.
 | `scripts/rank_sections.py` + `data/section_quality.csv` | Qt window: rank one mouse's sections by quality from straightened thumbnails with zones. All six mice ranked 11/17. Only `top_k_sections.py` reads it |
 | `scripts/top_k_sections.py`, `scripts/leave_one_out.py` | Sensitivity of the pooled result: each mouse's top-k ranked sections; drop each mouse, then each target |
 | `scripts/mouse_effect.py` | Within-mouse trends, each mouse's level (shared-slope fit), and levels vs the shared treatment's acoustics → `results/histology/mouse_effect/` |
+| `burst_ml/bml/encoder.py` | Exploratory: autoencoder and PCA over every burst spectrum (label-free, 24 mice), then delivery from the latent, scored like burst_ml → `burst_ml/results/exploratory_encoder/` |
+| `burst_ml/bml/learners.py` | Exploratory: eight standard learners × three feature sets, sonication record → delivery, per held-out mouse → `burst_ml/results/exploratory_learners/` |
 | `tests/` | 37 tests, passing |
 | `burst_ml/` | Pre-registered burst-level models. Own environment `burst_ml/.venv` (jax, numpyro). Per-burst cache in `burst_ml/cache/` (git-ignored; rebuild with `.venv/bin/python -m bml.cache` from `burst_ml/`, reads the zip). Full run `.venv/bin/python -m bml.run` (~20 min); 55 tests |
 

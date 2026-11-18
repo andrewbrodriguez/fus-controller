@@ -1,0 +1,7 @@
+encoder,check,value
+pca,variance explained (all inputs),0.134
+ae,variance explained (all inputs),0.1624
+ae,best validation R2 (sklearn),0.1546
+ae,epochs,372.0
+ae,R2 of log dose from target features (145 recordings),0.8884
+pca,R2 of log dose from target features (145 recordings),0.9172

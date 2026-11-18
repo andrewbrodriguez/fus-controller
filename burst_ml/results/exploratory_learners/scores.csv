@@ -1,0 +1,24 @@
+learner,features,rmse,r2,spearman,mice_better,rmse_vs_own_dose
+training mean (no acoustics),none,1.5548,0.0,,3,
+linear,dose,1.324,0.2748,0.7048,0,
+ridge,dose,1.3272,0.2714,0.7048,4,
+lasso,dose,1.3324,0.2656,0.7048,3,
+forest,dose,1.1989,0.4054,0.7655,4,
+boosting,dose,1.1042,0.4956,0.7487,6,
+mlp,dose,1.3248,0.274,0.669,4,
+gp,dose,1.3057,0.2948,0.7048,3,
+knn,dose,1.2346,0.3695,0.6683,3,
+ridge,engineered,1.5766,-0.0282,0.6905,1,0.2495
+lasso,engineered,1.3945,0.1956,0.6357,2,0.0621
+forest,engineered,1.3291,0.2693,0.7024,2,0.1302
+boosting,engineered,1.359,0.236,0.5452,2,0.2548
+mlp,engineered,2.0867,-0.8012,0.3881,0,0.762
+gp,engineered,1.5518,0.0039,0.5071,3,0.2461
+knn,engineered,1.4493,0.1312,0.5024,2,0.2147
+ridge,spectrum,1.5443,0.0135,0.4738,2,0.2172
+lasso,spectrum,1.7909,-0.3266,0.3571,2,0.4584
+forest,spectrum,1.5823,-0.0356,0.2548,2,0.3833
+boosting,spectrum,1.7131,-0.214,0.1929,1,0.6089
+mlp,spectrum,1.9728,-0.6099,0.369,1,0.6481
+gp,spectrum,1.5548,0.0,,3,0.2491
+knn,spectrum,1.7143,-0.2156,0.0738,1,0.4797
