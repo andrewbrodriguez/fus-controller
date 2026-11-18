@@ -133,7 +133,7 @@ turns the model back into the plain dose (`burst_params.png`):
 ### What the dose model itself shows
 
 - **Dose predicts delivery in an animal the model has never seen.** M3a beats the no-dose
-  model by Δelpd +7.11 (SE 1.38, Δ/SE 5.2). Within a held-out mouse the predicted order of its
+  model by Δelpd +7.11 (SE 1.38, Δ/SE 5.1). Within a held-out mouse the predicted order of its
   targets matches the observed order with mean Spearman ρ +0.71.
 - **The animal effect is real but not decisive here.** Dropping it (M2) costs 3.12 (SE 2.55),
   worse in 5 of 6 held-out mice. The animal SD is 0.61 on the logit scale (0.27–1.21).
